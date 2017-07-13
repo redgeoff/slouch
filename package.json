@@ -40,6 +40,7 @@
     "backoff-promise": "0.0.2",
     "bluebird": "^3.5.0",
     "quelle": "0.0.3",
+    "querystring-es3": "^0.2.1",
     "request": "^2.81.0",
     "sporks": "0.0.1",
     "squadron": "0.0.3"

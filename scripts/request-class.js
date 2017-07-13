@@ -5,6 +5,13 @@ var Promise = require('sporks/scripts/promise'),
   Throttler = require('squadron').Throttler,
   Backoff = require('backoff-promise');
 
+// Until https://github.com/Gozala/querystring/issues/20 is fixed, we need to manually define an
+// unescape function
+var QueryString = require('request/lib/querystring').Querystring;
+QueryString.prototype.unescape = function (s) {
+  return decodeURIComponent(s);
+};
+
 var RequestClass = function () {
   this._throttler = new Throttler(RequestClass.DEFAULT_CONNECTIONS);
 };

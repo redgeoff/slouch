@@ -23,3 +23,7 @@ echo "Creating system DBs"
 curl -X PUT http://admin:admin@localhost:5984/_users
 curl -X PUT http://admin:admin@localhost:5984/_replicator
 curl -X PUT http://admin:admin@localhost:5984/_global_changes
+
+# Enable CORS. This is only needed if you are connecting from another machine
+# sudo npm install -g add-cors-to-couchdb
+# add-cors-to-couchdb http://localhost:5984 -u admin -p admin
