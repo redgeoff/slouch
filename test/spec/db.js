@@ -1,14 +1,12 @@
 'use strict';
 
-var DB = require('../../scripts/db'),
-  config = require('../config.json'),
+var DB = require('../../scripts').DB,
+  utils = require('../utils'),
   sporks = require('sporks');
 
 describe('db', function () {
 
-  var url = config.couchdb.scheme + '://' + config.couchdb.username + ':' +
-    config.couchdb.password + '@' + config.couchdb.host + ':' + config.couchdb.port,
-    db = new DB(url);
+  var db = new DB(utils.couchDBURL());
 
   beforeEach(function () {
     return db.create('testdb');

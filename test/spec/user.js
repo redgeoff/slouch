@@ -1,13 +1,11 @@
 'use strict';
 
-var User = require('../../scripts/user'),
-  config = require('../config.json');
+var User = require('../../scripts').User,
+  utils = require('../utils');
 
 describe('user', function () {
 
-  var url = config.couchdb.scheme + '://' + config.couchdb.username + ':' +
-    config.couchdb.password + '@' + config.couchdb.host + ':' + config.couchdb.port,
-    user = new User(url);
+  var user = new User(utils.couchDBURL());
 
   beforeEach(function () {
     return user.create('testusername', 'testpassword', ['testrole1'], {

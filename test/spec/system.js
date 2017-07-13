@@ -1,13 +1,11 @@
 'use strict';
 
-var System = require('../../scripts/system'),
-  config = require('../config.json');
+var System = require('../../scripts').System,
+  utils = require('../utils');
 
-describe('db', function () {
+describe('system', function () {
 
-  var url = config.couchdb.scheme + '://' + config.couchdb.username + ':' +
-    config.couchdb.password + '@' + config.couchdb.host + ':' + config.couchdb.port,
-    system = new System(url);
+  var system = new System(utils.couchDBURL());
 
   it('should iterate through dbs', function () {
     var dbNames = [];
