@@ -122,8 +122,11 @@ RequestClass.prototype._shouldReconnect = function (err) {
       'ETIMEDOUT',
       'function_clause',
       'unknown_error',
-      'internal_server_error'
-    ].join('|')).test(err.message);
+      'internal_server_error',
+      'Failed to fetch', // ECONNREFUSED/ENOTFOUND in Chrome
+      'Type error', // ECONNREFUSED/ENOTFOUND in Safari
+      'XHR error' // ECONNREFUSED/ENOTFOUND in Firefox
+    ].join('|'), 'i').test(err.message);
   }
 };
 

@@ -18,6 +18,11 @@ describe('request', function () {
   });
 
   it('should handle ENOTFOUND errors', function () {
+    // Shorten the backoff as in a browser we just a "Failed to Fetch" error which triggers a retry
+    request._newBackoff = function () {
+      return new Backoff(10);
+    };
+
     return sporks.shouldThrow(function () {
       return request.request({
         url: 'http://somethingbad.example.com'
