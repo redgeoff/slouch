@@ -1,5 +1,15 @@
 # Testing
 
+
+## Set up
+
+Install CouchDB locally. You can easily run CouchDB via docker with:
+
+    $ ./run-couchdb-docker.sh
+
+Note: if you are not running ubuntu, you will probably have to configure the `common` variable
+
+
 ## Test in node
 
 This will run the tests in node:

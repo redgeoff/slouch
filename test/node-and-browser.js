@@ -1,15 +1,7 @@
 'use strict';
 
-var Foo = require('../scripts/foo');
+var chai = require('chai');
+chai.use(require('chai-as-promised'));
+chai.should();
 
-describe('node and browser', function () {
-
-  it('should test in both node and the browser', function () {
-    // TODO: insert tests that can be tested in both node and the browser
-    var foo = new Foo();
-    return foo.bar().then(function (thing) {
-      thing.should.eql('yar');
-    });
-  });
-
-});
+require('./spec');

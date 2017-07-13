@@ -2,10 +2,27 @@
 # node:
 #  version: 7.10.0
 
+# Uncomment to test with CouchDB 2
+machine:
+  services:
+    - docker
+
 dependencies:
   pre:
     - nvm install 7.10.0
     - nvm use 7.10.0 && npm install -g npm
+
+    # Uncomment to test with CouchDB 2
+    - docker run -d --name couchdb --restart always -p 5984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
+    # For for DB to be ready
+    - sleep 15
+    - curl -X PUT http://admin:admin@db.quizster.dev:5984/_users
+    - curl -X PUT http://admin:admin@db.quizster.dev:5984/_replicator
+    - curl -X PUT http://admin:admin@db.quizster.dev:5984/_global_changes
+
+    # Enable CORS
+    - nvm use 7.10.0 && npm install -g add-cors-to-couchdb
+    - nvm use 7.10.0 && add-cors-to-couchdb http://localhost:5984 -u admin -p admin
 
   override:
     - nvm use 7.10.0 && npm install
