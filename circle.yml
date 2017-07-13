@@ -20,6 +20,10 @@ dependencies:
     - curl -X PUT http://admin:admin@db.quizster.dev:5984/_replicator
     - curl -X PUT http://admin:admin@db.quizster.dev:5984/_global_changes
 
+    # Enable CORS
+    - nvm use 7.10.0 && npm install -g add-cors-to-couchdb
+    - add-cors-to-couchdb http://localhost:5984 -u admin -p admin
+
   override:
     - nvm use 7.10.0 && npm install
 
