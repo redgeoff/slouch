@@ -7,7 +7,7 @@
     $ npm install couch-slouch
 
 
-## Slouch is a good alternative to than nano as:
+## Slouch is a good alternative to nano as:
 
   - Don't have to create an instance for each DB
   - Native promises
