@@ -1,30 +1,12 @@
 'use strict';
 
-// var slouch = new Slouch(some-url);
-//
-// slouch.db.create();
-// slouch.db.changes();
-// slouch.db.copy();
-// slouch.db.all();
-// slouch.db.allArray();
-// slouch.db.replicate();
-//
-// slouch.security.set();
-//
-// slouch.doc.post();
-// slouch.doc.destroy();
-//
-// slouch.user.create();
-//
-// slouch.config.set();
-//
-// slouch.auth.onlyRoleCanView();
-
 var Auth = require('./auth'),
   Config = require('./config'),
   DB = require('./db'),
   Doc = require('./doc'),
+  Membership = require('./membership'),
   Security = require('./security'),
+  System = require('./system'),
   User = require('./user');
 
 var Slouch = function (url) {
@@ -34,6 +16,8 @@ var Slouch = function (url) {
   this.config = new Config(this);
   this.db = new DB(this);
   this.doc = new Doc(this);
+  this.system = new System(this);
+  this.membership = new Membership(this);
   this.security = new Security(this);
   this.user = new User(this);
 };
