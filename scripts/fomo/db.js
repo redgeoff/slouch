@@ -75,4 +75,18 @@ DB.prototype.changes = function (dbName, params) {
 
 };
 
+DB.prototype.view = function (dbName, viewDocId, view, params) {
+  return new PersistentStreamIterator({
+    url: this._slouch_url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
+    qs: params
+  }, 'rows.*');
+};
+
+DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
+  return promisedRequest.request({
+    url: this._slouch_url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
+    qs: params
+  });
+};
+
 module.exports = DB;
