@@ -7,6 +7,33 @@ var Doc = function (slouch) {
   this._slouch = slouch;
 };
 
+// Max retries during an upsert before considering the operation a failure. The upserts immediately
+// retry so if they fail this many times in a row then there is most likely an issue.
+Doc.prototype.maxRetries = 20;
+
+Doc.prototype.ignoreConflict = function (promiseFactory) {
+  return promiseFactory().catch(function (err) {
+    if (err.error !== 'conflict') { // not a conflict?
+      // Unexpected error
+      throw err;
+    }
+  });
+};
+
+Doc.prototype.isMissingError = function (err) {
+  return err.error === 'not_found';
+};
+
+Doc.prototype.ignoreMissing = function (promiseFactory) {
+  var self = this;
+  return promiseFactory().catch(function (err) {
+    if (!self.isMissingError(err)) { // not a not_found error?
+      // Unexpected error
+      throw err;
+    }
+  });
+};
+
 // Use to create doc
 Doc.prototype.post = function (dbName, doc) {
   return promisedRequest.request({
@@ -103,7 +130,7 @@ Doc.prototype.upsert = function (dbName, doc) {
   var _upsert = function () {
     return self.createOrUpdate(dbName, doc).catch(function (err) {
 
-      if (err.error === 'conflict' && i++ < Doc._MAX_RETRIES) { // conflict?
+      if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
 
         // Retry
         return _upsert();
@@ -171,7 +198,7 @@ Doc.prototype.getMergeUpsert = function (dbName, doc) {
   var _upsert = function () {
     return self.getMergeCreateOrUpdate(dbName, doc).catch(function (err) {
 
-      if (err.error === 'conflict' && i++ < Doc._MAX_RETRIES) { // conflict?
+      if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
 
         // Retry
         return _upsert();
@@ -201,7 +228,7 @@ Doc.prototype.getModifyUpsert = function (dbName, docId, onGetPromiseFactory) {
       return self.put(dbName, modifiedDoc);
     }).catch(function (err) {
 
-      if (err.error === 'conflict' && i++ < Doc._MAX_RETRIES) { // conflict?
+      if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
 
         // Retry
         return _upsert();
@@ -286,6 +313,17 @@ Doc.prototype.markDocAsDestroyed = function (dbName, docId) {
 // Just for formalizing the setting of the _deleted flag
 Doc.prototype.setDeleted = function (doc) {
   doc._deleted = true;
+};
+
+Doc.prototype.getAttachment = function (dbName, docId, attachmentName) {
+  return promisedRequest.request({
+    uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName,
+    method: 'GET',
+    raw: true,
+    encoding: null
+  }).then(function (response) {
+    return response.body;
+  });
 };
 
 module.exports = Doc;
