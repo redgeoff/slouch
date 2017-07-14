@@ -1,7 +1,8 @@
 'use strict';
 
 var promisedRequest = require('../request'),
-  sporks = require('sporks');
+  sporks = require('sporks'),
+  Promise = require('sporks/scripts/promise');
 
 var System = function (slouch) {
   this._slouch = slouch;

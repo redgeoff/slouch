@@ -1,7 +1,10 @@
 'use strict';
 
 var promisedRequest = require('../request'),
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator;
+  FilteredStreamIterator = require('quelle').FilteredStreamIterator,
+  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  StreamIterator = require('quelle').StreamIterator,
+  sporks = require('sporks');
 
 var DB = function (slouch) {
   this._slouch = slouch;

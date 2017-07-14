@@ -1,7 +1,8 @@
 'use strict';
 
 var promisedRequest = require('../request'),
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator;
+  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  sporks = require('sporks');
 
 var Doc = function (slouch) {
   this._slouch = slouch;

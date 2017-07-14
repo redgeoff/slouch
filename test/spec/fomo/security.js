@@ -1,8 +1,7 @@
 'use strict';
 
 var Slouch = require('../../../scripts/fomo'),
-  utils = require('../../utils'),
-  sporks = require('sporks');
+  utils = require('../../utils');
 
 describe('security', function () {
 
