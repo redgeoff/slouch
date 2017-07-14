@@ -1,13 +1,11 @@
 'use strict';
 
 var Slouch = require('../../scripts'),
-  utils = require('../utils'),
-  sporks = require('sporks');
+  utils = require('../utils');
 
 describe('user', function () {
 
   var slouch = new Slouch(utils.couchDBURL()),
-    db = slouch.db,
     user = slouch.user;
 
   beforeEach(function () {
