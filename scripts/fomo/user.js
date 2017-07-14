@@ -1,7 +1,7 @@
 'use strict';
 
-var Auth = function (slouch) {
+var User = function (slouch) {
   this._slouch = slouch;
 };
 
-module.exports = Auth;
+module.exports = User;
