@@ -1,12 +1,12 @@
 'use strict';
 
-var DB = require('../../scripts').DB,
-  ExcludeDesignDocsIterator = require('../../scripts').ExcludeDesignDocsIterator,
+var Slouch = require('../../scripts/fomo'),
   utils = require('../utils');
 
 describe('exclude-design-docs-iterator', function () {
 
-  var db = new DB(utils.couchDBURL());
+  var slouch = new Slouch(utils.couchDBURL()),
+    db = slouch.db;
 
   beforeEach(function () {
     return db.create('testdb');
@@ -17,14 +17,14 @@ describe('exclude-design-docs-iterator', function () {
   });
 
   var createDocs = function () {
-    return db.postDoc('testdb', {
+    return slouch.doc.post('testdb', {
       thing: 'play'
     }).then(function () {
-      return db.postDoc('testdb', {
+      return slouch.doc.post('testdb', {
         thing: 'write'
       });
     }).then(function () {
-      return db.postDoc('testdb', {
+      return slouch.doc.post('testdb', {
         _id: '_design/mydesign',
         thing: 'design'
       });
@@ -34,7 +34,7 @@ describe('exclude-design-docs-iterator', function () {
   it('should filter', function () {
     var docs = [];
     return createDocs().then(function () {
-      return new ExcludeDesignDocsIterator(db.allDocsIterator('testdb', {
+      return new slouch.ExcludeDesignDocsIterator(slouch.doc.all('testdb', {
         include_docs: true
       })).each(function (doc) {
         docs.push({
