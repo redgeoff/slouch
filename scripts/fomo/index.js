@@ -6,6 +6,7 @@ var Auth = require('./auth'),
   Doc = require('./doc'),
   ExcludeDesignDocsIterator = require('../exclude-design-docs-iterator'),
   Membership = require('./membership'),
+  NotAuthenticatedError = require('../not-authenticated-error'),
   Security = require('./security'),
   System = require('./system'),
   User = require('./user');
@@ -20,6 +21,7 @@ var Slouch = function (url) {
   this.ExcludeDesignDocsIterator = ExcludeDesignDocsIterator;
   this.system = new System(this);
   this.membership = new Membership(this);
+  this.NotAuthenticatedError = NotAuthenticatedError;
   this.security = new Security(this);
   this.user = new User(this);
 };
