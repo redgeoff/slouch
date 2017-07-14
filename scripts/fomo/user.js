@@ -7,6 +7,7 @@ var NotAuthenticatedError = require('../not-authenticated-error'),
 
 var User = function (slouch) {
   this._slouch = slouch;
+  this._dbName = '_users';
 };
 
 User.prototype.toUserId = function (username) {
@@ -19,7 +20,7 @@ User.prototype.toUsername = function (userId) {
 
 User.prototype._insert = function (username, user) {
   user._id = this.toUserId(username);
-  return this._slouch._db.put(this._dbName, user);
+  return this._slouch.doc.put(this._dbName, user);
 };
 
 User.prototype.create = function (username, password, roles, metadata) {
