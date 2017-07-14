@@ -3,26 +3,24 @@
 var NotAuthenticatedError = require('./not-authenticated-error'),
   request = require('./request'),
   url = require('url'),
-  DB = require('./db'),
   sporks = require('sporks');
 
-var User = function (url) {
+var User = function (slouch) {
+  this._slouch = slouch;
   this._dbName = '_users';
-  this._url = url;
-  this._db = new DB(this._url);
 };
 
-User.toUserId = function (username) {
+User.prototype.toUserId = function (username) {
   return 'org.couchdb.user:' + username;
 };
 
-User.toUsername = function (userId) {
+User.prototype.toUsername = function (userId) {
   return userId.replace(/org.couchdb.user:/, '');
 };
 
 User.prototype._insert = function (username, user) {
-  user._id = User.toUserId(username);
-  return this._db.putDoc(this._dbName, user);
+  user._id = this.toUserId(username);
+  return this._slouch.doc.put(this._dbName, user);
 };
 
 User.prototype.create = function (username, password, roles, metadata) {
@@ -39,7 +37,7 @@ User.prototype.create = function (username, password, roles, metadata) {
 };
 
 User.prototype.get = function (username) {
-  return this._db.getDoc(this._dbName, User.toUserId(username));
+  return this._slouch.doc.get(this._dbName, this.toUserId(username));
 };
 
 User.prototype._update = function (username, user) {
@@ -85,7 +83,7 @@ User.prototype.setMetadata = function (username, metadata) {
 };
 
 User.prototype._destroy = function (username, rev) {
-  return this._db.destroyDoc(this._dbName, User.toUserId(username), rev);
+  return this._slouch.doc.destroy(this._dbName, this.toUserId(username), rev);
 };
 
 User.prototype.destroy = function (username) {
@@ -110,7 +108,7 @@ User.prototype.authenticate = function (username, password) {
 
 User.prototype.postSession = function (doc) {
   return request.request({
-    uri: this._url + '/_session',
+    uri: this._slouch_url + '/_session',
     method: 'POST',
     json: doc
   });
@@ -119,7 +117,7 @@ User.prototype.postSession = function (doc) {
 User.prototype.authenticated = function (cookie) {
   // Specify a URL w/o a username and password as we want to check to make sure that the cookie is
   // for a current session
-  var parts = url.parse(this._url);
+  var parts = url.parse(this._slouch._url);
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
   return request.request({

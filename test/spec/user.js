@@ -1,11 +1,12 @@
 'use strict';
 
-var User = require('../../scripts').User,
+var Slouch = require('../../scripts'),
   utils = require('../utils');
 
 describe('user', function () {
 
-  var user = new User(utils.couchDBURL());
+  var slouch = new Slouch(utils.couchDBURL()),
+    user = slouch.user;
 
   beforeEach(function () {
     return user.create('testusername', 'testpassword', ['testrole1'], {

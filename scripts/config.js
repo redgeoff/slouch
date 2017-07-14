@@ -1,14 +1,10 @@
 'use strict';
 
-var Promise = require('sporks/scripts/promise'),
-  request = require('./request'),
-  DB = require('./db'),
-  System = require('./system');
+var request = require('./request'),
+  Promise = require('sporks/scripts/promise');
 
-var Config = function (url) {
-  this._url = url;
-  this._db = new DB(url);
-  this._system = new System(url);
+var Config = function (slouch) {
+  this._slouch = slouch;
 };
 
 Config.prototype._couchDB2Request = function (node, path, opts, parseBody) {
@@ -24,7 +20,7 @@ Config.prototype._couchDB2Requests = function (path, opts, parseBody, maxNumNode
   var self = this,
     promises = [],
     i = 0;
-  return self._system.membership().then(function (members) {
+  return self._slouch.membership.get().then(function (members) {
     members.cluster_nodes.forEach(function (node) {
       if (typeof maxNumNodes === 'undefined' || i++ < maxNumNodes) {
         promises.push(self._couchDB2Request(node, path, opts, parseBody));
@@ -44,7 +40,7 @@ Config.prototype._couchDB1Request = function (path, opts, parseBody) {
 
 Config.prototype._request = function (path, opts, parseBody, maxNumNodes) {
   var self = this;
-  return self._system.isCouchDB1().then(function (isCouchDB1) {
+  return self._slouch._system.isCouchDB1().then(function (isCouchDB1) {
     if (isCouchDB1) {
       return self._couchDB1Request(path, opts, parseBody);
     } else {
@@ -68,7 +64,7 @@ Config.prototype.unset = function (path) {
 
 Config.prototype.unsetIgnoreMissing = function (path) {
   var self = this;
-  return self._db.ignoreMissing(function () {
+  return self._slouch.doc.ignoreMissing(function () {
     return self.unset(path);
   });
 };

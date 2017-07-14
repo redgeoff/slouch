@@ -1,7 +1,8 @@
 'use strict';
 
 require('./db');
+require('./doc');
 require('./exclude-design-docs-iterator');
 require('./request');
-require('./system');
+require('./security');
 require('./user');

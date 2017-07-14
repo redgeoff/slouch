@@ -1,12 +1,11 @@
 'use strict';
 
-var DB = require('../../scripts').DB,
-  utils = require('../utils'),
-  sporks = require('sporks');
+var Slouch = require('../../scripts'),
+  utils = require('../utils');
 
 describe('db', function () {
 
-  var db = new DB(utils.couchDBURL());
+  var db = new Slouch(utils.couchDBURL()).db;
 
   beforeEach(function () {
     return db.create('testdb');
@@ -26,76 +25,23 @@ describe('db', function () {
     });
   });
 
-  it('should set and get security', function () {
-    var security = {
-      'admins': {
-        'names': ['joe', 'phil'],
-        'roles': ['boss']
-      },
-      'members': {
-        'names': ['dave'],
-        'roles': ['producer', 'consumer']
-      }
-    };
-    return db.setSecurity('testdb', security).then(function () {
-      return db.getSecurity('testdb');
-    }).then(function (_security) {
-      _security.should.eql(security);
-    });
-  });
+  it('should iterate through dbs', function () {
+    var dbNames = [];
 
-  it('should post, put and get doc', function () {
-    var doc = {
-      thing: 'play'
-    };
-
-    return db.postDoc('testdb', doc).then(function (_doc) {
-      doc._id = _doc.id;
-      return db.getDoc('testdb', doc._id);
-    }).then(function (body) {
-      doc._rev = body._rev;
-      doc.priority = 'medium';
-      return db.putDoc('testdb', doc);
+    return db.all().each(function (db) {
+      dbNames.push(db);
     }).then(function () {
-      return db.getDoc('testdb', doc._id);
-    }).then(function (body) {
-      doc._rev = body._rev;
-      body.should.eql(doc);
-    });
-  });
+      // Make sure db names were captured
+      (dbNames.should.length === 0).should.eql(false);
 
-  it('should destroy all non-design docs', function () {
-    return db.postDoc('testdb', {
-      thing: 'play'
-    }).then(function () {
-      return db.postDoc('testdb', {
-        thing: 'write'
+      // Make sure a specific DB like _users was captured
+      var usersFound = false;
+      dbNames.forEach(function (dbName) {
+        if (dbName === '_users') {
+          usersFound = true;
+        }
       });
-    }).then(function () {
-      return db.postDoc('testdb', {
-        _id: '_design/mydesign',
-        foo: 'bar'
-      });
-    }).then(function () {
-      return db.destroyAllNonDesignDocs('testdb');
-    }).then(function () {
-      return db.allDocs('testdb');
-    }).then(function (body) {
-      body.total_rows.should.eql(1);
-    });
-  });
-
-  it('should throw when conflict', function () {
-    return sporks.shouldThrow(function () {
-      var doc = {
-        thing: 'play'
-      };
-      return db.postDoc('testdb', doc).then(function (_doc) {
-        doc._id = _doc.id;
-        doc.priority = 'medium';
-        // Generates conflict as no rev provided
-        return db.putDoc('testdb', doc);
-      });
+      usersFound.should.eql(true);
     });
   });
 

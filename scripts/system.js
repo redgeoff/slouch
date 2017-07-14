@@ -1,23 +1,38 @@
 'use strict';
 
-var Promise = require('sporks/scripts/promise'),
-  promisedRequest = require('./request'),
-  DB = require('./db'),
+var promisedRequest = require('./request'),
   sporks = require('sporks'),
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
-  SystemCommon = require('./system-common');
+  Promise = require('sporks/scripts/promise');
 
-var System = function (url) {
-  this._url = url;
-  this._db = new DB(url);
-  this._systemCommon = new SystemCommon(url);
+var System = function (slouch) {
+  this._slouch = slouch;
 };
 
-// Use a JSONStream so that we don't have to load a large JSON structure into memory
-System.prototype.dbsIterator = function () {
-  return new PersistentStreamIterator({
-    url: this._url + '/_all_dbs'
-  }, '*');
+System.prototype._isCouchDB1 = function () {
+  return this.get().then(function (obj) {
+    return obj.version[0] === '1';
+  });
+};
+
+System.prototype.isCouchDB1 = function () {
+  var self = this;
+  return Promise.resolve().then(function () {
+    if (self._couchDB1 === null) {
+      return self._isCouchDB1().then(function (isCouchDB1) {
+        self._couchDB1 = isCouchDB1;
+        return self._couchDB1;
+      });
+    } else {
+      return self._couchDB1;
+    }
+  });
+};
+
+System.prototype.get = function () {
+  return promisedRequest.request({
+    uri: this._slouch._url + '/',
+    method: 'GET'
+  }, true);
 };
 
 System.prototype.reset = function (exceptDBNames) {
@@ -34,58 +49,19 @@ System.prototype.reset = function (exceptDBNames) {
       dbsToDestroyAndRecreate = ['_replicator', '_global_changes', '_users'];
     }
 
-    return self.dbsIterator().each(function (db) {
+    return self._slouch.db.all().each(function (db) {
       if (except[db]) {
         // Do nothing
         return Promise.resolve();
       } else if (dbsToDestroyAndRecreate.indexOf(db) !== -1) {
-        return self._db.destroy(db).then(function () {
-          return self._db.create(db);
+        return self._slouch.db.destroy(db).then(function () {
+          return self._slouch.db.create(db);
         });
       } else {
-        return self._db.destroy(db);
+        return self._slouch.db.destroy(db);
       }
     });
   });
-};
-
-System.prototype.replicate = function (params) {
-  return promisedRequest.request({
-    url: this._url + '/_replicate',
-    method: 'POST',
-    json: params
-  });
-};
-
-// For now, the copyDB function has to be in System so that we don't have a circular dependency
-// between System and DB
-System.prototype.copyDB = function (fromDBName, toDBName) {
-  var self = this;
-  return self._db.create(toDBName).then(function () {
-    return self._db.getSecurity(fromDBName);
-  }).then(function (security) {
-    return self._db.setSecurity(toDBName, security);
-  }).then(function () {
-    return self.replicate({
-      source: self._url + '/' + fromDBName,
-      target: self._url + '/' + toDBName
-    });
-  });
-};
-
-System.prototype.get = function () {
-  return this._systemCommon.get();
-};
-
-System.prototype.isCouchDB1 = function () {
-  return this._systemCommon.isCouchDB1();
-};
-
-System.prototype.membership = function () {
-  return promisedRequest.request({
-    uri: this._url + '/_membership',
-    method: 'GET'
-  }, true);
 };
 
 module.exports = System;
