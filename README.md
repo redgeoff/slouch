@@ -9,11 +9,11 @@
 
 ## Slouch is a good alternative to nano as:
 
-  - Don't have to create an instance for each DB
-  - Native promises
-  - Support for iterators
-  - More CouchDB support, e.g. admin functions
+  - You don't have to create an instance for each DB
+  - Supports native promises
+  - Supports iterators
   - Automatically throttles connections to DB to avoid max_dbs_open errors
   - Automatically persists connections with exponential backoff in case DB restarts or connection is dropped
-  - Also works in the browser
-  - Upserts, "get and put", support for optionally ignoring conflicts, missing docs, etc...
+  - Works in node and in the browser
+  - Provides upserts and "get and put" functions
+  - Support for optionally ignoring conflicts, missing docs, etc...
