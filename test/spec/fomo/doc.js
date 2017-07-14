@@ -7,8 +7,7 @@ var Slouch = require('../../../scripts/fomo'),
 describe('doc', function () {
 
   var slouch = new Slouch(utils.couchDBURL()),
-    db = slouch.db,
-    doc = slouch.doc;
+    db = slouch.db;
 
   beforeEach(function () {
     return db.create('testdb');
