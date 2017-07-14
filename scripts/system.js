@@ -1,6 +1,6 @@
 'use strict';
 
-var promisedRequest = require('../request'),
+var promisedRequest = require('./request'),
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise');
 

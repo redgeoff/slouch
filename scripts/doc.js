@@ -1,6 +1,6 @@
 'use strict';
 
-var promisedRequest = require('../request'),
+var promisedRequest = require('./request'),
   PersistentStreamIterator = require('quelle').PersistentStreamIterator,
   sporks = require('sporks');
 

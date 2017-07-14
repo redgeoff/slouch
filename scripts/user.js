@@ -1,7 +1,7 @@
 'use strict';
 
-var NotAuthenticatedError = require('../not-authenticated-error'),
-  request = require('../request'),
+var NotAuthenticatedError = require('./not-authenticated-error'),
+  request = require('./request'),
   url = require('url'),
   sporks = require('sporks');
 

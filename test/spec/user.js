@@ -1,7 +1,7 @@
 'use strict';
 
-var Slouch = require('../../../scripts/fomo'),
-  utils = require('../../utils'),
+var Slouch = require('../../scripts'),
+  utils = require('../utils'),
   sporks = require('sporks');
 
 describe('user', function () {

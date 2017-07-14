@@ -1,6 +1,6 @@
 'use strict';
 
-var Slouch = require('../../scripts/fomo'),
+var Slouch = require('../../scripts'),
   utils = require('../utils');
 
 describe('exclude-design-docs-iterator', function () {

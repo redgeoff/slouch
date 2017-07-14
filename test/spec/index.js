@@ -1,5 +1,8 @@
 'use strict';
 
-require('./fomo');
+require('./db');
+require('./doc');
 require('./exclude-design-docs-iterator');
 require('./request');
+require('./security');
+require('./user');

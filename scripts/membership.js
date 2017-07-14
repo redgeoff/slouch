@@ -1,6 +1,6 @@
 'use strict';
 
-var promisedRequest = require('../request');
+var promisedRequest = require('./request');
 
 var Membership = function (slouch) {
   this._slouch = slouch;

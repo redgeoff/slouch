@@ -1,6 +1,6 @@
 'use strict';
 
-var promisedRequest = require('../request'),
+var promisedRequest = require('./request'),
   FilteredStreamIterator = require('quelle').FilteredStreamIterator,
   PersistentStreamIterator = require('quelle').PersistentStreamIterator,
   StreamIterator = require('quelle').StreamIterator,
