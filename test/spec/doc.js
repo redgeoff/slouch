@@ -2,20 +2,39 @@
 
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
-  sporks = require('sporks');
+  sporks = require('sporks'),
+  Promise = require('sporks/scripts/promise');
 
 describe('doc', function () {
 
-  var slouch = new Slouch(utils.couchDBURL()),
-    db = slouch.db;
+  var slouch = null,
+    db = null;
 
   beforeEach(function () {
+    slouch = new Slouch(utils.couchDBURL());
+    db = slouch.db;
     return db.create('testdb');
   });
 
   afterEach(function () {
     return db.destroy('testdb');
   });
+
+  var createDocs = function () {
+    return slouch.doc.post('testdb', {
+      _id: '1',
+      thing: 'jam'
+    }).then(function () {
+      return slouch.doc.post('testdb', {
+        thing: 'clean',
+        fun: false
+      });
+    }).then(function () {
+      return slouch.doc.post('testdb', {
+        thing: 'code'
+      });
+    });
+  };
 
   it('should post, put and get doc', function () {
     var doc = {
@@ -68,6 +87,74 @@ describe('doc', function () {
         doc.priority = 'medium';
         // Generates conflict as no rev provided
         return slouch.doc.put('testdb', doc);
+      });
+    });
+  });
+
+  it('should ignore conflict when putting', function () {
+    return slouch.doc.post('testdb', {
+      _id: '1',
+      thing: 'jam'
+    }).then(function () {
+      return slouch.doc.putIgnoreConflict('testdb', {
+        _id: '1',
+        thing: 'clean'
+      });
+    });
+  });
+
+  it('should only ignore conflicts', function () {
+    return sporks.shouldThrow(function () {
+      return slouch.doc.putIgnoreConflict('missingdb', {
+        thing: 'clean'
+      });
+    });
+  });
+
+  it('should ignore missing docs', function () {
+    return slouch.doc.getIgnoreMissing('testdb', 'missingid');
+  });
+
+  it('should create when creating or updating', function () {
+    return slouch.doc.createOrUpdate('testdb', {
+      _id: '1',
+      thing: 'jam'
+    }).then(function () {
+      return slouch.doc.get('testdb', '1');
+    }).then(function (doc) {
+      doc._id.should.eql('1');
+      doc.thing.should.eql('jam');
+    });
+  });
+
+  it('should update when creating or updating', function () {
+    return createDocs().then(function () {
+      return slouch.doc.createOrUpdate('testdb', {
+        _id: '1',
+        thing: 'dance'
+      });
+    }).then(function () {
+      return slouch.doc.get('testdb', '1');
+    }).then(function (doc) {
+      doc._id.should.eql('1');
+      doc.thing.should.eql('dance');
+    });
+  });
+
+  it('should throw when creating or updating', function () {
+    // Fake error
+    slouch.doc.get = function () {
+      return Promise.resolve({
+        _rev: 'bad-rev'
+      });
+    };
+
+    return createDocs().then(function () {
+      return sporks.shouldThrow(function () {
+        return slouch.doc.createOrUpdate('testdb', {
+          _id: '1',
+          thing: 'jam'
+        });
       });
     });
   });
