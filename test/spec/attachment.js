@@ -67,6 +67,11 @@ describe('attachment', function () {
       return slouch.doc.get('testdb', 'foo');
     }).then(function (doc) {
       doc._attachments['my_image.png'].content_type.should.eql('image/png');
+
+      return slouch.attachment.get('testdb', 'foo', 'my_image.png');
+    }).then(function (attachment) {
+      var base64Attach = new Buffer(attachment).toString('base64');
+      base64Attach.should.eql(base64Data);
     });
   });
 
