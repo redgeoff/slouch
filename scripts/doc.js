@@ -279,7 +279,7 @@ Doc.prototype.getAndDestroy = function (dbName, docId) {
   });
 };
 
-Doc.prototype.markDocAsDestroyed = function (dbName, docId) {
+Doc.prototype.markAsDestroyed = function (dbName, docId) {
   return this.getMergeUpdate(dbName, {
     _id: docId,
     _deleted: true

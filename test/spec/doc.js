@@ -388,4 +388,14 @@ describe('doc', function () {
     });
   });
 
+  it('should mark as destroyed', function () {
+    return createDocs().then(function () {
+      return slouch.doc.markAsDestroyed('testdb', '1');
+    }).then(function () {
+      return slouch.doc.exists();
+    }).then(function (exists) {
+      exists.should.eql(false);
+    });
+  });
+
 });
