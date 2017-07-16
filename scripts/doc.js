@@ -297,7 +297,7 @@ Doc.prototype.destroyIgnoreConflict = function (dbName, docId, docRev) {
   });
 };
 
-Doc.prototype.getAnddestroy = function (dbName, docId) {
+Doc.prototype.getAndDestroy = function (dbName, docId) {
   var self = this;
   return self.get(dbName, docId).then(function (doc) {
     return self.destroy(dbName, docId, doc._rev);

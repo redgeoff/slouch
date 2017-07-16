@@ -149,6 +149,15 @@ describe('doc', function () {
     });
   });
 
+  it('should post and ignore conflict', function () {
+    return fakeConflict().then(function () {
+      return slouch.doc.postAndIgnoreConflict('testdb', {
+        _id: '1',
+        thing: 'dance'
+      });
+    });
+  });
+
   it('should create when creating or updating', function () {
     return slouch.doc.createOrUpdate('testdb', {
       _id: '1',
