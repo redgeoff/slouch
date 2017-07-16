@@ -265,4 +265,31 @@ describe('doc', function () {
     });
   });
 
+  it('should get, merge, create or update when doc existing', function () {
+    return createDocs().then(function () {
+      return slouch.doc.getMergeCreateOrUpdate('testdb', {
+        _id: '1',
+        priority: 'high'
+      });
+    }).then(function () {
+      return slouch.doc.get('testdb', '1');
+    }).then(function (doc) {
+      doc._id.should.eql('1');
+      doc.thing.should.eql('jam');
+      doc.priority.should.eql('high');
+    });
+  });
+
+  it('should get, merge, create or update when missing', function () {
+    return slouch.doc.getMergeCreateOrUpdate('testdb', {
+      _id: '1',
+      priority: 'high'
+    }).then(function () {
+      return slouch.doc.get('testdb', '1');
+    }).then(function (doc) {
+      doc._id.should.eql('1');
+      doc.priority.should.eql('high');
+    });
+  });
+
 });
