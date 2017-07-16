@@ -121,18 +121,19 @@ Doc.prototype.createOrUpdateIgnoreConflict = function (dbName, doc) {
   });
 };
 
-Doc.prototype.upsert = function (dbName, doc) {
+Doc.prototype._persistThroughConflicts = function (promiseFactory) {
 
   var self = this,
     i = 0;
 
-  var _upsert = function () {
-    return self.createOrUpdate(dbName, doc).catch(function (err) {
+  var run = function () {
+
+    return promiseFactory().catch(function (err) {
 
       if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
 
         // Retry
-        return _upsert();
+        return run();
 
       } else {
 
@@ -142,9 +143,17 @@ Doc.prototype.upsert = function (dbName, doc) {
       }
 
     });
+
   };
 
-  return _upsert();
+  return run();
+};
+
+Doc.prototype.upsert = function (dbName, doc) {
+  var self = this;
+  return self._persistThroughConflicts(function () {
+    return self.createOrUpdate(dbName, doc);
+  });
 };
 
 Doc.prototype.getMergeUpdate = function (dbName, doc) {
@@ -190,60 +199,21 @@ Doc.prototype.getMergeUpdateIgnoreConflict = function (dbName, doc) {
 };
 
 Doc.prototype.getMergeUpsert = function (dbName, doc) {
-
-  var self = this,
-    i = 0;
-
-  var _upsert = function () {
-    return self.getMergeCreateOrUpdate(dbName, doc).catch(function (err) {
-
-      if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
-
-        // Retry
-        return _upsert();
-
-      } else {
-
-        // Unexpected error
-        throw err;
-
-      }
-
-    });
-  };
-
-  return _upsert();
+  var self = this;
+  return self._persistThroughConflicts(function () {
+    return self.getMergeCreateOrUpdate(dbName, doc);
+  });
 };
 
 Doc.prototype.getModifyUpsert = function (dbName, docId, onGetPromiseFactory) {
-
-  var self = this,
-    i = 0;
-
-  var _upsert = function () {
+  var self = this;
+  return self._persistThroughConflicts(function () {
     return self.get(dbName, docId).then(function (doc) {
       return onGetPromiseFactory(doc);
     }).then(function (modifiedDoc) {
       return self.update(dbName, modifiedDoc);
-    }).catch(function (err) {
-
-      if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
-
-        // Retry
-        return _upsert();
-
-      } else {
-
-        // Unexpected error
-        throw err;
-
-      }
-
     });
-  };
-
-  return _upsert();
-
+  });
 };
 
 Doc.prototype.allArray = function (dbName, params) {
