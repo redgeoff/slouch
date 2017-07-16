@@ -75,4 +75,16 @@ describe('attachment', function () {
     });
   });
 
+  it('should destroy attachment', function () {
+    return createBase64Attachment().then(function () {
+      return slouch.doc.get('testdb', 'foo');
+    }).then(function (doc) {
+      return slouch.attachment.destroy('testdb', 'foo', 'my_image.png', doc._rev);
+    }).then(function () {
+      return slouch.doc.get('testdb', 'foo');
+    }).then(function (doc) {
+      (doc._attachments === undefined).should.eql(true);
+    });
+  });
+
 });

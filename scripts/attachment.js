@@ -41,4 +41,14 @@ Attachment.prototype.get = function (dbName, docId, attachmentName) {
   });
 };
 
+Attachment.prototype.destroy = function (dbName, docId, attachmentName, rev) {
+  return promisedRequest.request({
+    uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName,
+    method: 'DELETE',
+    qs: {
+      rev: rev
+    }
+  });
+};
+
 module.exports = Attachment;
