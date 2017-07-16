@@ -1,9 +1,7 @@
 'use strict';
 
 var Slouch = require('../../scripts'),
-  utils = require('../utils'),
-  sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise');
+  utils = require('../utils');
 
 describe('attachment', function () {
 
@@ -11,19 +9,23 @@ describe('attachment', function () {
     db = null;
 
   // Base64 encoded 10px by 10px black PNG. Source: http://png-pixel.com
-  var base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAEUlEQVR42mNk+M+AARiHsiAAcCIKAYwFoQ8AAAAASUVORK5CYII=';
+  var base64Data = [
+    'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAEUlEQVR42mNk+M+AARiHsiAAcCIKAYwFoQ8AAAAASUVO',
+    'RK5CYII='
+  ].join('');
 
-  // As per https://stackoverflow.com/a/14573049/2831606, we need an abstraction as the API can
-  // differ
-  var bufferFrom = function () {
-    if (typeof Buffer.from === 'function') {
-      // Node 5.10+
-      return Buffer.from(base64Data, 'base64'); // Ta-da
-    } else {
-      // older Node versions
-      return new Buffer(base64Data, 'base64'); // Ta-da
-    }
-  };
+  // TODO: will be needed when support binary attachments
+  // // As per https://stackoverflow.com/a/14573049/2831606, we need an abstraction as the API can
+  // // differ
+  // var bufferFrom = function () {
+  //   if (typeof Buffer.from === 'function') {
+  //     // Node 5.10+
+  //     return Buffer.from(base64Data, 'base64');
+  //   } else {
+  //     // older Node versions
+  //     return new Buffer(base64Data, 'base64');
+  //   }
+  // };
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -53,7 +55,10 @@ describe('attachment', function () {
   //   return slouch.doc.create('testdb', {
   //     _id: 'foo'
   //   }).then(function () {
-  //     return slouch.attachment.create('testdb', 'foo', 'myattachment', data, 'image/png');
+  //     return slouch.doc.get('testdb', 'foo');
+  //   }).then(function (doc) {
+  //     return slouch.attachment.create('testdb', 'foo', 'my_file.png', data, 'image/png',
+  //       doc._rev);
   //   });
   // });
 

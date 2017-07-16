@@ -7,21 +7,23 @@ var Attachment = function (slouch) {
 };
 
 // TODO
-// Attachment.prototype.create = function (dbName, docId, attachmentName, data, contentType) {
+// Attachment.prototype.create = function (dbName, docId, attachmentName, data, contentType, rev) {
 //   var formData = {
-//     my_file: {
+//     custom_file: {
 //       value: data,
 //       options: {
+//         filename: attachmentName,
 //         contentType: contentType
 //       }
 //     }
 //   };
 //
 //   return promisedRequest.request({
-//     uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName,
-//     method: 'POST',
-//     raw: true,
-//     encoding: null,
+//     uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName +
+//       '?rev=' + encodeURIComponent(rev),
+//     method: 'PUT',
+//     // raw: true,
+//     // encoding: null,
 //     formData: formData
 //   }).then(function (response) {
 //     return response.body;
