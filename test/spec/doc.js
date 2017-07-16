@@ -202,7 +202,7 @@ describe('doc', function () {
     });
   });
 
-  it('should should ignore conflict when creating or updating', function () {
+  it('should ignore conflict when creating or updating', function () {
     return fakeConflict().then(function () {
       return slouch.doc.createOrUpdateIgnoreConflict('testdb', {
         _id: '1',
@@ -289,6 +289,15 @@ describe('doc', function () {
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.priority.should.eql('high');
+    });
+  });
+
+  it('should ignore conflict when getting, merging and updating', function () {
+    return fakeConflict().then(function () {
+      return slouch.doc.getMergeUpdateIgnoreConflict('testdb', {
+        _id: '1',
+        thing: 'sing'
+      });
     });
   });
 
