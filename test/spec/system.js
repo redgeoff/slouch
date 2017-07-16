@@ -102,4 +102,22 @@ describe('system', function () {
     });
   });
 
+  it('should listen for updates', function () {
+    var promise = new Promise(function (resolve, reject) {
+      system.updates().each(function (update) {
+        if (update.db_name === 'testdb' && update.type === 'updated') {
+          resolve();
+        }
+      }).catch(function (err) {
+        reject(err);
+      });
+    });
+
+    return slouch.doc.create('testdb', {
+      foo: 'bar'
+    }).then(function () {
+      return promise;
+    });
+  });
+
 });
