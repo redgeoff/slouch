@@ -53,7 +53,9 @@ describe('doc', function () {
         // Fake conflict
         slouch.doc.get = function () {
           return Promise.resolve({
-            _rev: doc._rev
+            _id: '1',
+            _rev: doc._rev,
+            thing: 'dance'
           });
         };
 
@@ -297,6 +299,46 @@ describe('doc', function () {
       return slouch.doc.getMergeUpdateIgnoreConflict('testdb', {
         _id: '1',
         thing: 'sing'
+      });
+    });
+  });
+
+  it('should get, merge and upsert when conflict', function () {
+    var i = 0,
+      defaultCreateOrUpdate = slouch.doc.createOrUpdate;
+
+    // Fake resolution of conflict
+    slouch.doc.createOrUpdate = function () {
+      if (i++ > 3) {
+        // Resolve after a few attempts
+        slouch.doc.get = defaultGet;
+      }
+      return defaultCreateOrUpdate.apply(this, arguments);
+    };
+
+    return fakeConflict().then(function () {
+      return slouch.doc.getMergeUpsert('testdb', {
+        _id: '1',
+        priority: 'high'
+      });
+    }).then(function () {
+      return slouch.doc.get('testdb', '1');
+    }).then(function (doc) {
+      doc._id.should.eql('1');
+      doc.thing.should.eql('dance');
+      doc.priority.should.eql('high');
+    });
+  });
+
+  it('get, merge and upsert should fail after max retries', function () {
+    slouch.maxRetries = 3;
+
+    return fakeConflict().then(function () {
+      return sporks.shouldThrow(function () {
+        return slouch.doc.getMergeUpsert('testdb', {
+          _id: '1',
+          thing: 'dance'
+        });
       });
     });
   });
