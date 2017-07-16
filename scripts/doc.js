@@ -85,6 +85,14 @@ Doc.prototype.getIgnoreMissing = function (dbName, id) {
   });
 };
 
+Doc.prototype.exists = function (dbName, id) {
+  return this.get(dbName, id).then(function () {
+    return true;
+  }).catch(function () {
+    return false;
+  });
+};
+
 Doc.prototype.createOrUpdate = function (dbName, doc) {
 
   var self = this,
