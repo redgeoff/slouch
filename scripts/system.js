@@ -9,6 +9,7 @@ var promisedRequest = require('./request'),
 
 var System = function (slouch) {
   this._slouch = slouch;
+  this._couchDB1 = null;
 };
 
 System.prototype._isCouchDB1 = function () {
