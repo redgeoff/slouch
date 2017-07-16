@@ -141,6 +141,14 @@ describe('doc', function () {
     return slouch.doc.getIgnoreMissing('testdb', 'missingid');
   });
 
+  it('should throw if not missing', function () {
+    return sporks.shouldThrow(function () {
+      return slouch.doc.ignoreMissing(function () {
+        return sporks.promiseError(new Error());
+      });
+    });
+  });
+
   it('should create when creating or updating', function () {
     return slouch.doc.createOrUpdate('testdb', {
       _id: '1',
