@@ -93,6 +93,7 @@ DB.prototype.replicate = function (params) {
   });
 };
 
+// TODO: support fromDBName and toDbName also being URLs
 DB.prototype.copy = function (fromDBName, toDBName) {
   var self = this;
   return self.create(toDBName).then(function () {

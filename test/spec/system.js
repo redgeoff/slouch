@@ -1,18 +1,23 @@
 'use strict';
 
 var Slouch = require('../../scripts'),
-  utils = require('../utils');
+  utils = require('../utils'),
+  FakedStreamIterator = require('./faked-stream-iterator');
 
 describe('system', function () {
 
   var slouch = null,
     db = null,
-    system = null;
+    system = null,
+    destroyed = null,
+    created = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     system = slouch.system;
+    destroyed = [];
+    created = [];
     return db.create('testdb');
   });
 
@@ -23,6 +28,24 @@ describe('system', function () {
   var fakeCouchDBVersion = function (version) {
     system.get = function () {
       return Promise.resolve({ version: [version] });
+    };
+  };
+
+  var fakeDBAll = function (dbs) {
+    slouch.db.all = function () {
+      return new FakedStreamIterator(dbs);
+    };
+  };
+
+  var fakeCreateAndDestroy = function () {
+    slouch.db.create = function (dbName) {
+      created.push(dbName);
+      return Promise.resolve();
+    };
+
+    slouch.db.destroy = function (dbName) {
+      destroyed.push(dbName);
+      return Promise.resolve();
     };
   };
 
@@ -45,6 +68,37 @@ describe('system', function () {
       return system.isCouchDB1();
     }).then(function (is1) {
       is1.should.eql(true);
+    });
+  });
+
+  it('should reset when couchdb 1', function () {
+    fakeCouchDBVersion('1');
+    fakeDBAll(['_replicator', 'testa', 'testb']);
+    fakeCreateAndDestroy();
+
+    return system.reset().then(function () {
+      created.should.eql(['_replicator']);
+      destroyed.should.eql(['_replicator', 'testa', 'testb']);
+
+      created = [];
+      destroyed = [];
+
+      // Now try the exceptDBNames param
+      return system.reset(['testb']);
+    }).then(function () {
+      created.should.eql(['_replicator']);
+      destroyed.should.eql(['_replicator', 'testa']);
+    });
+  });
+
+  it('should reset when not couchdb', function () {
+    fakeCouchDBVersion('2');
+    fakeDBAll(['_replicator', '_global_changes', '_users', 'testa', 'testb']);
+    fakeCreateAndDestroy();
+
+    return system.reset().then(function () {
+      created.should.eql(['_replicator', '_global_changes', '_users']);
+      destroyed.should.eql(['_replicator', '_global_changes', '_users', 'testa', 'testb']);
     });
   });
 
