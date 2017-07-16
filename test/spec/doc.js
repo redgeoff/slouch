@@ -160,6 +160,14 @@ describe('doc', function () {
     return slouch.doc.getIgnoreMissing('testdb', 'missingid');
   });
 
+  it('should check if doc exists', function () {
+    return createDocs().then(function () {
+      return slouch.doc.exists('testdb', '1');
+    }).then(function (exists) {
+      exists.should.eql(true);
+    });
+  });
+
   it('should throw if not missing', function () {
     return sporks.shouldThrow(function () {
       return slouch.doc.ignoreMissing(function () {
