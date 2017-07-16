@@ -398,4 +398,10 @@ describe('doc', function () {
     });
   });
 
+  it('should set destroyed', function () {
+    var doc = {};
+    slouch.doc.setDestroyed(doc);
+    doc._deleted.should.eql(true);
+  });
+
 });

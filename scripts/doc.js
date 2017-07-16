@@ -287,7 +287,7 @@ Doc.prototype.markAsDestroyed = function (dbName, docId) {
 };
 
 // Just for formalizing the setting of the _deleted flag
-Doc.prototype.setDestroy = function (doc) {
+Doc.prototype.setDestroyed = function (doc) {
   doc._deleted = true;
 };
 
