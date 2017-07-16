@@ -291,15 +291,4 @@ Doc.prototype.setDestroyed = function (doc) {
   doc._deleted = true;
 };
 
-Doc.prototype.getAttachment = function (dbName, docId, attachmentName) {
-  return promisedRequest.request({
-    uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName,
-    method: 'GET',
-    raw: true,
-    encoding: null
-  }).then(function (response) {
-    return response.body;
-  });
-};
-
 module.exports = Doc;
