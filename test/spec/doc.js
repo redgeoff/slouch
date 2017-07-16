@@ -21,16 +21,16 @@ describe('doc', function () {
   });
 
   var createDocs = function () {
-    return slouch.doc.post('testdb', {
+    return slouch.doc.create('testdb', {
       _id: '1',
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         thing: 'clean',
         fun: false
       });
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         thing: 'code'
       });
     });
@@ -62,18 +62,18 @@ describe('doc', function () {
     });
   };
 
-  it('should post, put and get doc', function () {
+  it('should create, update and get doc', function () {
     var doc = {
       thing: 'play'
     };
 
-    return slouch.doc.post('testdb', doc).then(function (_doc) {
+    return slouch.doc.create('testdb', doc).then(function (_doc) {
       doc._id = _doc.id;
       return slouch.doc.get('testdb', doc._id);
     }).then(function (body) {
       doc._rev = body._rev;
       doc.priority = 'medium';
-      return slouch.doc.put('testdb', doc);
+      return slouch.doc.update('testdb', doc);
     }).then(function () {
       return slouch.doc.get('testdb', doc._id);
     }).then(function (body) {
@@ -83,14 +83,14 @@ describe('doc', function () {
   });
 
   it('should destroy all non-design docs', function () {
-    return slouch.doc.post('testdb', {
+    return slouch.doc.create('testdb', {
       thing: 'play'
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         thing: 'write'
       });
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         _id: '_design/mydesign',
         foo: 'bar'
       });
@@ -108,21 +108,21 @@ describe('doc', function () {
       var doc = {
         thing: 'play'
       };
-      return slouch.doc.post('testdb', doc).then(function (_doc) {
+      return slouch.doc.create('testdb', doc).then(function (_doc) {
         doc._id = _doc.id;
         doc.priority = 'medium';
         // Generates conflict as no rev provided
-        return slouch.doc.put('testdb', doc);
+        return slouch.doc.update('testdb', doc);
       });
     });
   });
 
-  it('should ignore conflict when putting', function () {
-    return slouch.doc.post('testdb', {
+  it('should ignore conflict when updateting', function () {
+    return slouch.doc.create('testdb', {
       _id: '1',
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.putIgnoreConflict('testdb', {
+      return slouch.doc.updateIgnoreConflict('testdb', {
         _id: '1',
         thing: 'clean'
       });
@@ -131,7 +131,7 @@ describe('doc', function () {
 
   it('should only ignore conflicts', function () {
     return sporks.shouldThrow(function () {
-      return slouch.doc.putIgnoreConflict('missingdb', {
+      return slouch.doc.updateIgnoreConflict('missingdb', {
         thing: 'clean'
       });
     });
@@ -149,9 +149,9 @@ describe('doc', function () {
     });
   });
 
-  it('should post and ignore conflict', function () {
+  it('should create and ignore conflict', function () {
     return fakeConflict().then(function () {
-      return slouch.doc.postAndIgnoreConflict('testdb', {
+      return slouch.doc.createAndIgnoreConflict('testdb', {
         _id: '1',
         thing: 'dance'
       });
@@ -250,9 +250,9 @@ describe('doc', function () {
     });
   });
 
-  it('should get, merge and put', function () {
+  it('should get, merge and update', function () {
     return createDocs().then(function () {
-      return slouch.doc.getMergePut('testdb', {
+      return slouch.doc.getMergeUpdate('testdb', {
         _id: '1',
         priority: 'high'
       });

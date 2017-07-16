@@ -35,8 +35,7 @@ Doc.prototype.ignoreMissing = function (promiseFactory) {
   });
 };
 
-// Use to create doc
-Doc.prototype.post = function (dbName, doc) {
+Doc.prototype.create = function (dbName, doc) {
   return promisedRequest.request({
     uri: this._slouch._url + '/' + dbName,
     method: 'POST',
@@ -46,30 +45,29 @@ Doc.prototype.post = function (dbName, doc) {
   });
 };
 
-Doc.prototype.postAndIgnoreConflict = function (dbName, doc) {
+Doc.prototype.createAndIgnoreConflict = function (dbName, doc) {
   var self = this;
   return self.ignoreConflict(function () {
-    return self.post(dbName, doc);
+    return self.create(dbName, doc);
   });
 };
 
-// Use to update doc
-Doc.prototype.put = function (dbName, doc) {
+Doc.prototype.update = function (dbName, doc) {
   return promisedRequest.request({
     uri: this._slouch._url + '/' + dbName + '/' + doc._id,
     method: 'PUT',
     body: JSON.stringify(doc)
   }).then(function () {
-    // Return doc so that callers like getMergePut have an automatic way to get the data that was
-    // put
+    // Return doc so that callers like getMergeUpdate have an automatic way to get the data that was
+    // update
     return doc;
   });
 };
 
-Doc.prototype.putIgnoreConflict = function (dbName, doc) {
+Doc.prototype.updateIgnoreConflict = function (dbName, doc) {
   var self = this;
   return self.ignoreConflict(function () {
-    return self.put(dbName, doc);
+    return self.update(dbName, doc);
   });
 };
 
@@ -97,14 +95,14 @@ Doc.prototype.createOrUpdate = function (dbName, doc) {
     // Use the latest rev so that we can attempt to update the doc without a conflict
     clonedDoc._rev = _doc._rev;
 
-    return self.put(dbName, clonedDoc);
+    return self.update(dbName, clonedDoc);
 
   }).catch(function (err) {
 
-    if (self.isMissingError(err)) { // missing? This can be expected on the first put
+    if (self.isMissingError(err)) { // missing? This can be expected on the first update
 
       // The doc is missing so we attempt to create the doc w/o a rev number
-      return self.post(dbName, doc);
+      return self.create(dbName, doc);
 
     } else {
 
@@ -149,7 +147,7 @@ Doc.prototype.upsert = function (dbName, doc) {
   return _upsert();
 };
 
-Doc.prototype.getMergePut = function (dbName, doc) {
+Doc.prototype.getMergeUpdate = function (dbName, doc) {
 
   var self = this;
 
@@ -159,7 +157,7 @@ Doc.prototype.getMergePut = function (dbName, doc) {
 
     clonedDoc = sporks.merge(clonedDoc, doc);
 
-    return self.put(dbName, clonedDoc);
+    return self.update(dbName, clonedDoc);
 
   });
 };
@@ -184,10 +182,10 @@ Doc.prototype.getMergeCreateOrUpdate = function (dbName, doc) {
   });
 };
 
-Doc.prototype.getMergePutIgnoreConflict = function (dbName, doc) {
+Doc.prototype.getMergeUpdateIgnoreConflict = function (dbName, doc) {
   var self = this;
   return self.ignoreConflict(function () {
-    return self.getMergePut(dbName, doc);
+    return self.getMergeUpdate(dbName, doc);
   });
 };
 
@@ -226,7 +224,7 @@ Doc.prototype.getModifyUpsert = function (dbName, docId, onGetPromiseFactory) {
     return self.get(dbName, docId).then(function (doc) {
       return onGetPromiseFactory(doc);
     }).then(function (modifiedDoc) {
-      return self.put(dbName, modifiedDoc);
+      return self.update(dbName, modifiedDoc);
     }).catch(function (err) {
 
       if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
@@ -305,14 +303,14 @@ Doc.prototype.getAndDestroy = function (dbName, docId) {
 };
 
 Doc.prototype.markDocAsDestroyed = function (dbName, docId) {
-  return this.getMergePut(dbName, {
+  return this.getMergeUpdate(dbName, {
     _id: docId,
     _deleted: true
   });
 };
 
 // Just for formalizing the setting of the _deleted flag
-Doc.prototype.setDeleted = function (doc) {
+Doc.prototype.setDestroy = function (doc) {
   doc._deleted = true;
 };
 

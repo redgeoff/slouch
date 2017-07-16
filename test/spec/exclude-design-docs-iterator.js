@@ -17,14 +17,14 @@ describe('exclude-design-docs-iterator', function () {
   });
 
   var createDocs = function () {
-    return slouch.doc.post('testdb', {
+    return slouch.doc.create('testdb', {
       thing: 'play'
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         thing: 'write'
       });
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         _id: '_design/mydesign',
         thing: 'design'
       });

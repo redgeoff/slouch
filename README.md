@@ -13,7 +13,7 @@ An API for CouchDB that does the heavy lifting
   - Automatically throttles connections to DB to avoid max_dbs_open errors
   - Automatically persists connections with exponential backoff in case DB restarts or connection is dropped
   - Works in node and in the browser
-  - Provides upserts and "get and put" functions
+  - Provides upserts and "get and update" functions
   - Support for optionally ignoring conflicts, missing docs, etc...
 
 

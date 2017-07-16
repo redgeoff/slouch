@@ -26,22 +26,22 @@ describe('db', function () {
   });
 
   var createDocs = function () {
-    return slouch.doc.post('testdb', {
+    return slouch.doc.create('testdb', {
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         thing: 'clean',
         fun: false
       });
     }).then(function () {
-      return slouch.doc.post('testdb', {
+      return slouch.doc.create('testdb', {
         thing: 'code'
       });
     });
   };
 
   var createView = function () {
-    return slouch.doc.post('testdb', {
+    return slouch.doc.create('testdb', {
       _id: '_design/myview',
       views: {
         fun: {

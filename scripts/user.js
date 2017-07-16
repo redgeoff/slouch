@@ -20,7 +20,7 @@ User.prototype.toUsername = function (userId) {
 
 User.prototype._insert = function (username, user) {
   user._id = this.toUserId(username);
-  return this._slouch.doc.put(this._dbName, user);
+  return this._slouch.doc.update(this._dbName, user);
 };
 
 User.prototype.create = function (username, password, roles, metadata) {
@@ -94,7 +94,7 @@ User.prototype.destroy = function (username) {
 };
 
 User.prototype.authenticate = function (username, password) {
-  return this.postSession({
+  return this.createSession({
     name: username,
     password: password
   }).then(function (response) {
@@ -106,7 +106,7 @@ User.prototype.authenticate = function (username, password) {
   });
 };
 
-User.prototype.postSession = function (doc) {
+User.prototype.createSession = function (doc) {
   return request.request({
     uri: this._slouch_url + '/_session',
     method: 'POST',
