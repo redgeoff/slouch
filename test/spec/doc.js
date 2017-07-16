@@ -8,7 +8,9 @@ var Slouch = require('../../scripts'),
 describe('doc', function () {
 
   var slouch = null,
-    db = null;
+    db = null,
+    defaultGet = null,
+    defaultUpdate = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -36,9 +38,21 @@ describe('doc', function () {
     });
   };
 
-  var defaultGet = null;
+  var fakeConflict = function (numConflicts) {
 
-  var fakeConflict = function () {
+    defaultUpdate = slouch.doc.update;
+
+    var i = 0;
+
+    // Fake resolution of conflict
+    slouch.doc.update = function () {
+      if (numConflicts && i++ > numConflicts) {
+        // Resolve after a few attempts
+        slouch.doc.get = defaultGet;
+      }
+      return defaultUpdate.apply(this, arguments);
+    };
+
     return createDocs().then(function () {
       return slouch.doc.get('testdb', '1');
     }).then(function (doc) {
@@ -214,19 +228,7 @@ describe('doc', function () {
   });
 
   it('should upsert when conflict', function () {
-    var i = 0,
-      defaultCreateOrUpdate = slouch.doc.createOrUpdate;
-
-    // Fake resolution of conflict
-    slouch.doc.createOrUpdate = function () {
-      if (i++ > 3) {
-        // Resolve after a few attempts
-        slouch.doc.get = defaultGet;
-      }
-      return defaultCreateOrUpdate.apply(this, arguments);
-    };
-
-    return fakeConflict().then(function () {
+    return fakeConflict(3).then(function () {
       return slouch.doc.upsert('testdb', {
         _id: '1',
         thing: 'dance'
@@ -304,19 +306,7 @@ describe('doc', function () {
   });
 
   it('should get, merge and upsert when conflict', function () {
-    var i = 0,
-      defaultCreateOrUpdate = slouch.doc.createOrUpdate;
-
-    // Fake resolution of conflict
-    slouch.doc.createOrUpdate = function () {
-      if (i++ > 3) {
-        // Resolve after a few attempts
-        slouch.doc.get = defaultGet;
-      }
-      return defaultCreateOrUpdate.apply(this, arguments);
-    };
-
-    return fakeConflict().then(function () {
+    return fakeConflict(3).then(function () {
       return slouch.doc.getMergeUpsert('testdb', {
         _id: '1',
         priority: 'high'
@@ -338,6 +328,42 @@ describe('doc', function () {
         return slouch.doc.getMergeUpsert('testdb', {
           _id: '1',
           thing: 'dance'
+        });
+      });
+    });
+  });
+
+  it('should get, modify and upsert when conflict', function () {
+    return fakeConflict(3).then(function () {
+      return slouch.doc.getModifyUpsert('testdb', '1', function (doc) {
+        return Promise.resolve({
+          _id: '1',
+          _rev: doc._rev,
+          thing: doc.thing,
+          priority: 'high'
+        });
+      });
+    }).then(function () {
+      return slouch.doc.get('testdb', '1');
+    }).then(function (doc) {
+      doc._id.should.eql('1');
+      doc.thing.should.eql('dance');
+      doc.priority.should.eql('high');
+    });
+  });
+
+  it('get, modify and upsert should fail after max retries', function () {
+    slouch.maxRetries = 3;
+
+    return fakeConflict().then(function () {
+      return sporks.shouldThrow(function () {
+        return slouch.doc.getModifyUpsert('testdb', '1', function (doc) {
+          return Promise.resolve({
+            _id: '1',
+            _rev: doc._rev,
+            thing: doc.thing,
+            priority: 'high'
+          });
         });
       });
     });
