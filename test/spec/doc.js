@@ -159,4 +159,33 @@ describe('doc', function () {
     });
   });
 
+  it('should should ignore conflict when creating or updating', function () {
+
+
+    return createDocs().then(function () {
+      return slouch.doc.get('testdb', '1').then(function (doc) {
+
+        return slouch.doc.createOrUpdate('testdb', {
+          _id: '1',
+          thing: 'dance'
+        }).then(function () {
+
+          // Fake conflict
+          slouch.doc.get = function () {
+            return Promise.resolve({
+              _rev: doc._rev
+            });
+          };
+
+          return slouch.doc.createOrUpdateIgnoreConflict('testdb', {
+            _id: '1',
+            thing: 'sing'
+          });
+
+        });
+      });
+
+    });
+  });
+
 });
