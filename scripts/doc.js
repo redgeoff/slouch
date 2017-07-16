@@ -237,12 +237,11 @@ Doc.prototype.destroyAllNonDesign = function (dbName) {
   return this.destroyAll(dbName, true);
 };
 
-Doc.prototype.destroyAll = function (dbName, keepDesignDocs, exceptDBNames) {
+Doc.prototype.destroyAll = function (dbName, keepDesignDocs) {
   var self = this;
 
   return self.all(dbName).each(function (doc) {
-    if ((!keepDesignDocs || doc.id.indexOf('_design') === -1) &&
-      (!exceptDBNames || exceptDBNames.indexOf(doc.id) !== -1)) {
+    if (!keepDesignDocs || doc.id.indexOf('_design') === -1) {
       return self.destroy(dbName, doc.id, doc.value.rev);
     }
   });

@@ -10,7 +10,8 @@ describe('doc', function () {
   var slouch = null,
     db = null,
     defaultGet = null,
-    defaultUpdate = null;
+    defaultUpdate = null,
+    conflictDoc = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -56,6 +57,8 @@ describe('doc', function () {
     return createDocs().then(function () {
       return slouch.doc.get('testdb', '1');
     }).then(function (doc) {
+
+      conflictDoc = doc;
 
       return slouch.doc.createOrUpdate('testdb', {
         _id: '1',
@@ -366,6 +369,12 @@ describe('doc', function () {
           });
         });
       });
+    });
+  });
+
+  it('should ignore conflicts when destroying', function () {
+    return fakeConflict().then(function () {
+      return slouch.doc.destroyIgnoreConflict('testdb', '1', conflictDoc._rev);
     });
   });
 
