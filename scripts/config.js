@@ -50,6 +50,12 @@ Config.prototype._request = function (path, opts, parseBody, maxNumNodes) {
   });
 };
 
+Config.prototype.get = function (path) {
+  return this._request(path, {
+    method: 'GET'
+  }, true);
+};
+
 Config.prototype.set = function (path, value) {
   return this._request(path, {
     method: 'PUT',
@@ -76,6 +82,9 @@ Config.prototype.setCouchHttpdAuthTimeout = function (timeoutSecs) {
 };
 
 Config.prototype.setCouchHttpdAuthAllowPersistentCookies = function (allow) {
+  if (typeof allow === 'boolean') {
+    allow = allow ? 'true' : 'false';
+  }
   return this.set('couch_httpd_auth/allow_persistent_cookies', allow);
 };
 

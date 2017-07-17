@@ -71,4 +71,34 @@ describe('config', function () {
     return config.setCouchHttpdAuthTimeout(3600);
   });
 
+  it('should get and unset', function () {
+    return config.setLogLevel('warning').then(function () {
+      return config.get('log/level');
+    }).then(function (value) {
+      value.should.eql('warning');
+
+      return config.unset('log/level');
+    }).then(function () {
+      return sporks.shouldThrow(function () {
+        return config.get('log/level');
+      });
+    });
+  });
+
+  it('should unset ignore missing', function () {
+    return config.setLogLevel('info').then(function () {
+      return config.unset('log/level');
+    }).then(function () {
+      return config.unsetIgnoreMissing('log/level');
+    });
+  });
+
+  it('should set couch_httpd_auth/allow_persistent_cookies', function () {
+    return config.setCouchHttpdAuthAllowPersistentCookies(true).then(function () {
+      return config.setCouchHttpdAuthAllowPersistentCookies(false);
+    }).then(function () {
+      config.setCouchHttpdAuthAllowPersistentCookies('true');
+    });
+  });
+
 });
