@@ -77,12 +77,16 @@ System.prototype.updates = function (params) {
   }, 'results.*');
 };
 
+System.prototype._cloneParams = function (params) {
+  return params ? sporks.clone(params) : {};
+};
+
 System.prototype.updatesViaGlobalChanges = function (params) {
   var self = this,
     iterator = new StreamIterator();
 
   self._slouch.db.get('_global_changes').then(function (dbDoc) {
-    var clonedParams = sporks.clone(params);
+    var clonedParams = self._cloneParams(params);
     clonedParams.since = dbDoc.update_seq;
 
     // We pipe to the returned iterator so that the function can return an iterator who's content is
@@ -108,9 +112,9 @@ System.prototype.updatesNoHistory = function (params) {
   var self = this,
     iterator = new StreamIterator();
 
-  self._slouch._system.isCouchDB1().then(function (isCouchDB1) {
+  self._slouch.system.isCouchDB1().then(function (isCouchDB1) {
     if (isCouchDB1) {
-      return self._slouch.db.updates(params);
+      return self.updates(params);
     } else {
       return self.updatesViaGlobalChanges(params);
     }

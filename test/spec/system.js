@@ -2,7 +2,8 @@
 
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
-  FakedStreamIterator = require('./faked-stream-iterator');
+  FakedStreamIterator = require('./faked-stream-iterator'),
+  sporks = require('sporks');
 
 describe('system', function () {
 
@@ -10,7 +11,8 @@ describe('system', function () {
     db = null,
     system = null,
     destroyed = null,
-    created = null;
+    created = null,
+    defaultGet = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -22,10 +24,12 @@ describe('system', function () {
   });
 
   afterEach(function () {
+    system.get = defaultGet;
     return db.destroy('testdb');
   });
 
   var fakeCouchDBVersion = function (version) {
+    defaultGet = system.get;
     system.get = function () {
       return Promise.resolve({ version: [version] });
     };
@@ -118,6 +122,71 @@ describe('system', function () {
     }).then(function () {
       return promise;
     });
+  });
+
+  it('should listen for updates no history when couchdb 1', function () {
+    fakeCouchDBVersion('1');
+
+    var promise = new Promise(function (resolve, reject) {
+      system.updatesNoHistory().each(function (update) {
+        if (update.db_name === 'testdb' && update.type === 'updated') {
+          resolve();
+        }
+      }).catch(function (err) {
+        reject(err);
+      });
+    });
+
+    return slouch.doc.create('testdb', {
+      foo: 'bar'
+    }).then(function () {
+      return promise;
+    });
+  });
+
+  it('should listen for updates no history when couchdb 2', function () {
+    fakeCouchDBVersion('2');
+
+    // Mock get regardless of version of CouchDB
+    var defaultGet = db.get;
+    db.get = function (name) {
+      var args = sporks.toArgsArray(arguments);
+      if (name === '_global_changes') {
+        args[0] = 'testdb';
+      }
+      return defaultGet.apply(this, args);
+    };
+
+    // Mock changes regardless of version of CouchDB
+    var defaultChanges = db.changes;
+    db.changes = function (name) {
+      var args = sporks.toArgsArray(arguments);
+      if (name === '_global_changes') {
+        args[0] = 'testdb';
+      }
+      return defaultChanges.apply(this, args);
+    };
+
+    var promise = new Promise(function (resolve, reject) {
+      system.updatesNoHistory().each(function (update) {
+        if (update.db_name === 'testdb' && update.type === 'updated') {
+          resolve();
+        }
+      }).catch(function (err) {
+        reject(err);
+      });
+    });
+
+    return slouch.doc.create('testdb', {
+      _id: 'updated:testdb'
+    }).then(function () {
+      return promise;
+    });
+  });
+
+  it('should clone params', function () {
+    var params = { foo: 'bar' };
+    system._cloneParams(params).should.eql(params);
   });
 
 });
