@@ -59,7 +59,7 @@ Config.prototype.get = function (path) {
 Config.prototype.set = function (path, value) {
   return this._request(path, {
     method: 'PUT',
-    body: JSON.stringify(value)
+    body: JSON.stringify(this._toString(value))
   });
 };
 
@@ -81,10 +81,17 @@ Config.prototype.setCouchHttpdAuthTimeout = function (timeoutSecs) {
   return this.set('couch_httpd_auth/timeout', timeoutSecs + '');
 };
 
-Config.prototype.setCouchHttpdAuthAllowPersistentCookies = function (allow) {
-  if (typeof allow === 'boolean') {
-    allow = allow ? 'true' : 'false';
+Config.prototype._toString = function (value) {
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  } else if (typeof value === 'string') {
+    return value;
+  } else {
+    return value + ''; // convert to string
   }
+};
+
+Config.prototype.setCouchHttpdAuthAllowPersistentCookies = function (allow) {
   return this.set('couch_httpd_auth/allow_persistent_cookies', allow);
 };
 

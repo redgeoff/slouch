@@ -94,11 +94,21 @@ describe('config', function () {
   });
 
   it('should set couch_httpd_auth/allow_persistent_cookies', function () {
-    return config.setCouchHttpdAuthAllowPersistentCookies(true).then(function () {
-      return config.setCouchHttpdAuthAllowPersistentCookies(false);
-    }).then(function () {
-      config.setCouchHttpdAuthAllowPersistentCookies('true');
+    return config.setCouchHttpdAuthAllowPersistentCookies(false).then(function () {
+      return config.setCouchHttpdAuthAllowPersistentCookies(true);
     });
+  });
+
+  it('should set compaction rule', function () {
+    return config.setCompactionRule('_default', '[{db_fragmentation, "70%"}, {view_fragmentation, "60%"}, {from, "06:00"}, {to, "10:00"}]');
+  });
+
+  it('should set max_dbs_open', function () {
+    return config.setCouchDBMaxDBsOpen(500);
+  });
+
+  it('should set httpd/max_connections', function () {
+    return config.setHttpdMaxConnections(2048);
   });
 
 });
