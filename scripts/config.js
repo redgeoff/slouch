@@ -8,7 +8,7 @@ var Config = function (slouch) {
 };
 
 Config.prototype._couchDB2Request = function (node, path, opts, parseBody) {
-  opts.uri = this._url + '/_node/' + node + '/_config/' + path;
+  opts.uri = this._slouch._url + '/_node/' + node + '/_config/' + path;
   return request.request(opts, parseBody);
 };
 
@@ -34,13 +34,13 @@ Config.prototype._couchDB2Requests = function (path, opts, parseBody, maxNumNode
 };
 
 Config.prototype._couchDB1Request = function (path, opts, parseBody) {
-  opts.uri = this._url + '/_config/' + path;
+  opts.uri = this._slouch._url + '/_config/' + path;
   return request.request(opts, parseBody);
 };
 
 Config.prototype._request = function (path, opts, parseBody, maxNumNodes) {
   var self = this;
-  return self._slouch._system.isCouchDB1().then(function (isCouchDB1) {
+  return self._slouch.system.isCouchDB1().then(function (isCouchDB1) {
     if (isCouchDB1) {
       return self._couchDB1Request(path, opts, parseBody);
     } else {
