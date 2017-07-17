@@ -14,6 +14,7 @@ QueryString.prototype.unescape = function (s) {
 
 var RequestClass = function () {
   this._throttler = new Throttler(RequestClass.DEFAULT_CONNECTIONS);
+  this._req = req;
 };
 
 // For debugging all traffic
@@ -49,7 +50,7 @@ RequestClass.prototype._request = function (opts, parseBody) {
   var self = this,
     selfArguments = arguments;
 
-  return req.apply(this, arguments).then(function (response) {
+  return self._req.apply(this, arguments).then(function (response) {
 
     var err = null;
 
