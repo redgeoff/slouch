@@ -5,26 +5,25 @@ var Slouch = require('../../scripts'),
 
 describe('exclude-design-docs-iterator', function () {
 
-  var slouch = new Slouch(utils.couchDBURL()),
-    db = slouch.db;
+  var slouch = new Slouch(utils.couchDBURL());
 
   beforeEach(function () {
-    return db.create('testdb');
+    return utils.createDB();
   });
 
   afterEach(function () {
-    return db.destroy('testdb');
+    return utils.destroyDB();
   });
 
   var createDocs = function () {
-    return slouch.doc.create('testdb', {
+    return slouch.doc.create(utils.createdDB, {
       thing: 'play'
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         thing: 'write'
       });
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         _id: '_design/mydesign',
         thing: 'design'
       });
@@ -34,7 +33,7 @@ describe('exclude-design-docs-iterator', function () {
   it('should filter', function () {
     var docs = [];
     return createDocs().then(function () {
-      return new slouch.ExcludeDesignDocsIterator(slouch.doc.all('testdb', {
+      return new slouch.ExcludeDesignDocsIterator(slouch.doc.all(utils.createdDB, {
         include_docs: true
       })).each(function (doc) {
         docs.push({

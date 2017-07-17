@@ -16,24 +16,24 @@ describe('doc', function () {
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
-    return db.create('testdb');
+    return utils.createDB();
   });
 
   afterEach(function () {
-    return db.destroy('testdb');
+    return utils.destroyDB();
   });
 
   var createDocs = function () {
-    return slouch.doc.create('testdb', {
+    return slouch.doc.create(utils.createdDB, {
       _id: '1',
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         thing: 'clean',
         fun: false
       });
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         thing: 'code'
       });
     });
@@ -55,12 +55,12 @@ describe('doc', function () {
     };
 
     return createDocs().then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
 
       conflictDoc = doc;
 
-      return slouch.doc.createOrUpdate('testdb', {
+      return slouch.doc.createOrUpdate(utils.createdDB, {
         _id: '1',
         thing: 'dance'
       }).then(function () {
@@ -86,15 +86,15 @@ describe('doc', function () {
       thing: 'play'
     };
 
-    return slouch.doc.create('testdb', doc).then(function (_doc) {
+    return slouch.doc.create(utils.createdDB, doc).then(function (_doc) {
       doc._id = _doc.id;
-      return slouch.doc.get('testdb', doc._id);
+      return slouch.doc.get(utils.createdDB, doc._id);
     }).then(function (body) {
       doc._rev = body._rev;
       doc.priority = 'medium';
-      return slouch.doc.update('testdb', doc);
+      return slouch.doc.update(utils.createdDB, doc);
     }).then(function () {
-      return slouch.doc.get('testdb', doc._id);
+      return slouch.doc.get(utils.createdDB, doc._id);
     }).then(function (body) {
       doc._rev = body._rev;
       body.should.eql(doc);
@@ -102,21 +102,21 @@ describe('doc', function () {
   });
 
   it('should destroy all non-design docs', function () {
-    return slouch.doc.create('testdb', {
+    return slouch.doc.create(utils.createdDB, {
       thing: 'play'
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         thing: 'write'
       });
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         _id: '_design/mydesign',
         foo: 'bar'
       });
     }).then(function () {
-      return slouch.doc.destroyAllNonDesign('testdb');
+      return slouch.doc.destroyAllNonDesign(utils.createdDB);
     }).then(function () {
-      return slouch.doc.allArray('testdb');
+      return slouch.doc.allArray(utils.createdDB);
     }).then(function (body) {
       body.total_rows.should.eql(1);
     });
@@ -127,21 +127,21 @@ describe('doc', function () {
       var doc = {
         thing: 'play'
       };
-      return slouch.doc.create('testdb', doc).then(function (_doc) {
+      return slouch.doc.create(utils.createdDB, doc).then(function (_doc) {
         doc._id = _doc.id;
         doc.priority = 'medium';
         // Generates conflict as no rev provided
-        return slouch.doc.update('testdb', doc);
+        return slouch.doc.update(utils.createdDB, doc);
       });
     });
   });
 
   it('should ignore conflict when updateting', function () {
-    return slouch.doc.create('testdb', {
+    return slouch.doc.create(utils.createdDB, {
       _id: '1',
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.updateIgnoreConflict('testdb', {
+      return slouch.doc.updateIgnoreConflict(utils.createdDB, {
         _id: '1',
         thing: 'clean'
       });
@@ -157,12 +157,12 @@ describe('doc', function () {
   });
 
   it('should ignore missing docs', function () {
-    return slouch.doc.getIgnoreMissing('testdb', 'missingid');
+    return slouch.doc.getIgnoreMissing(utils.createdDB, 'missingid');
   });
 
   it('should check if doc exists', function () {
     return createDocs().then(function () {
-      return slouch.doc.exists('testdb', '1');
+      return slouch.doc.exists(utils.createdDB, '1');
     }).then(function (exists) {
       exists.should.eql(true);
     });
@@ -178,7 +178,7 @@ describe('doc', function () {
 
   it('should create and ignore conflict', function () {
     return fakeConflict().then(function () {
-      return slouch.doc.createAndIgnoreConflict('testdb', {
+      return slouch.doc.createAndIgnoreConflict(utils.createdDB, {
         _id: '1',
         thing: 'dance'
       });
@@ -186,11 +186,11 @@ describe('doc', function () {
   });
 
   it('should create when creating or updating', function () {
-    return slouch.doc.createOrUpdate('testdb', {
+    return slouch.doc.createOrUpdate(utils.createdDB, {
       _id: '1',
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('jam');
@@ -199,12 +199,12 @@ describe('doc', function () {
 
   it('should update when creating or updating', function () {
     return createDocs().then(function () {
-      return slouch.doc.createOrUpdate('testdb', {
+      return slouch.doc.createOrUpdate(utils.createdDB, {
         _id: '1',
         thing: 'dance'
       });
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('dance');
@@ -221,7 +221,7 @@ describe('doc', function () {
 
     return createDocs().then(function () {
       return sporks.shouldThrow(function () {
-        return slouch.doc.createOrUpdate('testdb', {
+        return slouch.doc.createOrUpdate(utils.createdDB, {
           _id: '1',
           thing: 'jam'
         });
@@ -231,7 +231,7 @@ describe('doc', function () {
 
   it('should ignore conflict when creating or updating', function () {
     return fakeConflict().then(function () {
-      return slouch.doc.createOrUpdateIgnoreConflict('testdb', {
+      return slouch.doc.createOrUpdateIgnoreConflict(utils.createdDB, {
         _id: '1',
         thing: 'sing'
       });
@@ -240,12 +240,12 @@ describe('doc', function () {
 
   it('should upsert when conflict', function () {
     return fakeConflict(3).then(function () {
-      return slouch.doc.upsert('testdb', {
+      return slouch.doc.upsert(utils.createdDB, {
         _id: '1',
         thing: 'dance'
       });
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('dance');
@@ -257,7 +257,7 @@ describe('doc', function () {
 
     return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
-        return slouch.doc.upsert('testdb', {
+        return slouch.doc.upsert(utils.createdDB, {
           _id: '1',
           thing: 'dance'
         });
@@ -267,12 +267,12 @@ describe('doc', function () {
 
   it('should get, merge and update', function () {
     return createDocs().then(function () {
-      return slouch.doc.getMergeUpdate('testdb', {
+      return slouch.doc.getMergeUpdate(utils.createdDB, {
         _id: '1',
         priority: 'high'
       });
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('jam');
@@ -282,12 +282,12 @@ describe('doc', function () {
 
   it('should get, merge, create or update when doc existing', function () {
     return createDocs().then(function () {
-      return slouch.doc.getMergeCreateOrUpdate('testdb', {
+      return slouch.doc.getMergeCreateOrUpdate(utils.createdDB, {
         _id: '1',
         priority: 'high'
       });
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('jam');
@@ -296,11 +296,11 @@ describe('doc', function () {
   });
 
   it('should get, merge, create or update when missing', function () {
-    return slouch.doc.getMergeCreateOrUpdate('testdb', {
+    return slouch.doc.getMergeCreateOrUpdate(utils.createdDB, {
       _id: '1',
       priority: 'high'
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.priority.should.eql('high');
@@ -309,7 +309,7 @@ describe('doc', function () {
 
   it('should ignore conflict when getting, merging and updating', function () {
     return fakeConflict().then(function () {
-      return slouch.doc.getMergeUpdateIgnoreConflict('testdb', {
+      return slouch.doc.getMergeUpdateIgnoreConflict(utils.createdDB, {
         _id: '1',
         thing: 'sing'
       });
@@ -318,12 +318,12 @@ describe('doc', function () {
 
   it('should get, merge and upsert when conflict', function () {
     return fakeConflict(3).then(function () {
-      return slouch.doc.getMergeUpsert('testdb', {
+      return slouch.doc.getMergeUpsert(utils.createdDB, {
         _id: '1',
         priority: 'high'
       });
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('dance');
@@ -336,7 +336,7 @@ describe('doc', function () {
 
     return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
-        return slouch.doc.getMergeUpsert('testdb', {
+        return slouch.doc.getMergeUpsert(utils.createdDB, {
           _id: '1',
           thing: 'dance'
         });
@@ -346,7 +346,7 @@ describe('doc', function () {
 
   it('should get, modify and upsert when conflict', function () {
     return fakeConflict(3).then(function () {
-      return slouch.doc.getModifyUpsert('testdb', '1', function (doc) {
+      return slouch.doc.getModifyUpsert(utils.createdDB, '1', function (doc) {
         return Promise.resolve({
           _id: '1',
           _rev: doc._rev,
@@ -355,7 +355,7 @@ describe('doc', function () {
         });
       });
     }).then(function () {
-      return slouch.doc.get('testdb', '1');
+      return slouch.doc.get(utils.createdDB, '1');
     }).then(function (doc) {
       doc._id.should.eql('1');
       doc.thing.should.eql('dance');
@@ -368,7 +368,7 @@ describe('doc', function () {
 
     return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
-        return slouch.doc.getModifyUpsert('testdb', '1', function (doc) {
+        return slouch.doc.getModifyUpsert(utils.createdDB, '1', function (doc) {
           return Promise.resolve({
             _id: '1',
             _rev: doc._rev,
@@ -382,13 +382,13 @@ describe('doc', function () {
 
   it('should ignore conflicts when destroying', function () {
     return fakeConflict().then(function () {
-      return slouch.doc.destroyIgnoreConflict('testdb', '1', conflictDoc._rev);
+      return slouch.doc.destroyIgnoreConflict(utils.createdDB, '1', conflictDoc._rev);
     });
   });
 
   it('should get and destroy', function () {
     return createDocs().then(function () {
-      return slouch.doc.getAndDestroy('testdb', '1');
+      return slouch.doc.getAndDestroy(utils.createdDB, '1');
     }).then(function () {
       return slouch.doc.exists();
     }).then(function (exists) {
@@ -398,7 +398,7 @@ describe('doc', function () {
 
   it('should mark as destroyed', function () {
     return createDocs().then(function () {
-      return slouch.doc.markAsDestroyed('testdb', '1');
+      return slouch.doc.markAsDestroyed(utils.createdDB, '1');
     }).then(function () {
       return slouch.doc.exists();
     }).then(function (exists) {

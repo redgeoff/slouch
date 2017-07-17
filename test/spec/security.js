@@ -5,15 +5,14 @@ var Slouch = require('../../scripts'),
 
 describe('security', function () {
 
-  var slouch = new Slouch(utils.couchDBURL()),
-    db = slouch.db;
+  var slouch = new Slouch(utils.couchDBURL());
 
   beforeEach(function () {
-    return db.create('testdb');
+    return utils.createDB();
   });
 
   afterEach(function () {
-    return db.destroy('testdb');
+    return utils.destroyDB();
   });
 
   it('should set and get security', function () {
@@ -27,8 +26,8 @@ describe('security', function () {
         'roles': ['producer', 'consumer']
       }
     };
-    return slouch.security.set('testdb', security).then(function () {
-      return slouch.security.get('testdb');
+    return slouch.security.set(utils.createdDB, security).then(function () {
+      return slouch.security.get(utils.createdDB);
     }).then(function (_security) {
       _security.should.eql(security);
     });

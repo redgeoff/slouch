@@ -1,5 +1,7 @@
 'use strict';
 
+var Promise = require('sporks/scripts/promise');
+
 var FakedStreamIterator = function (items) {
   this._items = items;
   this._i = 0;

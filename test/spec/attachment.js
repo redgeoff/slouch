@@ -30,15 +30,15 @@ describe('attachment', function () {
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
-    return db.create('testdb');
+    return utils.createDB();
   });
 
   afterEach(function () {
-    return db.destroy('testdb');
+    return utils.destroyDB();
   });
 
   var createBase64Attachment = function () {
-    return slouch.doc.update('testdb', {
+    return slouch.doc.update(utils.createdDB, {
       _id: 'foo',
       _attachments: {
         'my_image.png': {
@@ -52,23 +52,23 @@ describe('attachment', function () {
   // TODO
   // it('should create attachment', function () {
   //   var data = bufferFrom(base64Data);
-  //   return slouch.doc.create('testdb', {
+  //   return slouch.doc.create(utils.createdDB, {
   //     _id: 'foo'
   //   }).then(function () {
-  //     return slouch.doc.get('testdb', 'foo');
+  //     return slouch.doc.get(utils.createdDB, 'foo');
   //   }).then(function (doc) {
-  //     return slouch.attachment.create('testdb', 'foo', 'my_file.png', data, 'image/png',
+  //     return slouch.attachment.create(utils.createdDB, 'foo', 'my_file.png', data, 'image/png',
   //       doc._rev);
   //   });
   // });
 
   it('should create attachment from base 64 data', function () {
     return createBase64Attachment().then(function () {
-      return slouch.doc.get('testdb', 'foo');
+      return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {
       doc._attachments['my_image.png'].content_type.should.eql('image/png');
 
-      return slouch.attachment.get('testdb', 'foo', 'my_image.png');
+      return slouch.attachment.get(utils.createdDB, 'foo', 'my_image.png');
     }).then(function (attachment) {
       var base64Attach = new Buffer(attachment).toString('base64');
       base64Attach.should.eql(base64Data);
@@ -77,11 +77,11 @@ describe('attachment', function () {
 
   it('should destroy attachment', function () {
     return createBase64Attachment().then(function () {
-      return slouch.doc.get('testdb', 'foo');
+      return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {
-      return slouch.attachment.destroy('testdb', 'foo', 'my_image.png', doc._rev);
+      return slouch.attachment.destroy(utils.createdDB, 'foo', 'my_image.png', doc._rev);
     }).then(function () {
-      return slouch.doc.get('testdb', 'foo');
+      return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {
       (doc._attachments === undefined).should.eql(true);
     });

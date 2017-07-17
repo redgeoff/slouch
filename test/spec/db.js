@@ -9,12 +9,15 @@ describe('db', function () {
 
   var slouch = null,
     db = null,
-    dbsToDestroy = ['testdb'];
+    dbsToDestroy = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
-    return db.create('testdb');
+    dbsToDestroy = [];
+    return utils.createDB().then(function () {
+      dbsToDestroy.push(utils.createdDB);
+    });
   });
 
   afterEach(function () {
@@ -26,22 +29,22 @@ describe('db', function () {
   });
 
   var createDocs = function () {
-    return slouch.doc.create('testdb', {
+    return slouch.doc.create(utils.createdDB, {
       thing: 'jam'
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         thing: 'clean',
         fun: false
       });
     }).then(function () {
-      return slouch.doc.create('testdb', {
+      return slouch.doc.create(utils.createdDB, {
         thing: 'code'
       });
     });
   };
 
   var createView = function () {
-    return slouch.doc.create('testdb', {
+    return slouch.doc.create(utils.createdDB, {
       _id: '_design/myview',
       views: {
         fun: {
@@ -73,10 +76,10 @@ describe('db', function () {
   };
 
   it('should check if exists', function () {
-    return db.exists('testdb').then(function (exists) {
+    return db.exists(utils.createdDB).then(function (exists) {
       exists.should.eql(true);
     }).then(function () {
-      return db.exists('testdb2');
+      return db.exists(utils.createdDB + '_2');
     }).then(function (exists) {
       exists.should.eql(false);
     });
@@ -123,19 +126,19 @@ describe('db', function () {
       return sporks.promiseError(err);
     };
 
-    return db.create('testdb');
+    return utils.createDB();
   });
 
   it('should get db', function () {
-    return db.get('testdb').then(function (_db) {
-      _db.db_name.should.eql('testdb');
+    return db.get(utils.createdDB).then(function (_db) {
+      _db.db_name.should.eql(utils.createdDB);
     });
   });
 
   it('should get changes', function () {
     var changes = {};
     return createDocs().then(function () {
-      return db.changes('testdb', {
+      return db.changes(utils.createdDB, {
         include_docs: true
       }).each(function (change) {
         // Use associative array as order is not guaranteed
@@ -155,7 +158,7 @@ describe('db', function () {
     return createDocs().then(function () {
       return createView();
     }).then(function () {
-      return db.view('testdb', '_design/myview', 'fun', {
+      return db.view(utils.createdDB, '_design/myview', 'fun', {
         include_docs: true
       }).each(function (doc) {
         // Use associative array as order is not guaranteed
@@ -174,7 +177,7 @@ describe('db', function () {
     return createDocs().then(function () {
       return createView();
     }).then(function () {
-      return db.viewArray('testdb', '_design/myview', 'fun', {
+      return db.viewArray(utils.createdDB, '_design/myview', 'fun', {
         include_docs: true
       }).then(function (_docs) {
         _docs.rows.forEach(function (_doc) {
@@ -192,25 +195,25 @@ describe('db', function () {
 
   it('should replicate', function () {
     return createDocs().then(function () {
-      return db.create('testdb2');
+      return db.create(utils.createdDB + '_2');
     }).then(function () {
-      dbsToDestroy.push('testdb2');
+      dbsToDestroy.push(utils.createdDB + '_2');
       return db.replicate({
-        source: slouch._url + '/testdb',
-        target: slouch._url + '/testdb2'
+        source: slouch._url + '/' + utils.createdDB,
+        target: slouch._url + '/' + utils.createdDB + '_2'
       });
     }).then(function () {
-      return verifyAllDocs('testdb2');
+      return verifyAllDocs(utils.createdDB + '_2');
     });
   });
 
   it('should copy', function () {
     return createDocs().then(function () {
-      return db.create('testdb2');
+      return db.create(utils.createdDB + '_2');
     }).then(function () {
-      return db.copy('testdb', 'testdb2');
+      return db.copy(utils.createdDB, utils.createdDB + '_2');
     }).then(function () {
-      return verifyAllDocs('testdb2');
+      return verifyAllDocs(utils.createdDB + '_2');
     });
   });
 
