@@ -142,4 +142,12 @@ describe('user', function () {
     }, err);
   });
 
+  it('should not be authenticated when cookie missing', function () {
+    var err = new Error();
+    err.name = 'NotAuthenticatedError';
+    return sporks.shouldThrow(function () {
+      return user.authenticated('bad-cookie');
+    }, err);
+  });
+
 });
