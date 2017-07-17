@@ -67,7 +67,12 @@ User.prototype.removeRole = function (username, role) {
   });
 };
 
-// TODO: downsertRole
+User.prototype.downsertRole = function (username, role) {
+  var self = this;
+  return self._slouch.doc._persistThroughConflicts(function () {
+    return self.removeRole(username, role);
+  });
+};
 
 User.prototype.setPassword = function (username, password) {
   var self = this;

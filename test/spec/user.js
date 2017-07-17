@@ -6,56 +6,28 @@ var Slouch = require('../../scripts'),
 
 describe('user', function () {
 
-  var slouch = new Slouch(utils.couchDBURL()),
-    user = slouch.user;
+  var slouch = null,
+    user = null,
+    defaultUpdate = null,
+    username = null;
 
   beforeEach(function () {
-    return user.create('testusername', 'testpassword', ['testrole1'], {
+    slouch = new Slouch(utils.couchDBURL());
+    user = slouch.user;
+    username = 'test_' + utils.nextId();
+    return user.create(username, 'testpassword', ['testrole1'], {
       firstName: 'Jill',
       email: 'test@example.com'
     });
   });
 
   afterEach(function () {
-    return user.destroy('testusername');
+    return user.destroy(username);
   });
 
-  // NOTE: create and destroy tested by beforeEach() and afterEach()
-
-  it('should not create when already exists', function () {
-    var err = null;
-    return user.create('testusername', 'testpassword').catch(function (_err) {
-      err = _err;
-    }).then(function () {
-      (err === null).should.eql(false);
-    });
-  });
-
-  it('should get', function () {
-    return user.get('testusername').then(function (_user) {
-      _user._id.should.eql('org.couchdb.user:testusername');
-      _user.name.should.eql('testusername');
-      _user.roles.should.eql(['testrole1']);
-      _user.type.should.eql('user');
-      _user.metadata.should.eql({
-        firstName: 'Jill',
-        email: 'test@example.com'
-      });
-      user.toUsername(_user._id).should.eql('testusername');
-    });
-  });
-
-  it('should add role', function () {
-    return user.addRole('testusername', 'testrole2').then(function () {
-      return user.get('testusername');
-    }).then(function (_user) {
-      _user.roles.should.eql(['testrole1', 'testrole2']);
-    });
-  });
-
-  it('should upsert role', function () {
-    // Fake conflict
-    var defaultUpdate = user._update, i = 0;
+  var fakeConflict = function () {
+    var i = 0;
+    defaultUpdate = user._update;
     user._update = function () {
       if (i++ < 3) {
         var err = new Error();
@@ -65,21 +37,78 @@ describe('user', function () {
         return defaultUpdate.apply(this, arguments);
       }
     };
+  };
 
-    return user.upsertRole('testusername', 'testrole2').then(function () {
-      return user.get('testusername');
+  // NOTE: create and destroy tested by beforeEach() and afterEach()
+
+  it('should not create when already exists', function () {
+    var err = null;
+    return user.create(username, 'testpassword').catch(function (_err) {
+      err = _err;
+    }).then(function () {
+      (err === null).should.eql(false);
+    });
+  });
+
+  it('should get', function () {
+    return user.get(username).then(function (_user) {
+      _user._id.should.eql('org.couchdb.user:' + username);
+      _user.name.should.eql(username);
+      _user.roles.should.eql(['testrole1']);
+      _user.type.should.eql('user');
+      _user.metadata.should.eql({
+        firstName: 'Jill',
+        email: 'test@example.com'
+      });
+      user.toUsername(_user._id).should.eql(username);
+    });
+  });
+
+  it('should add role', function () {
+    return user.addRole(username, 'testrole2').then(function () {
+      return user.get(username);
     }).then(function (_user) {
       _user.roles.should.eql(['testrole1', 'testrole2']);
     });
   });
 
+  it('should upsert role', function () {
+    fakeConflict();
+    return user.upsertRole(username, 'testrole2').then(function () {
+      return user.get(username);
+    }).then(function (_user) {
+      _user.roles.should.eql(['testrole1', 'testrole2']);
+    });
+  });
+
+  it('should remove role', function () {
+    return user.addRole(username, 'testrole2').then(function () {
+      return user.removeRole(username, 'testrole1');
+    }).then(function () {
+      return user.get(username);
+    }).then(function (_user) {
+      _user.roles.should.eql(['testrole2']);
+    });
+  });
+
+  it('should downsert role', function () {
+    return user.addRole(username, 'testrole2').then(function () {
+      fakeConflict();
+      return user.downsertRole(username, 'testrole1');
+    }).then(function () {
+      return user.get(username);
+    }).then(function (_user) {
+      _user.roles.should.eql(['testrole2']);
+    });
+  });
+
   it('should set password', function () {
     var origUser = null;
-    return user.get('testusername').then(function (_user) {
+    return user.get(username).then(function (_user) {
       origUser = _user;
-      return user.setPassword('testusername', 'testpassword2');
+      return user.setPassword(username, 'testpassword2');
     }).then(function () {
-      return user.get('testusername');
+      return user.get(username);
     }).then(function (_user) {
       // Make sure password changed
       (_user.derived_key === origUser.derived_key).should.eql(false);
@@ -87,10 +116,10 @@ describe('user', function () {
   });
 
   it('should set metadata', function () {
-    return user.setMetadata('testusername', {
+    return user.setMetadata(username, {
       firstName: 'Jack'
     }).then(function () {
-      return user.get('testusername');
+      return user.get(username);
     }).then(function (_user) {
       _user.metadata.firstName.should.eql('Jack');
     });
