@@ -3,7 +3,8 @@
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
   FakedStreamIterator = require('./faked-stream-iterator'),
-  Promise = require('sporks/scripts/promise');
+  Promise = require('sporks/scripts/promise'),
+  sporks = require('sporks');
 
 describe('system', function () {
 
@@ -128,69 +129,71 @@ describe('system', function () {
     });
   });
 
-  // it('should listen for updates no history when couchdb 1', function () {
-  //   fakeCouchDBVersion('1');
-  //
-  //   var promise = new Promise(function (resolve, reject) {
-  //     system.updatesNoHistory().each(function (update) {
-  //       if (update.db_name === utils.createdDB && update.type === 'updated') {
-  //         resolve();
-  //       }
-  //     }).catch(function (err) {
-  //       reject(err);
-  //     });
-  //   });
-  //
-  //   return slouch.doc.create(utils.createdDB, {
-  //     foo: 'bar'
-  //   }).then(function () {
-  //     return promise;
-  //   });
-  // });
-  //
-  // it('should listen for updates no history when couchdb 2', function () {
-  //   fakeCouchDBVersion('2');
-  //
-  //   // Mock get regardless of version of CouchDB
-  //   var defaultGet = db.get;
-  //   db.get = function (name) {
-  //     var args = sporks.toArgsArray(arguments);
-  //     if (name === '_global_changes') {
-  //       args[0] = utils.createdDB;
-  //     }
-  //     return defaultGet.apply(this, args);
-  //   };
-  //
-  //   // Mock changes regardless of version of CouchDB
-  //   var defaultChanges = db.changes;
-  //   db.changes = function (name) {
-  //     var args = sporks.toArgsArray(arguments);
-  //     if (name === '_global_changes') {
-  //       args[0] = utils.createdDB;
-  //     }
-  //     return defaultChanges.apply(this, args);
-  //   };
-  //
-  //   var promise = new Promise(function (resolve, reject) {
-  //     system.updatesNoHistory().each(function (update) {
-  //       if (update.db_name === utils.createdDB && update.type === 'updated') {
-  //         resolve();
-  //       }
-  //     }).catch(function (err) {
-  //       reject(err);
-  //     });
-  //   });
-  //
-  //   return slouch.doc.create(utils.createdDB, {
-  //     _id: 'updated:' + utils.createdDB
-  //   }).then(function () {
-  //     return promise;
-  //   });
-  // });
-  //
-  // it('should clone params', function () {
-  //   var params = { foo: 'bar' };
-  //   system._cloneParams(params).should.eql(params);
-  // });
+  it('should listen for updates no history when couchdb 1', function () {
+    fakeCouchDBVersion('1');
+
+    var promise = new Promise(function (resolve, reject) {
+      system.updatesNoHistory().each(function (update) {
+        if (update.db_name === utils.createdDB && update.type === 'updated') {
+          resolve();
+        }
+      }).catch(function (err) {
+        reject(err);
+      });
+    });
+
+    return slouch.doc.create(utils.createdDB, {
+      foo: 'bar'
+    }).then(function () {
+      return promise;
+    });
+  });
+
+  it('should listen for updates no history when couchdb 2', function () {
+    fakeCouchDBVersion('2');
+
+    // Mock get regardless of version of CouchDB
+    var defaultGet = db.get;
+    db.get = function (name) {
+      var args = sporks.toArgsArray(arguments);
+      if (name === '_global_changes') {
+        args[0] = utils.createdDB;
+      }
+      return defaultGet.apply(this, args);
+    };
+
+    // Mock changes regardless of version of CouchDB
+    var defaultChanges = db.changes;
+    db.changes = function (name) {
+      var args = sporks.toArgsArray(arguments);
+      if (name === '_global_changes') {
+        args[0] = utils.createdDB;
+      }
+      return defaultChanges.apply(this, args);
+    };
+
+    var promise = new Promise(function (resolve, reject) {
+      system.updatesNoHistory().each(function (update) {
+        if (update.db_name === utils.createdDB && update.type === 'updated') {
+          resolve();
+        }
+      }).catch(function (err) {
+        reject(err);
+      });
+    });
+
+    return slouch.doc.create(utils.createdDB, {
+      _id: 'updated:' + utils.createdDB
+    }).then(function () {
+      return promise;
+    });
+  });
+
+  it('should clone params', function () {
+    var params = {
+      foo: 'bar'
+    };
+    system._cloneParams(params).should.eql(params);
+  });
 
 });
