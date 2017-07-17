@@ -2,7 +2,8 @@
 
 var RequestClass = require('../../scripts/request-class'),
   sporks = require('sporks'),
-  Backoff = require('backoff-promise');
+  Backoff = require('backoff-promise'),
+  Promise = require('sporks/scripts/promise');
 
 describe('request-class', function () {
 

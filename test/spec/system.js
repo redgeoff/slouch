@@ -137,7 +137,9 @@ describe('system', function () {
     fakeCouchDBVersion('1');
 
     var promise = new Promise(function (resolve, reject) {
-      system.updatesNoHistory({ feed: 'continuous' }).each(function (update) {
+      system.updatesNoHistory({
+        feed: 'continuous'
+      }).each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
@@ -180,7 +182,9 @@ describe('system', function () {
     };
 
     var promise = new Promise(function (resolve, reject) {
-      system.updatesNoHistory({ feed: 'continuous' }).each(function (update) {
+      system.updatesNoHistory({
+        feed: 'continuous'
+      }).each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }

@@ -5,7 +5,8 @@
 
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
-  sporks = require('sporks');
+  sporks = require('sporks'),
+  Promise = require('sporks/scripts/promise');
 
 describe('config', function () {
 
@@ -100,7 +101,9 @@ describe('config', function () {
   });
 
   it('should set compaction rule', function () {
-    return config.setCompactionRule('_default', '[{db_fragmentation, "70%"}, {view_fragmentation, "60%"}, {from, "06:00"}, {to, "10:00"}]');
+    return config.setCompactionRule('_default',
+      '[{db_fragmentation, "70%"}, {view_fragmentation, "60%"}, {from, "06:00"}, {to, "10:00"}]'
+    );
   });
 
   it('should set max_dbs_open', function () {
