@@ -1,7 +1,8 @@
 'use strict';
 
 var Slouch = require('../../scripts'),
-  utils = require('../utils');
+  utils = require('../utils'),
+  sporks = require('sporks');
 
 describe('user', function () {
 
@@ -40,11 +41,32 @@ describe('user', function () {
         firstName: 'Jill',
         email: 'test@example.com'
       });
+      user.toUsername(_user._id).should.eql('testusername');
     });
   });
 
   it('should add role', function () {
     return user.addRole('testusername', 'testrole2').then(function () {
+      return user.get('testusername');
+    }).then(function (_user) {
+      _user.roles.should.eql(['testrole1', 'testrole2']);
+    });
+  });
+
+  it('should upsert role', function () {
+    // Fake conflict
+    var defaultUpdate = user._update, i = 0;
+    user._update = function () {
+      if (i++ < 3) {
+        var err = new Error();
+        err.error = 'conflict';
+        return sporks.promiseError(err);
+      } else {
+        return defaultUpdate.apply(this, arguments);
+      }
+    };
+
+    return user.upsertRole('testusername', 'testrole2').then(function () {
       return user.get('testusername');
     }).then(function (_user) {
       _user.roles.should.eql(['testrole1', 'testrole2']);

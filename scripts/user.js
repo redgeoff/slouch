@@ -48,13 +48,14 @@ User.prototype.addRole = function (username, role) {
   var self = this;
   return self.get(username).then(function (user) {
     user.roles.push(role);
-    return self._update(username, user).catch(function (err) {
-      if (err.statusCode === 409) { // conflict? Try again
-        return self.addRole(username, role);
-      } else {
-        throw err;
-      }
-    });
+    return self._update(username, user);
+  });
+};
+
+User.prototype.upsertRole = function (username, role) {
+  var self = this;
+  return self._slouch.doc._persistThroughConflicts(function () {
+    return self.addRole(username, role);
   });
 };
 
@@ -65,6 +66,8 @@ User.prototype.removeRole = function (username, role) {
     return self._update(username, user);
   });
 };
+
+// TODO: downsertRole
 
 User.prototype.setPassword = function (username, password) {
   var self = this;
