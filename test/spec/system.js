@@ -56,6 +56,10 @@ describe('system', function () {
     };
   };
 
+  it('should clone params when falsy', function () {
+    system._cloneParams().should.eql({});
+  });
+
   it('should check if couchdb 1', function () {
     // We run the tests on both CouchDB 1 and 2 and so we don't care about the version. In the
     // future, we could pass a paramter to our test scripts that would allow us to test this better.

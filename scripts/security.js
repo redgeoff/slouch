@@ -32,4 +32,21 @@ Security.prototype.get = function (dbName) {
   }, true);
 };
 
+Security.prototype.onlyRoleCanView = function (dbName, role) {
+  return this.set(dbName, {
+    admins: {
+      names: ['_admin'],
+      roles: []
+    },
+    members: {
+      names: [],
+      roles: [role]
+    }
+  });
+};
+
+Security.prototype.onlyAdminCanView = function (dbName) {
+  return this.onlyRoleCanView(dbName, '_admin');
+};
+
 module.exports = Security;

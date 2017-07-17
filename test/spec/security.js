@@ -33,4 +33,8 @@ describe('security', function () {
     });
   });
 
+  it('only admin can view', function () {
+    return slouch.security.onlyAdminCanView(utils.createdDB);
+  });
+
 });
