@@ -70,11 +70,21 @@ System.prototype.reset = function (exceptDBNames) {
 
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 System.prototype.updates = function (params) {
+  var indefinite = false,
+    jsonStreamParseStr = null;
+
+  if (params && params.feed === 'continuous') {
+    indefinite = true;
+    jsonStreamParseStr = undefined;
+  } else {
+    jsonStreamParseStr = 'results.*';
+  }
+
   return new PersistentStreamIterator({
     url: this._slouch._url + '/_db_updates',
     method: 'GET',
     qs: params
-  }, 'results.*');
+  }, jsonStreamParseStr, indefinite);
 };
 
 System.prototype._cloneParams = function (params) {
@@ -95,12 +105,17 @@ System.prototype.updatesViaGlobalChanges = function (params) {
   });
 
   return new FilteredStreamIterator(iterator, function (item) {
-    // Repackage the item so that it is compatible with _db_updates.
-    var parts = item.id.split(':');
-    return {
-      db_name: parts[1],
-      type: parts[0]
-    };
+    if (item.id) {
+      // Repackage the item so that it is compatible with _db_updates.
+      var parts = item.id.split(':');
+      return {
+        db_name: parts[1],
+        type: parts[0]
+      };
+    } else {
+      // Ignore items that don't have ids
+      return undefined;
+    }
   });
 };
 

@@ -133,7 +133,7 @@ describe('system', function () {
     fakeCouchDBVersion('1');
 
     var promise = new Promise(function (resolve, reject) {
-      system.updatesNoHistory().each(function (update) {
+      system.updatesNoHistory({ feed: 'continuous' }).each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
@@ -142,8 +142,11 @@ describe('system', function () {
       });
     });
 
-    return slouch.doc.create(utils.createdDB, {
-      foo: 'bar'
+    // Use timeout to create on the next click, after we start listening to the updates
+    return sporks.timeout().then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        foo: 'bar'
+      });
     }).then(function () {
       return promise;
     });
@@ -173,7 +176,7 @@ describe('system', function () {
     };
 
     var promise = new Promise(function (resolve, reject) {
-      system.updatesNoHistory().each(function (update) {
+      system.updatesNoHistory({ feed: 'continuous' }).each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
@@ -182,8 +185,11 @@ describe('system', function () {
       });
     });
 
-    return slouch.doc.create(utils.createdDB, {
-      _id: 'updated:' + utils.createdDB
+    // Use timeout to create on the next click, after we start listening to the updates
+    return sporks.timeout().then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        _id: 'updated:' + utils.createdDB
+      });
     }).then(function () {
       return promise;
     });

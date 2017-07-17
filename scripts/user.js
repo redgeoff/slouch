@@ -116,7 +116,7 @@ User.prototype.authenticate = function (username, password) {
 
 User.prototype.createSession = function (doc) {
   return request.request({
-    uri: this._slouch_url + '/_session',
+    uri: this._slouch._url + '/_session',
     method: 'POST',
     json: doc
   });

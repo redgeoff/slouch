@@ -125,4 +125,21 @@ describe('user', function () {
     });
   });
 
+  it('should authenticate and get session', function () {
+    return user.authenticateAndGetSession(username, 'testpassword').then(function (session) {
+      // Sanity check
+      session.userCtx.name.should.eql(username);
+      session.userCtx.roles.should.eql(['testrole1']);
+      (session.cookie === undefined).should.eql(false);
+    });
+  });
+
+  it('should not authenticate and get session', function () {
+    var err = new Error();
+    err.name = 'NotAuthenticatedError';
+    return sporks.shouldThrow(function () {
+      return user.authenticateAndGetSession(username, 'bad-password');
+    }, err);
+  });
+
 });

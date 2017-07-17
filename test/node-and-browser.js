@@ -7,7 +7,7 @@ chai.should();
 describe('slouch', function () {
 
   // Sometimes the DB gets a little backed up so we need more time for our tests
-  this.timeout(4000);
+  // this.timeout(10000);
 
   require('./spec');
 
