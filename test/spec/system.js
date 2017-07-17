@@ -116,8 +116,25 @@ describe('system', function () {
   });
 
   it('should listen for updates', function () {
+    var hasUpdate = false;
+    return slouch.doc.create(utils.createdDB, {
+      foo: 'bar'
+    }).then(function () {
+      return system.updates().each(function (update) {
+        if (update.db_name === utils.createdDB) {
+          hasUpdate = true;
+        }
+      });
+    }).then(function () {
+      hasUpdate.should.eql(true);
+    });
+  });
+
+  it('should listen for updates continuously', function () {
     var promise = new Promise(function (resolve, reject) {
-      system.updates().each(function (update) {
+      system.updates({
+        feed: 'continuous'
+      }).each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
@@ -126,8 +143,11 @@ describe('system', function () {
       });
     });
 
-    return slouch.doc.create(utils.createdDB, {
-      foo: 'bar'
+    // Use timeout to create on the next click, after we start listening to the updates
+    return sporks.timeout().then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        foo: 'bar'
+      });
     }).then(function () {
       return promise;
     });
