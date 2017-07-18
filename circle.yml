@@ -21,17 +21,17 @@ dependencies:
     - curl -X PUT http://admin:admin@db.quizster.dev:5984/_replicator
     - curl -X PUT http://admin:admin@db.quizster.dev:5984/_global_changes
 
-    # Install CouchDB 1
-    - docker run -d --name couchdb-1 --restart always -p 15984:5984 couchdb:1.6.1
-    # Wait for DB to be ready
-    - sleep 15
-    # Create admin user
-    - curl -X PUT localhost:15984/_config/admins/admin -d '"admin"'
+    # # Install CouchDB 1
+    # - docker run -d --name couchdb-1 --restart always -p 15984:5984 couchdb:1.6.1
+    # # Wait for DB to be ready
+    # - sleep 15
+    # # Create admin user
+    # - curl -X PUT localhost:15984/_config/admins/admin -d '"admin"'
 
     # Enable CORS
     - nvm use 8.1.4 && npm install -g add-cors-to-couchdb
     - nvm use 8.1.4 && add-cors-to-couchdb http://localhost:5984 -u admin -p admin
-    - nvm use 8.1.4 && add-cors-to-couchdb http://localhost:15984 -u admin -p admin
+    # - nvm use 8.1.4 && add-cors-to-couchdb http://localhost:15984 -u admin -p admin
 
   override:
     - nvm use 8.1.4 && npm install
@@ -47,5 +47,7 @@ test:
     - nvm use 8.1.4 && npm run browser-test-phantomjs
     - nvm use 8.1.4 && npm run browser-coverage-full-test
 
+    # TODO: replication and a number of other things doesn't appear to be working with the official
+    # couchdb 1.6.1 docker image. We'll probably need to build a custom image for these tests.
     # Test on CouchDB 1
-    - nvm use 8.1.4 && COUCHDB_PORT=15984 npm run node-full-test
+    # - nvm use 8.1.4 && COUCHDB_PORT=15984 npm run node-full-test
