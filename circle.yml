@@ -42,6 +42,10 @@ test:
     - nvm use 8.1.4 && npm run jshint
 
   override:
+    # Test on CouchDB 2
     - nvm use 8.1.4 && npm run node-full-test
     - nvm use 8.1.4 && npm run browser-test-phantomjs
     - nvm use 8.1.4 && npm run browser-coverage-full-test
+
+    # Test on CouchDB 1
+    - nvm use 8.1.4 && COUCHDB_PORT=15984 npm run node-full-test
