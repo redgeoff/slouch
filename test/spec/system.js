@@ -4,7 +4,10 @@ var Slouch = require('../../scripts'),
   utils = require('../utils'),
   FakedStreamIterator = require('./faked-stream-iterator'),
   Promise = require('sporks/scripts/promise'),
-  sporks = require('sporks');
+  sporks = require('sporks'),
+  MemoryStream = require('memorystream');
+//  FakedJSONRequest = require('quelle/test/spec/faked-json-request');
+//  events = require('events');
 
 describe('system', function () {
 
@@ -61,16 +64,18 @@ describe('system', function () {
   };
 
   // TODO: why do continuous requests just hang in PhantomJS, but not in any other browser?
-  var fakeContinuousUpdatesIfPhantomJS = function () {
+  var fakeContinuousUpdatesIfPhantomJS = function (item) {
     if (isPhantomJS()) {
-      system.updates = function () {
-        return new FakedStreamIterator([{
-          db_name: utils.createdDB,
-          type: 'updated'
-        }]);
+      system._request = function () {
+
+        var stream = new MemoryStream();
+
+        stream.write(JSON.stringify(item));
+
+        return stream;
       };
 
-      system.updatesNoHistory = system.updates;
+      db._request = system._request;
     }
   };
 
@@ -149,7 +154,10 @@ describe('system', function () {
   });
 
   it('should listen for updates continuously', function () {
-    fakeContinuousUpdatesIfPhantomJS();
+    fakeContinuousUpdatesIfPhantomJS({
+      db_name: utils.createdDB,
+      type: 'updated'
+    });
 
     var promise = new Promise(function (resolve, reject) {
       system.updates({
@@ -175,7 +183,10 @@ describe('system', function () {
 
   it('should listen for updates no history when couchdb 1', function () {
     fakeCouchDBVersion('1');
-    fakeContinuousUpdatesIfPhantomJS();
+    fakeContinuousUpdatesIfPhantomJS({
+      db_name: utils.createdDB,
+      type: 'updated'
+    });
 
     var promise = new Promise(function (resolve, reject) {
       system.updatesNoHistory({
@@ -201,7 +212,9 @@ describe('system', function () {
 
   it('should listen for updates no history when couchdb 2', function () {
     fakeCouchDBVersion('2');
-    fakeContinuousUpdatesIfPhantomJS();
+    fakeContinuousUpdatesIfPhantomJS({
+      id: 'updated:' + utils.createdDB
+    });
 
     // Mock get regardless of version of CouchDB
     var defaultGet = db.get;
@@ -250,6 +263,10 @@ describe('system', function () {
       foo: 'bar'
     };
     system._cloneParams(params).should.eql(params);
+  });
+
+  it('should return undefined if item missing id', function () {
+    (system._itemToUpdate({}) === undefined).should.eql(true);
   });
 
 });

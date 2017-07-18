@@ -5,11 +5,13 @@ var promisedRequest = require('./request'),
   PersistentStreamIterator = require('quelle').PersistentStreamIterator,
   StreamIterator = require('quelle').StreamIterator,
   sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise');
+  Promise = require('sporks/scripts/promise'),
+  request = require('request');
 
 var System = function (slouch) {
   this._slouch = slouch;
   this._couchDB1 = null;
+  this._request = request;
 };
 
 System.prototype._isCouchDB1 = function () {
@@ -84,11 +86,25 @@ System.prototype.updates = function (params) {
     url: this._slouch._url + '/_db_updates',
     method: 'GET',
     qs: params
-  }, jsonStreamParseStr, indefinite);
+  }, jsonStreamParseStr, indefinite, this._request);
 };
 
 System.prototype._cloneParams = function (params) {
   return params ? sporks.clone(params) : {};
+};
+
+System.prototype._itemToUpdate = function (item) {
+  if (item.id) {
+    // Repackage the item so that it is compatible with _db_updates.
+    var parts = item.id.split(':');
+    return {
+      db_name: parts[1],
+      type: parts[0]
+    };
+  } else {
+    // Ignore items that don't have ids
+    return undefined;
+  }
 };
 
 System.prototype.updatesViaGlobalChanges = function (params) {
@@ -105,17 +121,7 @@ System.prototype.updatesViaGlobalChanges = function (params) {
   });
 
   return new FilteredStreamIterator(iterator, function (item) {
-    if (item.id) {
-      // Repackage the item so that it is compatible with _db_updates.
-      var parts = item.id.split(':');
-      return {
-        db_name: parts[1],
-        type: parts[0]
-      };
-    } else {
-      // Ignore items that don't have ids
-      return undefined;
-    }
+    return self._itemToUpdate(item);
   });
 };
 

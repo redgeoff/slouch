@@ -1,10 +1,12 @@
 'use strict';
 
 var promisedRequest = require('./request'),
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator;
+  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  request = require('request');
 
 var DB = function (slouch) {
   this._slouch = slouch;
+  this._request = request;
 };
 
 DB.prototype._create = function (dbName) {
@@ -71,7 +73,7 @@ DB.prototype.changes = function (dbName, params) {
     url: this._slouch._url + '/' + dbName + '/_changes',
     method: 'GET',
     qs: params
-  }, jsonStreamParseStr, indefinite);
+  }, jsonStreamParseStr, indefinite, this._request);
 
 };
 
