@@ -8,6 +8,7 @@ var NotAuthenticatedError = require('./not-authenticated-error'),
 var User = function (slouch) {
   this._slouch = slouch;
   this._dbName = '_users';
+  this._request = request;
 };
 
 User.prototype.toUserId = function (username) {
@@ -115,20 +116,23 @@ User.prototype.authenticate = function (username, password) {
 };
 
 User.prototype.createSession = function (doc) {
-  return request.request({
+  return this._request.request({
     uri: this._slouch._url + '/_session',
     method: 'POST',
     json: doc
   });
 };
 
+// TODO: get authenticate() and authenticated() working properly in the browser. For now, we
+// have to fake the responses as it appears that the session cookie is not being propogated from
+// the session post to the session get.
 User.prototype.authenticated = function (cookie) {
   // Specify a URL w/o a username and password as we want to check to make sure that the cookie is
   // for a current session
   var parts = url.parse(this._slouch._url);
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
-  return request.request({
+  return this._request.request({
     uri: _url + '/_session',
     method: 'GET',
     headers: {
