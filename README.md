@@ -2,7 +2,7 @@
 
 [![Circle CI](https://circleci.com/gh/redgeoff/slouch.svg?style=svg&circle-token=ae7548ebc7e23a051ed03dbc3209c5e0529e260a)](https://circleci.com/gh/redgeoff/slouch)
 
-An API for CouchDB that does the heavy lifting
+A JS API for CouchDB that does the heavy lifting
 
 
 ## Slouch is a good alternative to nano as:

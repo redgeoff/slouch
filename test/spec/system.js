@@ -6,8 +6,6 @@ var Slouch = require('../../scripts'),
   Promise = require('sporks/scripts/promise'),
   sporks = require('sporks'),
   MemoryStream = require('memorystream');
-//  FakedJSONRequest = require('quelle/test/spec/faked-json-request');
-//  events = require('events');
 
 describe('system', function () {
 
