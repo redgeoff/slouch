@@ -133,7 +133,7 @@ User.prototype.authenticated = function (cookie) {
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
   return this._request.request({
-    uri: _url + '/_session',
+    uri: _url + '_session',
     method: 'GET',
     headers: {
       'Cookie': cookie

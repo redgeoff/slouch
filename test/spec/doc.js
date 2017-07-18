@@ -212,14 +212,7 @@ describe('doc', function () {
   });
 
   it('should throw when creating or updating', function () {
-    // Fake error
-    slouch.doc.get = function () {
-      return Promise.resolve({
-        _rev: 'bad-rev'
-      });
-    };
-
-    return createDocs().then(function () {
+    return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
         return slouch.doc.createOrUpdate(utils.createdDB, {
           _id: '1',
