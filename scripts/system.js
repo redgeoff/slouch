@@ -1,11 +1,17 @@
 'use strict';
 
 var promisedRequest = require('./request'),
+  FilteredStreamIterator = require('quelle').FilteredStreamIterator,
+  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  StreamIterator = require('quelle').StreamIterator,
   sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise');
+  Promise = require('sporks/scripts/promise'),
+  request = require('request');
 
 var System = function (slouch) {
   this._slouch = slouch;
+  this._couchDB1 = null;
+  this._request = request;
 };
 
 System.prototype._isCouchDB1 = function () {
@@ -62,6 +68,84 @@ System.prototype.reset = function (exceptDBNames) {
       }
     });
   });
+};
+
+// Use a JSONStream so that we don't have to load a large JSON structure into memory
+System.prototype.updates = function (params) {
+  var indefinite = false,
+    jsonStreamParseStr = null;
+
+  if (params && params.feed === 'continuous') {
+    indefinite = true;
+    jsonStreamParseStr = undefined;
+  } else {
+    jsonStreamParseStr = 'results.*';
+  }
+
+  return new PersistentStreamIterator({
+    url: this._slouch._url + '/_db_updates',
+    method: 'GET',
+    qs: params
+  }, jsonStreamParseStr, indefinite, this._request);
+};
+
+System.prototype._cloneParams = function (params) {
+  return params ? sporks.clone(params) : {};
+};
+
+System.prototype._itemToUpdate = function (item) {
+  if (item.id) {
+    // Repackage the item so that it is compatible with _db_updates.
+    var parts = item.id.split(':');
+    return {
+      db_name: parts[1],
+      type: parts[0]
+    };
+  } else {
+    // Ignore items that don't have ids
+    return undefined;
+  }
+};
+
+System.prototype.updatesViaGlobalChanges = function (params) {
+  var self = this,
+    iterator = new StreamIterator();
+
+  self._slouch.db.get('_global_changes').then(function (dbDoc) {
+    var clonedParams = self._cloneParams(params);
+    clonedParams.since = dbDoc.update_seq;
+
+    // We pipe to the returned iterator so that the function can return an iterator who's content is
+    // deferred.
+    self._slouch.db.changes('_global_changes', clonedParams).pipe(iterator);
+  });
+
+  return new FilteredStreamIterator(iterator, function (item) {
+    return self._itemToUpdate(item);
+  });
+};
+
+// The _db_updates feed in CouchDB does not include any history, i.e. any updates before when we
+// start listening to the feed. CouchDB 2 on the other hand stores the complete history in the
+// _global_changes database. We use the _changes feed on the _global_changes database to provide a
+// backwards compatible API.
+System.prototype.updatesNoHistory = function (params) {
+  var self = this,
+    iterator = new StreamIterator();
+
+  self._slouch.system.isCouchDB1().then(function (isCouchDB1) {
+    if (isCouchDB1) {
+      return self.updates(params);
+    } else {
+      return self.updatesViaGlobalChanges(params);
+    }
+  }).then(function (_iterator) {
+    // We pipe to the returned iterator so that the function can return an iterator who's content is
+    // deferred.
+    _iterator.pipe(iterator);
+  });
+
+  return iterator;
 };
 
 module.exports = System;

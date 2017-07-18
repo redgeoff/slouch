@@ -5,11 +5,12 @@ var request = require('./request'),
 
 var Config = function (slouch) {
   this._slouch = slouch;
+  this._req = request;
 };
 
 Config.prototype._couchDB2Request = function (node, path, opts, parseBody) {
-  opts.uri = this._url + '/_node/' + node + '/_config/' + path;
-  return request.request(opts, parseBody);
+  opts.uri = this._slouch._url + '/_node/' + node + '/_config/' + path;
+  return this._req.request(opts, parseBody);
 };
 
 // Warning: as per https://github.com/klaemo/docker-couchdb/issues/42#issuecomment-169610897, this
@@ -34,13 +35,13 @@ Config.prototype._couchDB2Requests = function (path, opts, parseBody, maxNumNode
 };
 
 Config.prototype._couchDB1Request = function (path, opts, parseBody) {
-  opts.uri = this._url + '/_config/' + path;
-  return request.request(opts, parseBody);
+  opts.uri = this._slouch._url + '/_config/' + path;
+  return this._req.request(opts, parseBody);
 };
 
 Config.prototype._request = function (path, opts, parseBody, maxNumNodes) {
   var self = this;
-  return self._slouch._system.isCouchDB1().then(function (isCouchDB1) {
+  return self._slouch.system.isCouchDB1().then(function (isCouchDB1) {
     if (isCouchDB1) {
       return self._couchDB1Request(path, opts, parseBody);
     } else {
@@ -49,10 +50,16 @@ Config.prototype._request = function (path, opts, parseBody, maxNumNodes) {
   });
 };
 
+Config.prototype.get = function (path) {
+  return this._request(path, {
+    method: 'GET'
+  }, true);
+};
+
 Config.prototype.set = function (path, value) {
   return this._request(path, {
     method: 'PUT',
-    body: JSON.stringify(value)
+    body: JSON.stringify(this._toString(value))
   });
 };
 
@@ -72,6 +79,16 @@ Config.prototype.unsetIgnoreMissing = function (path) {
 Config.prototype.setCouchHttpdAuthTimeout = function (timeoutSecs) {
   // Convert timeout value to a string
   return this.set('couch_httpd_auth/timeout', timeoutSecs + '');
+};
+
+Config.prototype._toString = function (value) {
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  } else if (typeof value === 'string') {
+    return value;
+  } else {
+    return value + ''; // convert to string
+  }
 };
 
 Config.prototype.setCouchHttpdAuthAllowPersistentCookies = function (allow) {

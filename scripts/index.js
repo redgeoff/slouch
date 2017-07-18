@@ -1,6 +1,6 @@
 'use strict';
 
-var Auth = require('./auth'),
+var Attachment = require('./attachment'),
   Config = require('./config'),
   DB = require('./db'),
   Doc = require('./doc'),
@@ -14,7 +14,7 @@ var Auth = require('./auth'),
 var Slouch = function (url) {
   this._url = url;
 
-  this.auth = new Auth(this);
+  this.attachment = new Attachment(this);
   this.config = new Config(this);
   this.db = new DB(this);
   this.doc = new Doc(this);

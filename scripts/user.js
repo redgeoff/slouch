@@ -8,6 +8,7 @@ var NotAuthenticatedError = require('./not-authenticated-error'),
 var User = function (slouch) {
   this._slouch = slouch;
   this._dbName = '_users';
+  this._request = request;
 };
 
 User.prototype.toUserId = function (username) {
@@ -20,7 +21,7 @@ User.prototype.toUsername = function (userId) {
 
 User.prototype._insert = function (username, user) {
   user._id = this.toUserId(username);
-  return this._slouch.doc.put(this._dbName, user);
+  return this._slouch.doc.update(this._dbName, user);
 };
 
 User.prototype.create = function (username, password, roles, metadata) {
@@ -48,13 +49,14 @@ User.prototype.addRole = function (username, role) {
   var self = this;
   return self.get(username).then(function (user) {
     user.roles.push(role);
-    return self._update(username, user).catch(function (err) {
-      if (err.statusCode === 409) { // conflict? Try again
-        return self.addRole(username, role);
-      } else {
-        throw err;
-      }
-    });
+    return self._update(username, user);
+  });
+};
+
+User.prototype.upsertRole = function (username, role) {
+  var self = this;
+  return self._slouch.doc._persistThroughConflicts(function () {
+    return self.addRole(username, role);
   });
 };
 
@@ -63,6 +65,13 @@ User.prototype.removeRole = function (username, role) {
   return self.get(username).then(function (user) {
     user.roles.splice(user.roles.indexOf(role), 1);
     return self._update(username, user);
+  });
+};
+
+User.prototype.downsertRole = function (username, role) {
+  var self = this;
+  return self._slouch.doc._persistThroughConflicts(function () {
+    return self.removeRole(username, role);
   });
 };
 
@@ -94,7 +103,7 @@ User.prototype.destroy = function (username) {
 };
 
 User.prototype.authenticate = function (username, password) {
-  return this.postSession({
+  return this.createSession({
     name: username,
     password: password
   }).then(function (response) {
@@ -106,21 +115,24 @@ User.prototype.authenticate = function (username, password) {
   });
 };
 
-User.prototype.postSession = function (doc) {
-  return request.request({
-    uri: this._slouch_url + '/_session',
+User.prototype.createSession = function (doc) {
+  return this._request.request({
+    uri: this._slouch._url + '/_session',
     method: 'POST',
     json: doc
   });
 };
 
+// TODO: get authenticate() and authenticated() working properly in the browser. For now, we
+// have to fake the responses as it appears that the session cookie is not being propogated from
+// the session post to the session get.
 User.prototype.authenticated = function (cookie) {
   // Specify a URL w/o a username and password as we want to check to make sure that the cookie is
   // for a current session
   var parts = url.parse(this._slouch._url);
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
-  return request.request({
+  return this._request.request({
     uri: _url + '/_session',
     method: 'GET',
     headers: {

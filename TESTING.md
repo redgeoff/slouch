@@ -7,7 +7,18 @@ Install CouchDB locally. You can easily run CouchDB via docker with:
 
     $ ./run-couchdb-docker.sh
 
-Note: if you are not running ubuntu, you will probably have to configure the `common` variable
+Notes:
+- If you are not running ubuntu, you will probably have to configure the `common` variable
+- If you are running the tests against a CouchDB instance on another box then you will need to enable CORs, e.g. ./enable-cors.sh and you will also need to change the `host` entry in test/spec/config.json
+
+
+## Resetting the DB
+
+If your DB accumulates a lot of junk data and you want to clear it, you can do so with:
+
+    $ npm run reset-db
+
+Warning: this will delete all your databases!
 
 
 ## Test in node
