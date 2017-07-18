@@ -74,6 +74,7 @@ describe('system', function () {
       system._request = function () {
         var stream = new MemoryStream();
         stream.write(JSON.stringify(item));
+        stream.abort = function () {};
         return stream;
       };
 
