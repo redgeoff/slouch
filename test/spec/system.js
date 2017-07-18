@@ -57,7 +57,6 @@ describe('system', function () {
   };
 
   var isPhantomJS = function () {
-return true;
     return global.navigator && global.navigator.userAgent.indexOf('PhantomJS') !== -1;
   };
 
