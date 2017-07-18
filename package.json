@@ -34,7 +34,8 @@
     "browser-coverage-full-test": "npm run browser-coverage-test && npm run browser-coverage-report && npm run browser-coverage-check",
     "test": "npm run assert-beautified && npm run jshint && npm run node-full-test && npm run browser-coverage-full-test",
     "TODO-build": "",
-    "TODO-test-in-sauce": ""
+    "TODO-test-in-sauce": "",
+    "reset-db": "./reset-db.js"
   },
   "dependencies": {
     "backoff-promise": "0.0.2",

@@ -16,7 +16,8 @@ describe('system', function () {
     system = null,
     destroyed = null,
     created = null,
-    defaultGet = null;
+    defaultGet = null,
+    iteratorToAbort = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -24,10 +25,14 @@ describe('system', function () {
     system = slouch.system;
     destroyed = [];
     created = [];
+    iteratorToAbort = null;
     return utils.createDB();
   });
 
   afterEach(function () {
+    if (iteratorToAbort) {
+      iteratorToAbort.abort();
+    }
     system.get = defaultGet;
     return utils.destroyDB();
   });
@@ -67,11 +72,8 @@ describe('system', function () {
   var fakeContinuousUpdatesIfPhantomJS = function (item) {
     if (isPhantomJS()) {
       system._request = function () {
-
         var stream = new MemoryStream();
-
         stream.write(JSON.stringify(item));
-
         return stream;
       };
 
@@ -160,9 +162,11 @@ describe('system', function () {
     });
 
     var promise = new Promise(function (resolve, reject) {
-      system.updates({
+      iteratorToAbort = system.updates({
         feed: 'continuous'
-      }).each(function (update) {
+      });
+
+      iteratorToAbort.each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
@@ -189,9 +193,11 @@ describe('system', function () {
     });
 
     var promise = new Promise(function (resolve, reject) {
-      system.updatesNoHistory({
+      iteratorToAbort = system.updatesNoHistory({
         feed: 'continuous'
-      }).each(function (update) {
+      });
+
+      iteratorToAbort.each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
@@ -237,9 +243,11 @@ describe('system', function () {
     };
 
     var promise = new Promise(function (resolve, reject) {
-      system.updatesNoHistory({
+      iteratorToAbort = system.updatesNoHistory({
         feed: 'continuous'
-      }).each(function (update) {
+      });
+
+      iteratorToAbort.each(function (update) {
         if (update.db_name === utils.createdDB && update.type === 'updated') {
           resolve();
         }
