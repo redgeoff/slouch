@@ -1,7 +1,7 @@
 'use strict';
 
 var Slouch = require('../');
-var slouch = new Slouch('http://localhost:5984');
+var slouch = new Slouch('http://admin:admin@localhost:5984');
 
 slouch.db.create('mydb').then(function () {
 
@@ -16,6 +16,10 @@ slouch.db.create('mydb').then(function () {
   return slouch.doc.get('mydb', doc._id);
 
 }).then(function (doc) {
+
+  return slouch.doc.destroy('mydb', doc._id, doc._rev);
+
+}).then(function () {
 
   return slouch.db.destroy('mydb');
 
