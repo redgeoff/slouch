@@ -5,7 +5,7 @@
 A JS API for CouchDB that does the heavy lifting
 
 
-## Slouch is a good alternative to nano as:
+## Slouch is a good alternative to nano:
 
   - You don't have to create an instance for each DB
   - Supports native promises
@@ -18,6 +18,8 @@ A JS API for CouchDB that does the heavy lifting
   - Designed for both CouchDB 1 and CouchDB 2
 
 
-## Install
+## Table of Contents
 
-    $ npm install couch-slouch
+* [Getting Started](https://github.com/redgeoff/slouch/wiki/Getting-Started)
+* [Don't just relax. Slouch!](https://github.com/redgeoff/slouch/wiki/Don%27t-just-relax.-Slouch%21)
+* [Reference](https://github.com/redgeoff/slouch/wiki#table-of-contents)
