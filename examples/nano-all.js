@@ -3,8 +3,12 @@
 // This example illustrates how to read all the docs in a database with nano and not slouch. See
 // ./all.js for a comparable and more condensed example using slouch.
 
-// Note: you can use something like Promise.promisfy() or nano-promises to simplify some of the code
-// below.
+// Notes:
+// - You can use something like Promise.promisfy() or nano-promises to simplify some of the code
+//   below by using promises instead of callbacks.
+// - This example is not fault tolerant. If the database connection is dropped or the database
+//   throws an error like max_dbs_open then the code will just crash. You can of course implement
+//   a retry mechanism, but that would introduce yet more code.
 
 var nano = require('nano')('http://admin:admin@localhost:5984'),
   JSONStream = require('JSONStream');
