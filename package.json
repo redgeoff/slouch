@@ -8,8 +8,14 @@
     "url": "git://github.com/redgeoff/couch-slouch"
   },
   "keywords": [
-    "js",
-    "seed"
+    "couchdb",
+    "couch",
+    "api",
+    "client",
+    "request",
+    "rest",
+    "restful",
+    "json"
   ],
   "author": "Geoffrey Cox",
   "license": "MIT",
