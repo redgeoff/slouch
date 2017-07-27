@@ -23,3 +23,4 @@ A JS API for CouchDB that does the heavy lifting
 * [Getting Started](https://github.com/redgeoff/slouch/wiki/Getting-Started)
 * [Don't just relax. Slouch!](https://github.com/redgeoff/slouch/wiki/Don%27t-just-relax.-Slouch%21)
 * [Reference](https://github.com/redgeoff/slouch/wiki#table-of-contents)
+* [Don’t Just Relax; Slouch: A JS Client for CouchDB that Does the Heavy Lifting](https://medium.com/@redgeoff/dont-just-relax-slouch-a-js-client-for-couchdb-that-does-the-heavy-lifting-d8232eba8e2c)
