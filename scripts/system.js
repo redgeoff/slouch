@@ -2,7 +2,7 @@
 
 var promisedRequest = require('./request'),
   FilteredStreamIterator = require('quelle').FilteredStreamIterator,
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   StreamIterator = require('quelle').StreamIterator,
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise'),
@@ -82,7 +82,7 @@ System.prototype.updates = function (params) {
     jsonStreamParseStr = 'results.*';
   }
 
-  return new PersistentStreamIterator({
+  return new CouchPersistentStreamIterator({
     url: this._slouch._url + '/_db_updates',
     method: 'GET',
     qs: params

@@ -3,7 +3,8 @@
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
   sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise');
+  Promise = require('sporks/scripts/promise'),
+  config = require('../config.json');
 
 describe('doc', function () {
 
@@ -403,6 +404,20 @@ describe('doc', function () {
     var doc = {};
     slouch.doc.setDestroyed(doc);
     doc._deleted.should.eql(true);
+  });
+
+  it('all should throw when permissions error', function () {
+    var badAuthURL = config.couchdb.scheme + '://baduser:badpassord@' + config.couchdb.host +
+      ':' + config.couchdb.port,
+      slouch2 = new Slouch(badAuthURL),
+      readItem = false;
+    return sporks.shouldThrow(function () {
+      return slouch2.doc.all(utils.createdDB).each(function ( /* doc */ ) {
+        readItem = true;
+      });
+    }).then(function () {
+      readItem.should.eql(false);
+    });
   });
 
 });

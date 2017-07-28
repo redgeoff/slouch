@@ -44,12 +44,12 @@
     "reset-db": "./reset-db.js"
   },
   "dependencies": {
-    "backoff-promise": "0.0.2",
+    "backoff-promise": "^0.0.2",
     "bluebird": "^3.5.0",
-    "quelle": "0.0.3",
+    "quelle": "^0.0.4",
     "request": "^2.81.0",
-    "sporks": "0.0.1",
-    "squadron": "0.0.3"
+    "sporks": "^0.0.1",
+    "squadron": "^0.0.3"
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",

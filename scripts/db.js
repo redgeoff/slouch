@@ -1,7 +1,7 @@
 'use strict';
 
 var promisedRequest = require('./request'),
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   request = require('request');
 
 var DB = function (slouch) {
@@ -69,7 +69,7 @@ DB.prototype.changes = function (dbName, params) {
     jsonStreamParseStr = 'results.*';
   }
 
-  return new PersistentStreamIterator({
+  return new CouchPersistentStreamIterator({
     url: this._slouch._url + '/' + dbName + '/_changes',
     method: 'GET',
     qs: params
@@ -78,7 +78,7 @@ DB.prototype.changes = function (dbName, params) {
 };
 
 DB.prototype.view = function (dbName, viewDocId, view, params) {
-  return new PersistentStreamIterator({
+  return new CouchPersistentStreamIterator({
     url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
     qs: params
   }, 'rows.*');
@@ -93,7 +93,7 @@ DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
 
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 DB.prototype.all = function () {
-  return new PersistentStreamIterator({
+  return new CouchPersistentStreamIterator({
     url: this._slouch._url + '/_all_dbs'
   }, '*');
 };
