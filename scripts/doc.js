@@ -1,7 +1,7 @@
 'use strict';
 
 var promisedRequest = require('./request'),
-  PersistentStreamIterator = require('quelle').PersistentStreamIterator,
+  CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   sporks = require('sporks');
 
 var Doc = function (slouch) {
@@ -234,7 +234,7 @@ Doc.prototype.allArray = function (dbName, params) {
 
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 Doc.prototype.all = function (dbName, params) {
-  return new PersistentStreamIterator({
+  return new CouchPersistentStreamIterator({
     url: this._slouch._url + '/' + dbName + '/_all_docs',
     method: 'GET',
     qs: params
