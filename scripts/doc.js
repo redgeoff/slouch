@@ -12,6 +12,10 @@ var Doc = function (slouch) {
 // retry so if they fail this many times in a row then there is most likely an issue.
 Doc.prototype.maxRetries = 20;
 
+// If true, we'll try to automatically ignore any duplicate updates, updates that would not change
+// any of the docs attributes. This of course means that a new revision would not be generated.
+Doc.prototype.ignoreDuplicateUpdates = true;
+
 Doc.prototype.ignoreConflict = function (promiseFactory) {
   return promiseFactory().catch(function (err) {
     if (err.error !== 'conflict') { // not a conflict?
@@ -93,6 +97,31 @@ Doc.prototype.exists = function (dbName, id) {
   });
 };
 
+// Compare the values of the docs without respect to the rev.
+Doc.prototype._eqls = function (doc1, doc2) {
+  var clonedDoc1 = sporks.clone(doc1),
+    clonedDoc2 = sporks.clone(doc2);
+
+  delete clonedDoc1._rev;
+  delete clonedDoc2._rev;
+
+  return sporks.isEqual(clonedDoc1, clonedDoc2);
+};
+
+Doc.prototype._updateOrIgnore = function (dbName, curDoc, newDoc) {
+  // Are the docs the same? Should we ignore these updates?
+  if (this._eqls(curDoc, newDoc) && this.ignoreDuplicateUpdates) {
+
+    // Return doc so that response is standardized
+    return newDoc;
+
+  } else {
+
+    return this.update(dbName, newDoc);
+
+  }
+};
+
 Doc.prototype.createOrUpdate = function (dbName, doc) {
 
   var self = this,
@@ -103,7 +132,7 @@ Doc.prototype.createOrUpdate = function (dbName, doc) {
     // Use the latest rev so that we can attempt to update the doc without a conflict
     clonedDoc._rev = _doc._rev;
 
-    return self.update(dbName, clonedDoc);
+    return self._updateOrIgnore(dbName, _doc, clonedDoc);
 
   }).catch(function (err) {
 
@@ -174,7 +203,7 @@ Doc.prototype.getMergeUpdate = function (dbName, doc) {
 
     clonedDoc = sporks.merge(clonedDoc, doc);
 
-    return self.update(dbName, clonedDoc);
+    return self._updateOrIgnore(dbName, _doc, clonedDoc);
 
   });
 };
@@ -219,6 +248,9 @@ Doc.prototype.getModifyUpsert = function (dbName, docId, onGetPromiseFactory) {
     return self.get(dbName, docId).then(function (doc) {
       return onGetPromiseFactory(doc);
     }).then(function (modifiedDoc) {
+      // TODO: we should probably build in a construct that allows modifiedDoc to be undefined and
+      // in this case no update is made. This could then be used to ignore duplicate updates like
+      // getMergeUpdate ignores duplicate updates.
       return self.update(dbName, modifiedDoc);
     });
   });
