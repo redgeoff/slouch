@@ -12,11 +12,13 @@ describe('doc', function () {
     db = null,
     defaultGet = null,
     defaultUpdate = null,
-    conflictDoc = null;
+    conflictDoc = null,
+    updates = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
+    updates = [];
     return utils.createDB();
   });
 
@@ -82,6 +84,17 @@ describe('doc', function () {
     });
   };
 
+  var spyOnUpdates = function () {
+    defaultUpdate = slouch.doc.update;
+
+    slouch.doc.update = function () {
+      return defaultUpdate.apply(this, arguments).then(function (update) {
+        updates.push(update);
+        return update;
+      });
+    };
+  };
+
   it('should create, update and get doc', function () {
     var doc = {
       thing: 'play'
@@ -94,7 +107,12 @@ describe('doc', function () {
       doc._rev = body._rev;
       doc.priority = 'medium';
       return slouch.doc.update(utils.createdDB, doc);
-    }).then(function () {
+    }).then(function (updatedDoc) {
+      var clonedDoc = sporks.clone(doc);
+      delete clonedDoc._rev;
+      delete updatedDoc._rev;
+      updatedDoc.should.eql(clonedDoc);
+
       return slouch.doc.get(utils.createdDB, doc._id);
     }).then(function (body) {
       doc._rev = body._rev;
@@ -249,6 +267,9 @@ describe('doc', function () {
   it('upsert should fail after max retries', function () {
     slouch.maxRetries = 3;
 
+    // Disable for conflict faking
+    slouch.doc.ignoreDuplicateUpdates = false;
+
     return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
         return slouch.doc.upsert(utils.createdDB, {
@@ -327,6 +348,9 @@ describe('doc', function () {
 
   it('get, merge and upsert should fail after max retries', function () {
     slouch.maxRetries = 3;
+
+    // Disable for conflict faking
+    slouch.doc.ignoreDuplicateUpdates = false;
 
     return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
@@ -417,6 +441,61 @@ describe('doc', function () {
       });
     }).then(function () {
       readItem.should.eql(false);
+    });
+  });
+
+  it('should update when ignoreDuplicateUpdates is true', function () {
+    spyOnUpdates();
+
+    var doc = {
+      _id: '1',
+      thing: 'play'
+    };
+
+    return slouch.doc.create(utils.createdDB, doc).then(function () {
+      doc.thing = 'write';
+      return slouch.doc.createOrUpdate(utils.createdDB, doc);
+    }).then(function (_doc) {
+      updates.should.eql([_doc]);
+    });
+  });
+
+  it('should ignore when ignoreDuplicateUpdates is true', function () {
+    spyOnUpdates();
+
+    var doc = {
+      _id: '1',
+      thing: 'play'
+    };
+
+    return slouch.doc.create(utils.createdDB, doc).then(function () {
+      return slouch.doc.createOrUpdate(utils.createdDB, doc);
+    }).then(function (_doc) {
+      // Remove the rev as we don't have it stored in doc
+      delete _doc._rev;
+
+      // Update should still return doc
+      _doc.should.eql(doc);
+
+      // Spy should show that nothing was actually updated
+      updates.length.should.eql(0);
+    });
+  });
+
+  it('should update when ignoreDuplicateUpdates is false', function () {
+    slouch.doc.ignoreDuplicateUpdates = false;
+
+    spyOnUpdates();
+
+    var doc = {
+      _id: '1',
+      thing: 'play'
+    };
+
+    return slouch.doc.create(utils.createdDB, doc).then(function () {
+      return slouch.doc.createOrUpdate(utils.createdDB, doc);
+    }).then(function (_doc) {
+      updates.should.eql([_doc]);
     });
   });
 
