@@ -54,7 +54,7 @@
   "devDependencies": {
     "beautify-proj": "^1.0.0",
     "browserify": "^14.4.0",
-    "chai": "^4.1.0",
+    "chai": "^4.1.2",
     "chai-as-promised": "^6.0.0",
     "gofur": "^0.0.7",
     "istanbul": "^0.4.5",
