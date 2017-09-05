@@ -12,13 +12,14 @@ describe('user', function () {
     defaultUpdate = null,
     username = null,
     defaultRequest = null,
-    dbs = [];
+    dbs = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     user = slouch.user;
     username = 'test_' + utils.nextId();
     defaultRequest = user._request.request;
+    dbs = [];
     return user.create(username, 'testpassword', ['testrole1'], {
       firstName: 'Jill',
       email: 'test@example.com'
@@ -245,6 +246,11 @@ describe('user', function () {
       // Make sure roles were merged
       doc.roles.should.eql(['testrole1', 'testrole2', 'testrole3']);
     });
+  });
+
+  it('should ignore if no conflicts', function () {
+    // Sanity test for code coverage
+    return user.resolveConflicts(username);
   });
 
 });
