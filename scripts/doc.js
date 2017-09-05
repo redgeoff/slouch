@@ -75,10 +75,11 @@ Doc.prototype.updateIgnoreConflict = function (dbName, doc) {
   });
 };
 
-Doc.prototype.get = function (dbName, docId) {
+Doc.prototype.get = function (dbName, docId, params) {
   return promisedRequest.request({
     uri: this._slouch._url + '/' + dbName + '/' + docId,
-    method: 'GET'
+    method: 'GET',
+    qs: params
   }, true);
 };
 
