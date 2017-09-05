@@ -3,7 +3,8 @@
 var NotAuthenticatedError = require('./not-authenticated-error'),
   request = require('./request'),
   url = require('url'),
-  sporks = require('sporks');
+  sporks = require('sporks'),
+  Promise = require('sporks/scripts/promise');
 
 var User = function (slouch) {
   this._slouch = slouch;
@@ -37,8 +38,8 @@ User.prototype.create = function (username, password, roles, metadata) {
   return this._insert(username, user);
 };
 
-User.prototype.get = function (username) {
-  return this._slouch.doc.get(this._dbName, this.toUserId(username));
+User.prototype.get = function (username, params) {
+  return this._slouch.doc.get(this._dbName, this.toUserId(username), params);
 };
 
 User.prototype._update = function (username, user) {
@@ -156,6 +157,50 @@ User.prototype.authenticateAndGetSession = function (username, password) {
   }).then(function (session) {
     session.cookie = response.cookie;
     return session;
+  });
+};
+
+// Provides a simple way of resolving conflicts at the user layer whereby a merge of the roles is
+// assumed to be the only data needed in the conflicting docs. Until you resolve these conflicts,
+// users cannot log in. You can pretty easily encounter conflicts on user docs with CouchDB 2. For
+// example, if a user is being added to two roles simultaneously via different CouchDB nodes then
+// when the CouchDB nodes replicate the user, the user will be in conflict.
+User.prototype.resolveConflicts = function (username) {
+  var self = this;
+  return self.get(username, {
+    conflicts: true
+  }).then(function (user) {
+    // Verify that there is a conflict
+    if (user._conflicts) {
+
+      var roles = sporks.flip(user.roles),
+        gets = [],
+        destroys = [];
+
+      user._conflicts.forEach(function (rev) {
+        gets.push(self.get(username, {
+          rev: rev
+        }).then(function (userRev) {
+          userRev.roles.forEach(function (role) {
+            // Build a list of all roles, using an associative array so that duplicates are ignored.
+            roles[role] = true;
+          });
+        }));
+      });
+
+      return Promise.all(gets).then(function () {
+        // Update the user and set all the roles
+        user.roles = sporks.keys(roles);
+        return self._update(username, user);
+      }).then(function () {
+        // Delete all the conflicts
+        user._conflicts.forEach(function (rev) {
+          destroys.push(self._destroy(username, rev));
+        });
+        return Promise.all(destroys);
+      });
+
+    }
   });
 };
 

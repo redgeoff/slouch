@@ -11,7 +11,8 @@ describe('user', function () {
     user = null,
     defaultUpdate = null,
     username = null,
-    defaultRequest = null;
+    defaultRequest = null,
+    dbs = [];
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -24,9 +25,21 @@ describe('user', function () {
     });
   });
 
+  var destroyDBs = function () {
+    if (dbs.length > 0) {
+      var promises = [];
+      dbs.forEach(function (db) {
+        promises.push(slouch.db.destroy(db));
+      });
+      return Promise.all(promises);
+    }
+  };
+
   afterEach(function () {
     user._request.request = defaultRequest;
-    return user.destroy(username);
+    return user.destroy(username).then(function () {
+      return destroyDBs();
+    });
   });
 
   var fakeConflict = function () {
@@ -179,6 +192,59 @@ describe('user', function () {
     return sporks.shouldThrow(function () {
       return user.authenticated('bad-cookie');
     }, err);
+  });
+
+  var generateUserConflict = function () {
+    // Generate a conflict in a user doc by replicating to and from another DB which we will name
+    // the same name as the username.
+    return slouch.db.create(username).then(function () {
+      // Add DB to list that will be destroyed
+      dbs.push(username);
+
+      // Replicate the user
+      return slouch.db.replicate({
+        source: slouch._url + '/_users',
+        target: slouch._url + '/' + username
+      });
+    }).then(function () {
+      // Add a role to the _users docs
+      return user.addRole(username, 'testrole2');
+    }).then(function () {
+      // Add a role to the other DB's doc
+      return slouch.doc.get(username, user.toUserId(username)).then(function (doc) {
+        doc.roles = ['testrole1', 'testrole3'];
+        return slouch.doc.update(username, doc);
+      });
+    }).then(function () {
+      // Replicate the docs to generate a conflict
+      return slouch.db.replicate({
+        source: slouch._url + '/' + username,
+        target: slouch._url + '/_users'
+      });
+    }).then(function () {
+      // Make sure that the doc is in conflict
+      return user.get(username, {
+        conflicts: true
+      });
+    }).then(function (doc) {
+      (doc._conflicts.length > 0).should.eql(true);
+    });
+  };
+
+  it('should resolve conflicts', function () {
+    return generateUserConflict().then(function () {
+      return user.resolveConflicts(username);
+    }).then(function () {
+      return user.get(username, {
+        conflicts: true
+      });
+    }).then(function (doc) {
+      // Make sure there no conflicts
+      (doc._conflicts === undefined).should.eql(true);
+
+      // Make sure roles were merged
+      doc.roles.should.eql(['testrole1', 'testrole2', 'testrole3']);
+    });
   });
 
 });
