@@ -244,7 +244,7 @@ describe('user', function () {
       (doc._conflicts === undefined).should.eql(true);
 
       // Make sure roles were merged
-      doc.roles.should.eql(['testrole1', 'testrole2', 'testrole3']);
+      doc.roles.sort().should.eql(['testrole1', 'testrole2', 'testrole3']);
     });
   });
 
