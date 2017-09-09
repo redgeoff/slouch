@@ -44,8 +44,8 @@ Run specific tests and generate code coverage:
 ## Manual browser tests
 
     $ npm run browser-server
-    Use any browser to visit http://127.0.0.1:8001/index.html
-    And you can filter the tests, e.g. http://127.0.0.1:8001/index.html?grep=reg-ex
+    Use any browser to visit http://127.0.0.1:8001/browser/index.html
+    And you can filter the tests, e.g. http://127.0.0.1:8001/browser/index.html?grep=reg-ex
 
 
 ## Automated browser tests
