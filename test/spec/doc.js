@@ -4,7 +4,8 @@ var Slouch = require('../../scripts'),
   utils = require('../utils'),
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise'),
-  config = require('../config.json');
+  config = require('../config.json'),
+  Backoff = require('backoff-promise');
 
 describe('doc', function () {
 
@@ -19,6 +20,12 @@ describe('doc', function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     updates = [];
+
+    // Shorten backoff
+    slouch.doc._newBackoff = function () {
+      return new Backoff(1);
+    };
+
     return utils.createDB();
   });
 
@@ -265,8 +272,6 @@ describe('doc', function () {
   });
 
   it('upsert should fail after max retries', function () {
-    slouch.maxRetries = 3;
-
     // Disable for conflict faking
     slouch.doc.ignoreDuplicateUpdates = false;
 
@@ -347,8 +352,6 @@ describe('doc', function () {
   });
 
   it('get, merge and upsert should fail after max retries', function () {
-    slouch.maxRetries = 3;
-
     // Disable for conflict faking
     slouch.doc.ignoreDuplicateUpdates = false;
 
@@ -382,8 +385,6 @@ describe('doc', function () {
   });
 
   it('get, modify and upsert should fail after max retries', function () {
-    slouch.maxRetries = 3;
-
     return fakeConflict().then(function () {
       return sporks.shouldThrow(function () {
         return slouch.doc.getModifyUpsert(utils.createdDB, '1', function (doc) {
