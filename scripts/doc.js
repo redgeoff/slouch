@@ -2,7 +2,8 @@
 
 var promisedRequest = require('./request'),
   CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
-  sporks = require('sporks');
+  sporks = require('sporks'),
+  Backoff = require('backoff-promise');
 
 var Doc = function (slouch) {
   this._slouch = slouch;
@@ -159,27 +160,33 @@ Doc.prototype.createOrUpdateIgnoreConflict = function (dbName, doc) {
   });
 };
 
+// Provide a construct for mocking
+Doc.prototype._newBackoff = function () {
+  return new Backoff();
+};
+
 Doc.prototype._persistThroughConflicts = function (promiseFactory) {
 
   var self = this,
     i = 0;
 
+  // Use an exponential backoff to prevent multiple ticks from competing with each other and
+  // resulting in none of the ticks persisting through the conflict within the allotted number of
+  // retries.
+  var backoff = self._newBackoff();
+
   var run = function () {
 
-    return promiseFactory().catch(function (err) {
-
-      if (err.error === 'conflict' && i++ < self.maxRetries) { // conflict?
-
-        // Retry
+    return backoff.attempt(function () {
+      return promiseFactory();
+    }).catch(function (err) {
+      // Conflict and haven't reached max retries?
+      if (err.error === 'conflict' && i++ < self.maxRetries) {
+        // Attempt again
         return run();
-
       } else {
-
-        // Unexpected error
         throw err;
-
       }
-
     });
 
   };
