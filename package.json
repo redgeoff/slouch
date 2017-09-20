@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/redgeoff/couch-slouch"
+    "url": "git://github.com/redgeoff/slouch"
   },
   "keywords": [
     "couchdb",
@@ -20,7 +20,7 @@
   "author": "Geoffrey Cox",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/redgeoff/couch-slouch/issues"
+    "url": "https://github.com/redgeoff/slouch/issues"
   },
   "scripts": {
     "assert-beautified": "beautify-proj -i test -c beautify.json && beautify-proj -i scripts -c beautify.json",
