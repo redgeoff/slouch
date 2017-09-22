@@ -39,7 +39,7 @@ var Slouch = function (url) {
 Slouch.prototype._requestFactory = function () {
   var self = this;
   return function () {
-    return self._requestClass._request.apply(self._requestClass, arguments);
+    return self._requestClass.request.apply(self._requestClass, arguments);
   };
 };
 

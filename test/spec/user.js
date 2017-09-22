@@ -71,7 +71,9 @@ describe('user', function () {
       // Set security so that only this user can access it
       return slouch.security.onlyRoleCanView(username, 'testrole1');
     }).then(function () {
-      return slouch.doc.create(username, { foo: 'bar' });
+      return slouch.doc.create(username, {
+        foo: 'bar'
+      });
     });
   };
 

@@ -1,7 +1,6 @@
 'use strict';
 
-var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
-  request = require('request');
+var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator');
 
 var DB = function (slouch) {
   this._slouch = slouch;

@@ -9,10 +9,12 @@ var RequestClass = require('../../scripts/request-class'),
 describe('request-class', function () {
 
   var consoleLog = console.log,
-    requestClass = null;
+    requestClass = null,
+    defaultRequest = null;
 
   beforeEach(function () {
     requestClass = new RequestClass(request);
+    defaultRequest = requestClass.request;
 
     // Shorten the backoff
     requestClass._newBackoff = function () {
@@ -91,5 +93,45 @@ describe('request-class', function () {
     requestClass.setMaxConnections(2);
     requestClass._throttler.getMaxConcurrentProcesses().should.eql(2);
   });
+
+  it('should handle ENOTFOUND errors', function () {
+    // Shorten the backoff as in a browser we just a "Failed to Fetch" error which triggers a retry
+    requestClass._newBackoff = function () {
+      return new Backoff(1);
+    };
+
+    return sporks.shouldThrow(function () {
+      return requestClass.request({
+        url: 'http://somethingbad.example.com'
+      });
+    });
+  });
+
+  it('should handle ECONNREFUSED errors', function () {
+
+    var n = 0;
+
+    // Shorten the backoff
+    requestClass._newBackoff = function () {
+      return new Backoff(10);
+    };
+
+    requestClass._request = function () {
+      if (++n === 3) {
+        // Simulate success after several failures
+        return Promise.resolve();
+      } else {
+        return defaultRequest.apply(this, arguments);
+      }
+    };
+
+    return requestClass.request({
+      url: 'http://127.0.0.1:1234'
+    }).then(function () {
+      n.should.eql(3);
+    });
+  });
+
+  // TODO: test handling of all_dbs_active errors
 
 });
