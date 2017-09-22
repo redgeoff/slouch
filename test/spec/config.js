@@ -27,11 +27,9 @@ describe('config', function () {
   };
 
   var mockRequest = function (nodes) {
-    config._req = {
-      request: function (opts) {
-        requests.push(opts);
-        return Promise.resolve();
-      }
+    slouch._req = function (opts) {
+      requests.push(opts);
+      return Promise.resolve();
     };
 
     slouch.membership.get = function () {

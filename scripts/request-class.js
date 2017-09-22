@@ -1,9 +1,14 @@
 'use strict';
 
+// TODO: rename to EnhancedRequest
+
+// TODO: enhance even further so that this construct can also be used at the quelle layer. Among
+// various benefits it would allow the PersistentStreams to be throttled.
+
 var Promise = require('sporks/scripts/promise'),
-  req = Promise.promisify(require('request')),
   Throttler = require('squadron').Throttler,
-  Backoff = require('backoff-promise');
+  Backoff = require('backoff-promise'),
+  NotAuthorizedError = require('./not-authorized-error');
 
 // Until https://github.com/Gozala/querystring/issues/20 is fixed, we need to manually define an
 // unescape function
@@ -12,9 +17,11 @@ QueryString.prototype.unescape = function (s) {
   return decodeURIComponent(s);
 };
 
-var RequestClass = function () {
+// Adds persistence, throttling, error handling and promises to request
+var RequestClass = function (request) {
   this._throttler = new Throttler(RequestClass.DEFAULT_CONNECTIONS);
-  this._req = req;
+  this._req = Promise.promisify(request);
+  this._cookie = null;
 };
 
 // For debugging all traffic
@@ -44,6 +51,21 @@ RequestClass.prototype._getStatusCode = function (body) {
   if (body.reason && body.reason.indexOf('Could not open source database') !== -1) {
     return 404;
   }
+};
+
+RequestClass.prototype._newError = function (body, args) {
+  var err = null,
+    msg = 'reason=' + body.reason + ', error=' + body.error + ', arguments' + JSON.stringify(args);
+
+  if (body.error === 'unauthorized') {
+    err = new NotAuthorizedError(msg);
+  } else {
+    err = new Error(msg);
+  }
+  err.statusCode = this._getStatusCode(body);
+  err.error = body.error;
+
+  return err;
 };
 
 RequestClass.prototype._request = function (opts, parseBody) {
@@ -78,10 +100,7 @@ RequestClass.prototype._request = function (opts, parseBody) {
     });
 
     if (body.error) {
-      err = new Error('reason=' + body.reason + ', error=' + body.error + ', arguments' +
-        JSON.stringify(selfArguments));
-      err.statusCode = self._getStatusCode(body);
-      err.error = body.error;
+      err = self._newError(body, selfArguments);
       throw err;
     } else {
       return parseBody ? body : response;

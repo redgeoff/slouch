@@ -1,7 +1,5 @@
 'use strict';
 
-var promisedRequest = require('./request');
-
 var Security = function (slouch) {
   this._slouch = slouch;
 };
@@ -18,7 +16,7 @@ var Security = function (slouch) {
 //    }
 // }
 Security.prototype.set = function (dbName, security) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/_security',
     method: 'PUT',
     body: JSON.stringify(security)
@@ -26,7 +24,7 @@ Security.prototype.set = function (dbName, security) {
 };
 
 Security.prototype.get = function (dbName) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/_security',
     method: 'GET'
   }, true);

@@ -3,7 +3,9 @@
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
   sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise');
+  Promise = require('sporks/scripts/promise'),
+  NotAuthenticatedError = require('../../scripts/not-authenticated-error'),
+  NotAuthorizedError = require('../../scripts/not-authorized-error');
 
 describe('user', function () {
 
@@ -11,14 +13,18 @@ describe('user', function () {
     user = null,
     defaultUpdate = null,
     username = null,
-    defaultRequest = null,
-    dbs = null;
+    defaultReq = null,
+    dbs = null,
+    slouchNoAuth = null,
+    notAuthenticatedErr = new NotAuthenticatedError(),
+    notAuthorizedErr = new NotAuthorizedError();
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
+    slouchNoAuth = new Slouch(utils.couchDBURLNoAuth());
     user = slouch.user;
     username = 'test_' + utils.nextId();
-    defaultRequest = user._request.request;
+    defaultReq = slouch._req;
     dbs = [];
     return user.create(username, 'testpassword', ['testrole1'], {
       firstName: 'Jill',
@@ -37,7 +43,7 @@ describe('user', function () {
   };
 
   afterEach(function () {
-    user._request.request = defaultRequest;
+    slouch._req = defaultReq;
     return user.destroy(username).then(function () {
       return destroyDBs();
     });
@@ -55,6 +61,18 @@ describe('user', function () {
         return defaultUpdate.apply(this, arguments);
       }
     };
+  };
+
+  var createPrivateDB = function () {
+    return slouch.db.create(username).then(function () {
+      // Add DB to list that will be destroyed
+      dbs.push(username);
+
+      // Set security so that only this user can access it
+      return slouch.security.onlyRoleCanView(username, 'testrole1');
+    }).then(function () {
+      return slouch.doc.create(username, { foo: 'bar' });
+    });
   };
 
   // NOTE: create and destroy tested by beforeEach() and afterEach()
@@ -149,7 +167,7 @@ describe('user', function () {
     // have to fake the responses as it appears that the session cookie is not being propogated from
     // the session post to the session get.
     if (global.window) { // in browser?
-      user._request.request = function () {
+      slouch._req = function () {
         if (arguments['0'].uri.indexOf('_session') !== -1) {
           return Promise.resolve({
             headers: {
@@ -166,7 +184,7 @@ describe('user', function () {
             })
           });
         } else {
-          return defaultRequest.apply(this, arguments);
+          return defaultReq.apply(this, arguments);
         }
       };
     }
@@ -180,19 +198,52 @@ describe('user', function () {
   });
 
   it('should not authenticate and get session', function () {
-    var err = new Error();
-    err.name = 'NotAuthenticatedError';
     return sporks.shouldThrow(function () {
       return user.authenticateAndGetSession(username, 'bad-password');
-    }, err);
+    }, notAuthenticatedErr);
   });
 
   it('should not be authenticated when cookie missing', function () {
-    var err = new Error();
-    err.name = 'NotAuthenticatedError';
     return sporks.shouldThrow(function () {
       return user.authenticated('bad-cookie');
-    }, err);
+    }, notAuthenticatedErr);
+  });
+
+  it('should log in and log out', function () {
+    var n = 0;
+    return createPrivateDB().then(function () {
+      // Make sure cannot access DB before log in
+      return sporks.shouldThrow(function () {
+        return slouchNoAuth.db.get(username);
+      }, notAuthorizedErr);
+    }).then(function () {
+      return slouchNoAuth.user.logIn(username, 'testpassword');
+    }).then(function () {
+      // This would throw if the user does not have access
+      return slouchNoAuth.db.get(username);
+    }).then(function () {
+      return slouchNoAuth.doc.all(username).each(function () {
+        n++;
+      });
+    }).then(function () {
+      // Make sure we read a doc
+      n.should.eql(1);
+
+      return slouchNoAuth.user.logOut();
+    }).then(function () {
+      // Make sure can no longer access DB
+      return sporks.shouldThrow(function () {
+        return slouchNoAuth.db.get(username);
+      }, notAuthorizedErr);
+    });
+  });
+
+  it('should not log in when password incorrect', function () {
+    return createPrivateDB().then(function () {
+      return sporks.shouldThrow(function () {
+        return user.logIn(username, 'badpassword');
+      }, notAuthenticatedErr);
+    });
   });
 
   var generateUserConflict = function () {

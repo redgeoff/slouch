@@ -1,7 +1,6 @@
 'use strict';
 
 var NotAuthenticatedError = require('./not-authenticated-error'),
-  request = require('./request'),
   url = require('url'),
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise');
@@ -9,7 +8,6 @@ var NotAuthenticatedError = require('./not-authenticated-error'),
 var User = function (slouch) {
   this._slouch = slouch;
   this._dbName = '_users';
-  this._request = request;
 };
 
 User.prototype.toUserId = function (username) {
@@ -117,10 +115,18 @@ User.prototype.authenticate = function (username, password) {
 };
 
 User.prototype.createSession = function (doc) {
-  return this._request.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/_session',
     method: 'POST',
     json: doc
+  });
+};
+
+// TODO: Also support option to pass in cookie
+User.prototype.destroySession = function () {
+  return this._slouch._req({
+    uri: this._slouch._url + '/_session',
+    method: 'DELETE'
   });
 };
 
@@ -133,7 +139,7 @@ User.prototype.authenticated = function (cookie) {
   var parts = url.parse(this._slouch._url);
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
-  return this._request.request({
+  return this._slouch._req({
     uri: _url + '_session',
     method: 'GET',
     headers: {
@@ -157,6 +163,29 @@ User.prototype.authenticateAndGetSession = function (username, password) {
   }).then(function (session) {
     session.cookie = response.cookie;
     return session;
+  });
+};
+
+User.prototype.setCookie = function (cookie) {
+  this._slouch._requestWrapper.setCookie(cookie);
+};
+
+User.prototype.logIn = function (username, password) {
+  var self = this;
+  return self.authenticate(username, password).then(function (response) {
+    // Set cookie for all subsequent calls
+    self.setCookie(response.cookie);
+    return response;
+  });
+};
+
+User.prototype.logOut = function () {
+  // Destroy session
+  var self = this;
+  return self.destroySession().then(function (response) {
+    // Remove cookie from subsequent requests
+    self.setCookie(null);
+    return response;
   });
 };
 

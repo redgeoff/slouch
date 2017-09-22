@@ -1,16 +1,14 @@
 'use strict';
 
-var promisedRequest = require('./request'),
-  CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
+var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   request = require('request');
 
 var DB = function (slouch) {
   this._slouch = slouch;
-  this._request = request;
 };
 
 DB.prototype._create = function (dbName) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
     method: 'PUT'
   });
@@ -32,21 +30,21 @@ DB.prototype.create = function (dbName) {
 };
 
 DB.prototype.destroy = function (dbName) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
     method: 'DELETE'
   });
 };
 
 DB.prototype.get = function (dbName) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
     method: 'GET'
   }, true);
 };
 
 DB.prototype.exists = function (dbName) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
     method: 'GET'
   }).then(function () {
@@ -73,7 +71,7 @@ DB.prototype.changes = function (dbName, params) {
     url: this._slouch._url + '/' + dbName + '/_changes',
     method: 'GET',
     qs: params
-  }, jsonStreamParseStr, indefinite, this._request);
+  }, jsonStreamParseStr, indefinite, this._slouch._request);
 
 };
 
@@ -85,7 +83,7 @@ DB.prototype.view = function (dbName, viewDocId, view, params) {
 };
 
 DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
-  return promisedRequest.request({
+  return this._slouch._req({
     url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
     qs: params
   }, true);
@@ -99,7 +97,7 @@ DB.prototype.all = function () {
 };
 
 DB.prototype.replicate = function (params) {
-  return promisedRequest.request({
+  return this._slouch._req({
     url: this._slouch._url + '/_replicate',
     method: 'POST',
     json: params

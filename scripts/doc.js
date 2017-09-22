@@ -1,7 +1,6 @@
 'use strict';
 
-var promisedRequest = require('./request'),
-  CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
+var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   sporks = require('sporks'),
   Backoff = require('backoff-promise');
 
@@ -41,7 +40,7 @@ Doc.prototype.ignoreMissing = function (promiseFactory) {
 };
 
 Doc.prototype.create = function (dbName, doc) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
     method: 'POST',
     json: doc
@@ -58,7 +57,7 @@ Doc.prototype.createAndIgnoreConflict = function (dbName, doc) {
 };
 
 Doc.prototype.update = function (dbName, doc) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + doc._id,
     method: 'PUT',
     body: JSON.stringify(doc)
@@ -77,7 +76,7 @@ Doc.prototype.updateIgnoreConflict = function (dbName, doc) {
 };
 
 Doc.prototype.get = function (dbName, docId, params) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + docId,
     method: 'GET',
     qs: params
@@ -265,7 +264,7 @@ Doc.prototype.getModifyUpsert = function (dbName, docId, onGetPromiseFactory) {
 };
 
 Doc.prototype.allArray = function (dbName, params) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/_all_docs',
     method: 'GET',
     qs: params
@@ -278,7 +277,7 @@ Doc.prototype.all = function (dbName, params) {
     url: this._slouch._url + '/' + dbName + '/_all_docs',
     method: 'GET',
     qs: params
-  }, 'rows.*');
+  }, 'rows.*', null, this._slouch._request);
 };
 
 Doc.prototype.destroyAllNonDesign = function (dbName) {
@@ -296,7 +295,7 @@ Doc.prototype.destroyAll = function (dbName, keepDesignDocs) {
 };
 
 Doc.prototype.destroy = function (dbName, docId, docRev) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + docId,
     method: 'DELETE',
     qs: {

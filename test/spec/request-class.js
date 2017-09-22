@@ -3,18 +3,19 @@
 var RequestClass = require('../../scripts/request-class'),
   sporks = require('sporks'),
   Backoff = require('backoff-promise'),
-  Promise = require('sporks/scripts/promise');
+  Promise = require('sporks/scripts/promise'),
+  request = require('request');
 
 describe('request-class', function () {
 
   var consoleLog = console.log,
-    request = null;
+    requestClass = null;
 
   beforeEach(function () {
-    request = new RequestClass();
+    requestClass = new RequestClass(request);
 
     // Shorten the backoff
-    request._newBackoff = function () {
+    requestClass._newBackoff = function () {
       return new Backoff(10);
     };
   });
@@ -36,42 +37,42 @@ describe('request-class', function () {
       logged = str;
     };
 
-    request._log('foo');
+    requestClass._log('foo');
     logged.should.eql('foo');
   });
 
   it('should get 404 status code', function () {
-    request._getStatusCode({
+    requestClass._getStatusCode({
       reason: 'Could not open source database'
     }).should.eql(404);
   });
 
   it('should handle malformed error', function () {
     // Fake
-    request._req = function () {
+    requestClass._req = function () {
       return Promise.resolve(null);
     };
 
     return sporks.shouldThrow(function () {
-      return request._request();
+      return requestClass._request();
     });
   });
 
   it('should reconnect when all DBs active', function () {
     var err = new Error('all_dbs_active');
-    request._shouldReconnect(err).should.eql(true);
+    requestClass._shouldReconnect(err).should.eql(true);
   });
 
   it('should throw error reach max retries', function () {
     var err = new Error('all_dbs_active');
 
     // Fake
-    request._request = function () {
+    requestClass._request = function () {
       return sporks.promiseError(err);
     };
 
     return sporks.shouldThrow(function () {
-      return request.request();
+      return requestClass.request();
     }, err);
   });
 
@@ -79,16 +80,16 @@ describe('request-class', function () {
     var err = new Error('default_authentication_handler');
 
     // Fake
-    request._request = function () {
+    requestClass._request = function () {
       return sporks.promiseError(err);
     };
 
-    return request.request();
+    return requestClass.request();
   });
 
   it('should set max connections', function () {
-    request.setMaxConnections(2);
-    request._throttler.getMaxConcurrentProcesses().should.eql(2);
+    requestClass.setMaxConnections(2);
+    requestClass._throttler.getMaxConcurrentProcesses().should.eql(2);
   });
 
 });

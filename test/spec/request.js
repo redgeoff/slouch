@@ -1,6 +1,7 @@
 'use strict';
 
-var request = require('../../scripts/request'),
+var RequestClass = require('../../scripts/request-class'),
+  request = new RequestClass(require('request')),
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise'),
   Backoff = require('backoff-promise');
