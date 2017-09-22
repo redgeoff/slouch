@@ -20,4 +20,15 @@ describe('request-wrapper', function () {
     });
   });
 
+  it('should set cookie in header', function () {
+    var requestWrapper = new RequestWrapper();
+    requestWrapper.setCookie('my-cookie');
+    var opts = requestWrapper._setCookieHeader({});
+    opts.should.eql({
+      headers: {
+        cookie: 'my-cookie'
+      }
+    });
+  });
+
 });

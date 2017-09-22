@@ -101,13 +101,19 @@ User.prototype.destroy = function (username) {
   });
 };
 
+// Abstracted as cookies are not returned in the browser
+User.prototype._getCookieFromResponse = function (response) {
+  return response.headers['set-cookie'] ? response.headers['set-cookie'][0] : null;
+};
+
 User.prototype.authenticate = function (username, password) {
-  return this.createSession({
+  var self = this;
+  return self.createSession({
     name: username,
     password: password
   }).then(function (response) {
     return {
-      cookie: response.headers['set-cookie'][0]
+      cookie: self._getCookieFromResponse(response)
     };
   }).catch(function (err) {
     throw new NotAuthenticatedError(err.message);
