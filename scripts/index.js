@@ -10,7 +10,7 @@ var Attachment = require('./attachment'),
   Security = require('./security'),
   System = require('./system'),
   User = require('./user'),
-  RequestClass = require('./request-class'),
+  EnhancedRequest = require('./enhanced-request'),
   RequestWrapper = require('./request-wrapper');
 
 var Slouch = function (url) {
@@ -19,7 +19,7 @@ var Slouch = function (url) {
   // Package request so that we can inject a cookie, provide promises and better built-in logic
   this._requestWrapper = new RequestWrapper();
   this._request = this._requestWrapper.requestFactory();
-  this._requestClass = new RequestClass(this._request);
+  this._requestClass = new EnhancedRequest(this._request);
 
   // Shorthand so that can just issue _slouch.req() in different modules
   this._req = this._requestFactory();

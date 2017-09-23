@@ -1,19 +1,19 @@
 'use strict';
 
-var RequestClass = require('../../scripts/request-class'),
+var EnhancedRequest = require('../../scripts/enhanced-request'),
   sporks = require('sporks'),
   Backoff = require('backoff-promise'),
   Promise = require('sporks/scripts/promise'),
   request = require('request');
 
-describe('request-class', function () {
+describe('enhanced-request', function () {
 
   var consoleLog = console.log,
     requestClass = null,
     defaultRequest = null;
 
   beforeEach(function () {
-    requestClass = new RequestClass(request);
+    requestClass = new EnhancedRequest(request);
     defaultRequest = requestClass.request;
 
     // Shorten the backoff
@@ -26,11 +26,11 @@ describe('request-class', function () {
     // Restore console log
     console.log = consoleLog;
 
-    RequestClass.LOG_EVERYTHING = false;
+    EnhancedRequest.LOG_EVERYTHING = false;
   });
 
   it('should log', function () {
-    RequestClass.LOG_EVERYTHING = true;
+    EnhancedRequest.LOG_EVERYTHING = true;
 
     var logged = null;
 
