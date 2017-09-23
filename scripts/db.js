@@ -31,15 +31,17 @@ DB.prototype.create = function (dbName) {
 DB.prototype.destroy = function (dbName) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
-    method: 'DELETE'
+    method: 'DELETE',
+    parseBody: true
   });
 };
 
 DB.prototype.get = function (dbName) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + dbName,
-    method: 'GET'
-  }, true);
+    method: 'GET',
+    parseBody: true
+  });
 };
 
 DB.prototype.exists = function (dbName) {
@@ -84,8 +86,9 @@ DB.prototype.view = function (dbName, viewDocId, view, params) {
 DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
   return this._slouch._req({
     url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
-    qs: params
-  }, true);
+    qs: params,
+    parseBody: true
+  });
 };
 
 // Use a JSONStream so that we don't have to load a large JSON structure into memory

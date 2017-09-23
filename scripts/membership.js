@@ -7,8 +7,9 @@ var Membership = function (slouch) {
 Membership.prototype.get = function () {
   return this._slouch._req({
     uri: this._slouch._url + '/_membership',
-    method: 'GET'
-  }, true);
+    method: 'GET',
+    parseBody: true
+  });
 };
 
 module.exports = Membership;

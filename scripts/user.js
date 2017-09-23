@@ -124,8 +124,10 @@ User.prototype.createSession = function (doc) {
   return this._slouch._req({
     uri: this._slouch._url + '/_session',
     method: 'POST',
-    json: doc
-  }, true, true);
+    json: doc,
+    parseBody: true,
+    fullResponse: true
+  });
 };
 
 User.prototype._getHeaderWithCookie = function (cookie) {
@@ -147,16 +149,20 @@ User.prototype.getSession = function (cookie, url) {
   return this._slouch._req({
     uri: (url ? url : this._slouch._url) + '/_session',
     method: 'GET',
-    headers: this._getHeaderWithCookie(cookie)
-  }, true, true);
+    headers: this._getHeaderWithCookie(cookie),
+    parseBody: true,
+    fullResponse: true
+  });
 };
 
 User.prototype.destroySession = function (cookie) {
   return this._slouch._req({
     uri: this._slouch._url + '/_session',
     method: 'DELETE',
-    headers: this._getHeaderWithCookie(cookie)
-  }, true, true);
+    headers: this._getHeaderWithCookie(cookie),
+    parseBody: true,
+    fullResponse: true
+  });
 };
 
 // TODO: get authenticate() and authenticated() working properly in the browser. For now, we

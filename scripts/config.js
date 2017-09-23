@@ -8,7 +8,8 @@ var Config = function (slouch) {
 
 Config.prototype._couchDB2Request = function (node, path, opts, parseBody) {
   opts.uri = this._slouch._url + '/_node/' + node + '/_config/' + path;
-  return this._slouch._req(opts, parseBody);
+  opts.parseBody = parseBody;
+  return this._slouch._req(opts);
 };
 
 // Warning: as per https://github.com/klaemo/docker-couchdb/issues/42#issuecomment-169610897, this
@@ -34,7 +35,8 @@ Config.prototype._couchDB2Requests = function (path, opts, parseBody, maxNumNode
 
 Config.prototype._couchDB1Request = function (path, opts, parseBody) {
   opts.uri = this._slouch._url + '/_config/' + path;
-  return this._slouch._req(opts, parseBody);
+  opts.parseBody = parseBody;
+  return this._slouch._req(opts);
 };
 
 Config.prototype._request = function (path, opts, parseBody, maxNumNodes) {

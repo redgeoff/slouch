@@ -34,8 +34,9 @@ System.prototype.isCouchDB1 = function () {
 System.prototype.get = function () {
   return this._slouch._req({
     uri: this._slouch._url + '/',
-    method: 'GET'
-  }, true);
+    method: 'GET',
+    parseBody: true
+  });
 };
 
 System.prototype.reset = function (exceptDBNames) {

@@ -6,7 +6,8 @@
 var Promise = require('sporks/scripts/promise'),
   Throttler = require('squadron').Throttler,
   Backoff = require('backoff-promise'),
-  NotAuthorizedError = require('./not-authorized-error');
+  NotAuthorizedError = require('./not-authorized-error'),
+  sporks = require('sporks');
 
 // Until https://github.com/Gozala/querystring/issues/20 is fixed, we need to manually define an
 // unescape function
@@ -66,12 +67,37 @@ EnhancedRequest.prototype._newError = function (body, args) {
   return err;
 };
 
-EnhancedRequest.prototype._request = function (opts, parseBody, fullResponse) {
+EnhancedRequest.prototype._getAndRemove = function (opts, name) {
+  var val = opts[name];
+  delete opts[name];
+  return val;
+};
+
+EnhancedRequest.prototype._removeEnhancedOpts = function (opts) {
+  var requestOpts = null,
+    enhancedOpts = null;
+
+  if (opts) {
+    requestOpts = sporks.clone(opts);
+    enhancedOpts = {
+      parseBody: this._getAndRemove(requestOpts, 'parseBody'),
+      fullResponse: this._getAndRemove(requestOpts, 'fullResponse')
+    };
+  }
+
+  return {
+    request: requestOpts,
+    enhanced: enhancedOpts
+  };
+};
+
+EnhancedRequest.prototype._request = function (opts) {
 
   var self = this,
-    selfArguments = arguments;
+    selfArguments = arguments,
+    splitOpts = self._removeEnhancedOpts(opts);
 
-  return self._req.apply(this, [opts]).then(function (response) {
+  return self._req.apply(this, [splitOpts.request]).then(function (response) {
 
     var err = null;
 
@@ -102,14 +128,14 @@ EnhancedRequest.prototype._request = function (opts, parseBody, fullResponse) {
       err = self._newError(body, selfArguments);
       throw err;
     } else {
-      if (parseBody) {
+      if (splitOpts.enhanced.parseBody) {
         response.body = body;
       }
 
-      if (fullResponse) {
+      if (splitOpts.enhanced.fullResponse) {
         return response;
       } else {
-        return parseBody ? body : response;
+        return splitOpts.enhanced.parseBody ? body : response;
       }
     }
   });

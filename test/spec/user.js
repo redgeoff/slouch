@@ -193,13 +193,13 @@ describe('user', function () {
                 'some-cookie'
               ]
             },
-            body: JSON.stringify({
+            body: {
               userCtx: {
                 name: username,
                 roles: ['testrole1']
               },
               cookie: 'some-cookie'
-            })
+            }
           });
         } else {
           return defaultReq.apply(this, arguments);
@@ -219,6 +219,14 @@ describe('user', function () {
     return sporks.shouldThrow(function () {
       return user.authenticateAndGetSession(username, 'bad-password');
     }, notAuthenticatedErr);
+  });
+
+  it('should get session with default url', function () {
+    // TODO: should be able to remove after cookie authentication works in the browser
+    return slouch.user.getSession().then(function (response) {
+      // Sanity test
+      response.body.ok.should.eql(true);
+    });
   });
 
   it('should not be authenticated when cookie missing', function () {

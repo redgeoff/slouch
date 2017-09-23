@@ -26,8 +26,9 @@ Security.prototype.set = function (dbName, security) {
 Security.prototype.get = function (dbName) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/_security',
-    method: 'GET'
-  }, true);
+    method: 'GET',
+    parseBody: true
+  });
 };
 
 Security.prototype.onlyRoleCanView = function (dbName, role) {

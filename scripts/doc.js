@@ -79,8 +79,9 @@ Doc.prototype.get = function (dbName, docId, params) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + docId,
     method: 'GET',
-    qs: params
-  }, true);
+    qs: params,
+    parseBody: true
+  });
 };
 
 Doc.prototype.getIgnoreMissing = function (dbName, id) {
@@ -267,8 +268,9 @@ Doc.prototype.allArray = function (dbName, params) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/_all_docs',
     method: 'GET',
-    qs: params
-  }, true);
+    qs: params,
+    parseBody: true
+  });
 };
 
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
@@ -300,7 +302,8 @@ Doc.prototype.destroy = function (dbName, docId, docRev) {
     method: 'DELETE',
     qs: {
       rev: docRev
-    }
+    },
+    parseBody: true
   });
 };
 
