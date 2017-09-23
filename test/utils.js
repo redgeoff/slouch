@@ -14,6 +14,10 @@ Utils.prototype.couchDBURL = function () {
     config.couchdb.password + '@' + config.couchdb.host + ':' + config.couchdb.port;
 };
 
+Utils.prototype.couchDBURLNoAuth = function () {
+  return config.couchdb.scheme + '://' + config.couchdb.host + ':' + config.couchdb.port;
+};
+
 Utils.prototype.nextId = function () {
   return this._dbId++;
 };

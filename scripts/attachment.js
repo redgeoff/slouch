@@ -1,7 +1,5 @@
 'use strict';
 
-var promisedRequest = require('./request');
-
 var Attachment = function (slouch) {
   this._slouch = slouch;
 };
@@ -18,7 +16,7 @@ var Attachment = function (slouch) {
 //     }
 //   };
 //
-//   return promisedRequest.request({
+//   return this._slouch._req({
 //     uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName +
 //       '?rev=' + encodeURIComponent(rev),
 //     method: 'PUT',
@@ -31,7 +29,7 @@ var Attachment = function (slouch) {
 // };
 
 Attachment.prototype.get = function (dbName, docId, attachmentName) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName,
     method: 'GET',
     raw: true,
@@ -42,7 +40,7 @@ Attachment.prototype.get = function (dbName, docId, attachmentName) {
 };
 
 Attachment.prototype.destroy = function (dbName, docId, attachmentName, rev) {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + docId + '/' + attachmentName,
     method: 'DELETE',
     qs: {

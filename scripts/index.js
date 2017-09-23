@@ -9,10 +9,20 @@ var Attachment = require('./attachment'),
   NotAuthenticatedError = require('./not-authenticated-error'),
   Security = require('./security'),
   System = require('./system'),
-  User = require('./user');
+  User = require('./user'),
+  EnhancedRequest = require('./enhanced-request'),
+  RequestWrapper = require('./request-wrapper');
 
 var Slouch = function (url) {
   this._url = url;
+
+  // Package request so that we can inject a cookie, provide promises and better built-in logic
+  this._requestWrapper = new RequestWrapper();
+  this._request = this._requestWrapper.requestFactory();
+  this._enhancedRequest = new EnhancedRequest(this._request);
+
+  // Shorthand so that can just issue _slouch.req() in different modules
+  this._req = this._requestFactory();
 
   this.attachment = new Attachment(this);
   this.config = new Config(this);
@@ -24,6 +34,13 @@ var Slouch = function (url) {
   this.NotAuthenticatedError = NotAuthenticatedError;
   this.security = new Security(this);
   this.user = new User(this);
+};
+
+Slouch.prototype._requestFactory = function () {
+  var self = this;
+  return function () {
+    return self._enhancedRequest.request.apply(self._enhancedRequest, arguments);
+  };
 };
 
 module.exports = Slouch;

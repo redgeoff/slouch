@@ -69,14 +69,12 @@ describe('system', function () {
   // TODO: why do continuous requests just hang in PhantomJS, but not in any other browser?
   var fakeContinuousUpdatesIfPhantomJS = function (item) {
     if (isPhantomJS()) {
-      system._request = function () {
+      slouch._request = function () {
         var stream = new MemoryStream();
         stream.write(JSON.stringify(item));
         stream.abort = function () {};
         return stream;
       };
-
-      db._request = system._request;
     }
   };
 

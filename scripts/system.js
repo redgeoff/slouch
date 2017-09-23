@@ -1,17 +1,14 @@
 'use strict';
 
-var promisedRequest = require('./request'),
-  FilteredStreamIterator = require('quelle').FilteredStreamIterator,
+var FilteredStreamIterator = require('quelle').FilteredStreamIterator,
   CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   StreamIterator = require('quelle').StreamIterator,
   sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise'),
-  request = require('request');
+  Promise = require('sporks/scripts/promise');
 
 var System = function (slouch) {
   this._slouch = slouch;
   this._couchDB1 = null;
-  this._request = request;
 };
 
 System.prototype._isCouchDB1 = function () {
@@ -35,10 +32,11 @@ System.prototype.isCouchDB1 = function () {
 };
 
 System.prototype.get = function () {
-  return promisedRequest.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/',
-    method: 'GET'
-  }, true);
+    method: 'GET',
+    parseBody: true
+  });
 };
 
 System.prototype.reset = function (exceptDBNames) {
@@ -86,7 +84,7 @@ System.prototype.updates = function (params) {
     url: this._slouch._url + '/_db_updates',
     method: 'GET',
     qs: params
-  }, jsonStreamParseStr, indefinite, this._request);
+  }, jsonStreamParseStr, indefinite, this._slouch._request);
 };
 
 System.prototype._cloneParams = function (params) {

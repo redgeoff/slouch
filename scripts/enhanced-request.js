@@ -1,9 +1,13 @@
 'use strict';
 
+// TODO: enhance even further so that this construct can also be used at the quelle layer. Among
+// various benefits it would allow the PersistentStreams to be throttled.
+
 var Promise = require('sporks/scripts/promise'),
-  req = Promise.promisify(require('request')),
   Throttler = require('squadron').Throttler,
-  Backoff = require('backoff-promise');
+  Backoff = require('backoff-promise'),
+  NotAuthorizedError = require('./not-authorized-error'),
+  sporks = require('sporks');
 
 // Until https://github.com/Gozala/querystring/issues/20 is fixed, we need to manually define an
 // unescape function
@@ -12,28 +16,30 @@ QueryString.prototype.unescape = function (s) {
   return decodeURIComponent(s);
 };
 
-var RequestClass = function () {
-  this._throttler = new Throttler(RequestClass.DEFAULT_CONNECTIONS);
-  this._req = req;
+// Adds persistence, throttling, error handling and promises to request
+var EnhancedRequest = function (request) {
+  this._throttler = new Throttler(EnhancedRequest.DEFAULT_CONNECTIONS);
+  this._req = Promise.promisify(request);
+  this._cookie = null;
 };
 
 // For debugging all traffic
-RequestClass.LOG_EVERYTHING = false;
+EnhancedRequest.LOG_EVERYTHING = false;
 
-RequestClass.prototype._log = function () {
-  if (RequestClass.LOG_EVERYTHING) {
+EnhancedRequest.prototype._log = function () {
+  if (EnhancedRequest.LOG_EVERYTHING) {
     console.log.apply(console.log, arguments);
   }
 };
 
 // The default value for max_dbs_open is 500 and we want to leave some space for other processes to
 // also hit the DB.
-RequestClass.DEFAULT_CONNECTIONS = 20;
+EnhancedRequest.DEFAULT_CONNECTIONS = 20;
 
-RequestClass.MAX_RETRIES = 10;
+EnhancedRequest.MAX_RETRIES = 10;
 
 // Preserve some compatibility with nano
-RequestClass.prototype._getStatusCode = function (body) {
+EnhancedRequest.prototype._getStatusCode = function (body) {
   switch (body.error) {
   case 'conflict':
     return 409;
@@ -46,11 +52,52 @@ RequestClass.prototype._getStatusCode = function (body) {
   }
 };
 
-RequestClass.prototype._request = function (opts, parseBody) {
-  var self = this,
-    selfArguments = arguments;
+EnhancedRequest.prototype._newError = function (body, args) {
+  var err = null,
+    msg = 'reason=' + body.reason + ', error=' + body.error + ', arguments' + JSON.stringify(args);
 
-  return self._req.apply(this, arguments).then(function (response) {
+  if (body.error === 'unauthorized') {
+    err = new NotAuthorizedError(msg);
+  } else {
+    err = new Error(msg);
+  }
+  err.statusCode = this._getStatusCode(body);
+  err.error = body.error;
+
+  return err;
+};
+
+EnhancedRequest.prototype._getAndRemove = function (opts, name) {
+  var val = opts[name];
+  delete opts[name];
+  return val;
+};
+
+EnhancedRequest.prototype._removeEnhancedOpts = function (opts) {
+  var requestOpts = null,
+    enhancedOpts = null;
+
+  if (opts) {
+    requestOpts = sporks.clone(opts);
+    enhancedOpts = {
+      parseBody: this._getAndRemove(requestOpts, 'parseBody'),
+      fullResponse: this._getAndRemove(requestOpts, 'fullResponse')
+    };
+  }
+
+  return {
+    request: requestOpts,
+    enhanced: enhancedOpts
+  };
+};
+
+EnhancedRequest.prototype._request = function (opts) {
+
+  var self = this,
+    selfArguments = arguments,
+    splitOpts = self._removeEnhancedOpts(opts);
+
+  return self._req.apply(this, [splitOpts.request]).then(function (response) {
 
     var err = null;
 
@@ -78,18 +125,23 @@ RequestClass.prototype._request = function (opts, parseBody) {
     });
 
     if (body.error) {
-      err = new Error('reason=' + body.reason + ', error=' + body.error + ', arguments' +
-        JSON.stringify(selfArguments));
-      err.statusCode = self._getStatusCode(body);
-      err.error = body.error;
+      err = self._newError(body, selfArguments);
       throw err;
     } else {
-      return parseBody ? body : response;
+      if (splitOpts.enhanced.parseBody) {
+        response.body = body;
+      }
+
+      if (splitOpts.enhanced.fullResponse) {
+        return response;
+      } else {
+        return splitOpts.enhanced.parseBody ? body : response;
+      }
     }
   });
 };
 
-RequestClass.prototype._throttledRequestClass = function () {
+EnhancedRequest.prototype._throttledEnhancedRequest = function () {
   var self = this,
     selfArguments = arguments;
   return self._throttler.run(function () {
@@ -97,7 +149,7 @@ RequestClass.prototype._throttledRequestClass = function () {
   });
 };
 
-RequestClass.prototype._shouldReconnect = function (err) {
+EnhancedRequest.prototype._shouldReconnect = function (err) {
   switch (err.message) {
 
   case 'all_dbs_active': // No more connections
@@ -131,34 +183,34 @@ RequestClass.prototype._shouldReconnect = function (err) {
   }
 };
 
-RequestClass.prototype._shouldIgnore = function (err) {
+EnhancedRequest.prototype._shouldIgnore = function (err) {
   // For some strange reason, CouchDB will give us "default_authentication_handler" errors even when
   // the request was successful and we need to ignore these errors.
   return /default_authentication_handler/.test(err.message);
 };
 
 // Provide a construct for mocking
-RequestClass.prototype._newBackoff = function () {
+EnhancedRequest.prototype._newBackoff = function () {
   return new Backoff();
 };
 
-RequestClass.prototype.request = function () {
+EnhancedRequest.prototype.request = function () {
 
   var self = this,
     selfArguments = arguments,
     backoff = self._newBackoff(),
     retries = 0;
 
-  var backoffThrottledRequestClass = function () {
+  var backoffThrottledEnhancedRequest = function () {
     return backoff.attempt(function () {
-      return self._throttledRequestClass.apply(self, selfArguments);
+      return self._throttledEnhancedRequest.apply(self, selfArguments);
     }).catch(function (err) {
       // Reached max retries?
-      if (retries++ >= RequestClass.MAX_RETRIES) {
+      if (retries++ >= EnhancedRequest.MAX_RETRIES) {
         throw err;
       } else if (self._shouldReconnect(err)) {
         // Attempt again
-        return backoffThrottledRequestClass();
+        return backoffThrottledEnhancedRequest();
       } else if (!self._shouldIgnore(err)) {
         // Error doesn't warrant retry to throw to caller
         throw err;
@@ -166,13 +218,13 @@ RequestClass.prototype.request = function () {
     });
   };
 
-  return backoffThrottledRequestClass();
+  return backoffThrottledEnhancedRequest();
 };
 
-RequestClass.prototype.setMaxConnections = function (maxConnections) {
+EnhancedRequest.prototype.setMaxConnections = function (maxConnections) {
   // TODO: reducing the number doesn't work when it is done after the new max has already been
   // reached. Does it?
   this._throttler.setMaxConcurrentProcesses(maxConnections);
 };
 
-module.exports = RequestClass;
+module.exports = EnhancedRequest;

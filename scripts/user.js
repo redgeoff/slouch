@@ -1,7 +1,6 @@
 'use strict';
 
 var NotAuthenticatedError = require('./not-authenticated-error'),
-  request = require('./request'),
   url = require('url'),
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise');
@@ -9,7 +8,6 @@ var NotAuthenticatedError = require('./not-authenticated-error'),
 var User = function (slouch) {
   this._slouch = slouch;
   this._dbName = '_users';
-  this._request = request;
 };
 
 User.prototype.toUserId = function (username) {
@@ -103,13 +101,19 @@ User.prototype.destroy = function (username) {
   });
 };
 
+// Abstracted as cookies are not returned in the browser
+User.prototype._getCookieFromResponse = function (response) {
+  return response.headers['set-cookie'] ? response.headers['set-cookie'][0] : null;
+};
+
 User.prototype.authenticate = function (username, password) {
-  return this.createSession({
+  var self = this;
+  return self.createSession({
     name: username,
     password: password
   }).then(function (response) {
     return {
-      cookie: response.headers['set-cookie'][0]
+      cookie: self._getCookieFromResponse(response)
     };
   }).catch(function (err) {
     throw new NotAuthenticatedError(err.message);
@@ -117,10 +121,47 @@ User.prototype.authenticate = function (username, password) {
 };
 
 User.prototype.createSession = function (doc) {
-  return this._request.request({
+  return this._slouch._req({
     uri: this._slouch._url + '/_session',
     method: 'POST',
-    json: doc
+    json: doc,
+    parseBody: true,
+    fullResponse: true
+  });
+};
+
+User.prototype._getHeaderWithCookie = function (cookie) {
+  var headers = null;
+
+  if (cookie) {
+    headers = {
+      cookie: cookie
+    };
+  } else {
+    // Need to set to undefined here for jshint
+    headers = undefined;
+  }
+
+  return headers;
+};
+
+User.prototype.getSession = function (cookie, url) {
+  return this._slouch._req({
+    uri: (url ? url : this._slouch._url) + '/_session',
+    method: 'GET',
+    headers: this._getHeaderWithCookie(cookie),
+    parseBody: true,
+    fullResponse: true
+  });
+};
+
+User.prototype.destroySession = function (cookie) {
+  return this._slouch._req({
+    uri: this._slouch._url + '/_session',
+    method: 'DELETE',
+    headers: this._getHeaderWithCookie(cookie),
+    parseBody: true,
+    fullResponse: true
   });
 };
 
@@ -133,14 +174,8 @@ User.prototype.authenticated = function (cookie) {
   var parts = url.parse(this._slouch._url);
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
-  return this._request.request({
-    uri: _url + '_session',
-    method: 'GET',
-    headers: {
-      'Cookie': cookie
-    }
-  }).then(function (response) {
-    var body = JSON.parse(response.body);
+  return this.getSession(cookie, _url).then(function (response) {
+    var body = response.body;
     if (!body.userCtx.name) { // not authenticated?
       throw new NotAuthenticatedError('not authenticated via cookie');
     }
@@ -157,6 +192,29 @@ User.prototype.authenticateAndGetSession = function (username, password) {
   }).then(function (session) {
     session.cookie = response.cookie;
     return session;
+  });
+};
+
+User.prototype.setCookie = function (cookie) {
+  this._slouch._requestWrapper.setCookie(cookie);
+};
+
+User.prototype.logIn = function (username, password) {
+  var self = this;
+  return self.authenticate(username, password).then(function (response) {
+    // Set cookie for all subsequent calls
+    self.setCookie(response.cookie);
+    return response;
+  });
+};
+
+User.prototype.logOut = function () {
+  // Destroy session
+  var self = this;
+  return self.destroySession().then(function (response) {
+    // Remove cookie from subsequent requests
+    self.setCookie(null);
+    return response;
   });
 };
 
