@@ -227,7 +227,7 @@ describe('user', function () {
     }, notAuthenticatedErr);
   });
 
-  it('should log in and log out', function () {
+  it('should log in, get session and log out', function () {
     var n = 0;
 
     // TODO: in node? Cookie authentication is not working in the browser yet
@@ -251,6 +251,11 @@ describe('user', function () {
         }).then(function () {
           // Make sure we read a doc
           n.should.eql(1);
+        }).then(function () {
+          return slouchNoAuth.user.getSession().then(function (session) {
+            // Sanity test
+            session.userCtx.name.should.eql(username);
+          });
         });
       }
     }).then(function () {

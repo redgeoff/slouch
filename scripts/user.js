@@ -129,6 +129,14 @@ User.prototype.createSession = function (doc) {
 };
 
 // TODO: Also support option to pass in cookie
+User.prototype.getSession = function () {
+  return this._slouch._req({
+    uri: this._slouch._url + '/_session',
+    method: 'GET'
+  }, true);
+};
+
+// TODO: Also support option to pass in cookie
 User.prototype.destroySession = function () {
   return this._slouch._req({
     uri: this._slouch._url + '/_session',
