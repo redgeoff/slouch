@@ -252,9 +252,9 @@ describe('user', function () {
           // Make sure we read a doc
           n.should.eql(1);
         }).then(function () {
-          return slouchNoAuth.user.getSession().then(function (session) {
+          return slouchNoAuth.user.getSession().then(function (response) {
             // Sanity test
-            session.userCtx.name.should.eql(username);
+            response.body.userCtx.name.should.eql(username);
           });
         });
       }

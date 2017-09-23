@@ -66,11 +66,12 @@ EnhancedRequest.prototype._newError = function (body, args) {
   return err;
 };
 
-EnhancedRequest.prototype._request = function (opts, parseBody) {
+EnhancedRequest.prototype._request = function (opts, parseBody, fullResponse) {
+
   var self = this,
     selfArguments = arguments;
 
-  return self._req.apply(this, arguments).then(function (response) {
+  return self._req.apply(this, [opts]).then(function (response) {
 
     var err = null;
 
@@ -101,7 +102,15 @@ EnhancedRequest.prototype._request = function (opts, parseBody) {
       err = self._newError(body, selfArguments);
       throw err;
     } else {
-      return parseBody ? body : response;
+      if (parseBody) {
+        response.body = body;
+      }
+
+      if (fullResponse) {
+        return response;
+      } else {
+        return parseBody ? body : response;
+      }
     }
   });
 };

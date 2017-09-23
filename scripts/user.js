@@ -125,23 +125,38 @@ User.prototype.createSession = function (doc) {
     uri: this._slouch._url + '/_session',
     method: 'POST',
     json: doc
-  });
+  }, true, true);
 };
 
-// TODO: Also support option to pass in cookie
-User.prototype.getSession = function () {
-  return this._slouch._req({
-    uri: this._slouch._url + '/_session',
-    method: 'GET'
-  }, true);
+User.prototype._getHeaderWithCookie = function (cookie) {
+  var headers = null;
+
+  if (cookie) {
+    headers = {
+      cookie: cookie
+    };
+  } else {
+    // Need to set to undefined here for jshint
+    headers = undefined;
+  }
+
+  return headers;
 };
 
-// TODO: Also support option to pass in cookie
-User.prototype.destroySession = function () {
+User.prototype.getSession = function (cookie, url) {
+  return this._slouch._req({
+    uri: (url ? url : this._slouch._url) + '/_session',
+    method: 'GET',
+    headers: this._getHeaderWithCookie(cookie)
+  }, true, true);
+};
+
+User.prototype.destroySession = function (cookie) {
   return this._slouch._req({
     uri: this._slouch._url + '/_session',
-    method: 'DELETE'
-  });
+    method: 'DELETE',
+    headers: this._getHeaderWithCookie(cookie)
+  }, true, true);
 };
 
 // TODO: get authenticate() and authenticated() working properly in the browser. For now, we
@@ -153,14 +168,8 @@ User.prototype.authenticated = function (cookie) {
   var parts = url.parse(this._slouch._url);
   var _url = parts.protocol + '//' + parts.host + parts.pathname;
 
-  return this._slouch._req({
-    uri: _url + '_session',
-    method: 'GET',
-    headers: {
-      'Cookie': cookie
-    }
-  }).then(function (response) {
-    var body = JSON.parse(response.body);
+  return this.getSession(cookie, _url).then(function (response) {
+    var body = response.body;
     if (!body.userCtx.name) { // not authenticated?
       throw new NotAuthenticatedError('not authenticated via cookie');
     }

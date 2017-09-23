@@ -19,7 +19,7 @@ var Slouch = function (url) {
   // Package request so that we can inject a cookie, provide promises and better built-in logic
   this._requestWrapper = new RequestWrapper();
   this._request = this._requestWrapper.requestFactory();
-  this._requestClass = new EnhancedRequest(this._request);
+  this._enhancedRequest = new EnhancedRequest(this._request);
 
   // Shorthand so that can just issue _slouch.req() in different modules
   this._req = this._requestFactory();
@@ -39,7 +39,7 @@ var Slouch = function (url) {
 Slouch.prototype._requestFactory = function () {
   var self = this;
   return function () {
-    return self._requestClass.request.apply(self._requestClass, arguments);
+    return self._enhancedRequest.request.apply(self._enhancedRequest, arguments);
   };
 };
 
