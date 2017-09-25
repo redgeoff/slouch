@@ -93,7 +93,7 @@ describe('db', function () {
       dbNames.push(db);
     }).then(function () {
       // Make sure db names were captured
-      (dbNames.should.length === 0).should.eql(false);
+      dbNames.should.not.have.lengthOf(0, 'db names were not captured');
 
       // Make sure a specific DB like _users was captured
       var usersFound = false;
@@ -102,7 +102,7 @@ describe('db', function () {
           usersFound = true;
         }
       });
-      usersFound.should.eql(true);
+      usersFound.should.eql(true, 'A specific DB like _users was not captured');
     });
   });
 

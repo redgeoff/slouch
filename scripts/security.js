@@ -58,7 +58,7 @@ Security.prototype.onlyUserCanView = function (dbName, user) {
 };
 
 Security.prototype.onlyAdminCanView = function (dbName) {
-  return this.onlyUserCanView(dbName, '_admin');
+  return this.onlyRoleCanView(dbName, '_admin');
 };
 
 module.exports = Security;
