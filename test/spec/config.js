@@ -74,7 +74,12 @@ describe('config', function () {
     return config.setLogLevel('warning').then(function () {
       return config.get('log/level');
     }).then(function (value) {
-      value.should.eql('warning');
+      // value will be an array on a multinode cluster
+      if (Array.isArray(value)) {
+        value[0].should.eql('warning');
+      } else {
+        value.should.eql('warning');
+      }
 
       return config.unset('log/level');
     }).then(function () {

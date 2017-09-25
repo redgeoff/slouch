@@ -1,6 +1,7 @@
 'use strict';
 
-var Promise = require('sporks/scripts/promise');
+var Promise = require('sporks/scripts/promise'),
+  sporks = require('sporks');
 
 var Config = function (slouch) {
   this._slouch = slouch;
@@ -20,10 +21,13 @@ Config.prototype._couchDB2Requests = function (path, opts, parseBody, maxNumNode
   var self = this,
     promises = [],
     i = 0;
+
   return self._slouch.membership.get().then(function (members) {
     members.cluster_nodes.forEach(function (node) {
       if (typeof maxNumNodes === 'undefined' || i++ < maxNumNodes) {
-        promises.push(self._couchDB2Request(node, path, opts, parseBody));
+        // Clone the opts as we need a separate copy per node
+        var clonedOpts = sporks.clone(opts);
+        promises.push(self._couchDB2Request(node, path, clonedOpts, parseBody));
       }
     });
 
