@@ -23,7 +23,7 @@ Warning: this will delete all your databases!
 
 ## Beautify
 
-We use [beautify-proj](https://github.com/delta-db/beautify-proj) to beautify all of our code. This helps us to keep our coding style standardized. If the `assert-beautified` tests fail then you'll want to run `npm run beautify` and then commit the changes.
+We use [beautify-proj](https://github.com/delta-db/beautify-proj) to beautify all of our code. This helps us to keep our coding style standardized. If the `assert-beautified` test fails then you'll want to run `npm run beautify` and then commit the changes.
 
 
 ## Test in node
