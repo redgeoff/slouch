@@ -38,7 +38,7 @@ describe('security', function () {
   });
 
   it('only role can view', function () {
-    return slouch.security.onlyRoleCanView(utils.createdDB, 'role').then(function() {
+    return slouch.security.onlyRoleCanView(utils.createdDB, 'role').then(function () {
       return slouch.security.get(utils.createdDB);
     }).then(function (_security) {
       return _security.should.eql({
@@ -50,12 +50,12 @@ describe('security', function () {
           'names': [],
           'roles': ['role']
         }
-      })
+      });
     });
   });
 
   it('only user can view', function () {
-    return slouch.security.onlyUserCanView(utils.createdDB, 'user').then(function() {
+    return slouch.security.onlyUserCanView(utils.createdDB, 'user').then(function () {
       return slouch.security.get(utils.createdDB);
     }).then(function (_security) {
       return _security.should.eql({
@@ -67,7 +67,7 @@ describe('security', function () {
           'names': ['user'],
           'roles': []
         }
-      })
+      });
     });
   });
 
