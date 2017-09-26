@@ -44,6 +44,19 @@ Security.prototype.onlyRoleCanView = function (dbName, role) {
   });
 };
 
+Security.prototype.onlyUserCanView = function (dbName, user) {
+  return this.set(dbName, {
+    admins: {
+      names: ['_admin'],
+      roles: []
+    },
+    members: {
+      names: [user],
+      roles: []
+    }
+  });
+};
+
 Security.prototype.onlyAdminCanView = function (dbName) {
   return this.onlyRoleCanView(dbName, '_admin');
 };

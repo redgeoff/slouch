@@ -37,4 +37,38 @@ describe('security', function () {
     return slouch.security.onlyAdminCanView(utils.createdDB);
   });
 
+  it('only role can view', function () {
+    return slouch.security.onlyRoleCanView(utils.createdDB, 'role').then(function () {
+      return slouch.security.get(utils.createdDB);
+    }).then(function (_security) {
+      return _security.should.eql({
+        'admins': {
+          'names': ['_admin'],
+          'roles': []
+        },
+        'members': {
+          'names': [],
+          'roles': ['role']
+        }
+      });
+    });
+  });
+
+  it('only user can view', function () {
+    return slouch.security.onlyUserCanView(utils.createdDB, 'user').then(function () {
+      return slouch.security.get(utils.createdDB);
+    }).then(function (_security) {
+      return _security.should.eql({
+        'admins': {
+          'names': ['_admin'],
+          'roles': []
+        },
+        'members': {
+          'names': ['user'],
+          'roles': []
+        }
+      });
+    });
+  });
+
 });
