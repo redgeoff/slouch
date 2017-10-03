@@ -41,7 +41,7 @@ test:
   pre:
     # As per https://discuss.circleci.com/t/docker-run-error-bind-address-already-in-use/294/12,
     # need to force stop couchdb to prevent bind conflicts
-    - sudo service couchdb stop
+    # - sudo service couchdb stop
 
     - nvm use 8.1.4 && npm run assert-beautified
     - nvm use 8.1.4 && npm run jshint
