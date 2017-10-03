@@ -56,11 +56,11 @@
     "browserify": "^14.4.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^6.0.0",
-    "gofur": "^0.0.7",
+    "gofur": "^0.0.8",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "memorystream": "^0.3.1",
-    "mocha": "^3.4.2"
+    "mocha": "^4.0.0"
   },
   "greenkeeper": {
     "ignore": [
