@@ -13,7 +13,8 @@ dependencies:
     - nvm use 8.1.4 && npm install -g npm
 
     # Install CouchDB 2
-    - docker run -d --name couchdb --restart always -p 5984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
+    # - docker run -d --name couchdb --restart always -p 5984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
+    - docker run -d --name couchdb -p 5984:5984 -e COUCHDB_USER='admin' -e COUCHDB_PASSWORD='admin' redgeoff/couchdb
     # Wait for DB to be ready
     - sleep 15
     # Create system DBs
@@ -38,6 +39,10 @@ dependencies:
 
 test:
   pre:
+    # As per https://discuss.circleci.com/t/docker-run-error-bind-address-already-in-use/294/12,
+    # need to force stop couchdb to prevent bind conflicts
+    - sudo service couchdb stop
+
     - nvm use 8.1.4 && npm run assert-beautified
     - nvm use 8.1.4 && npm run jshint
 
@@ -51,3 +56,7 @@ test:
     # couchdb 1.6.1 docker image. We'll probably need to build a custom image for these tests.
     # Test on CouchDB 1
     # - nvm use 8.1.4 && COUCHDB_PORT=15984 npm run node-full-test
+
+  post:
+    # Stop CouchDB instance to prevent bind conflicts with subsequent test containers
+    - docker stop couchdb
