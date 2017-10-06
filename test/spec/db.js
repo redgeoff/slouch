@@ -209,7 +209,7 @@ describe('db', function () {
       // Simulate dropped connection
       var err = new Error();
       err.code = 'ETIMEDOUT';
-      changesIterator._lastRequest.emit('error', err);
+      changesIterator._streamIterator._lastRequest.emit('error', err);
     }).then(function () {
       // Create "code" doc
       return code();

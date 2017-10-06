@@ -1,6 +1,7 @@
 'use strict';
 
-var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator');
+var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
+  FilteredStreamIterator = require('quelle').FilteredStreamIterator;
 
 var DB = function (slouch) {
   this._slouch = slouch;
@@ -58,21 +59,40 @@ DB.prototype.exists = function (dbName) {
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 DB.prototype.changes = function (dbName, params) {
 
-  var indefinite = false,
-    jsonStreamParseStr = null;
+  var self = this,
+    indefinite = false,
+    jsonStreamParseStr = null,
+    request = null,
+    lastSeq = null;
 
   if (params && params.feed === 'continuous') {
     indefinite = true;
     jsonStreamParseStr = undefined;
+
+    // Define a wrapper for the request so that we can inject an update "since" on reconnect so that
+    // our place can be resumed
+    request = function () {
+      if (lastSeq) {
+        arguments[0].qs.since = lastSeq;
+      }
+      return self._slouch._request.apply(self._slouch, arguments);
+    };
   } else {
     jsonStreamParseStr = 'results.*';
+    request = self._slouch._request;
   }
 
-  return new CouchPersistentStreamIterator({
-    url: this._slouch._url + '/' + dbName + '/_changes',
+  var iterator = new CouchPersistentStreamIterator({
+    url: self._slouch._url + '/' + dbName + '/_changes',
     method: 'GET',
     qs: params
-  }, jsonStreamParseStr, indefinite, this._slouch._request);
+  }, jsonStreamParseStr, indefinite, request);
+
+  return new FilteredStreamIterator(iterator, function (item) {
+    // Store the lastSeq so that we can resume after a reconnect
+    lastSeq = item.seq;
+    return item;
+  });
 
 };
 
