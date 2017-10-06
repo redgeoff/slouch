@@ -29,18 +29,30 @@ describe('db', function () {
     return Promise.all(promises);
   });
 
-  var createDocs = function () {
+  var jam = function () {
     return slouch.doc.create(utils.createdDB, {
       thing: 'jam'
+    });
+  };
+
+  var clean = function () {
+    return slouch.doc.create(utils.createdDB, {
+      thing: 'clean',
+      fun: false
+    });
+  };
+
+  var code = function () {
+    return slouch.doc.create(utils.createdDB, {
+      thing: 'code'
+    });
+  };
+
+  var createDocs = function () {
+    return jam().then(function () {
+      return clean();
     }).then(function () {
-      return slouch.doc.create(utils.createdDB, {
-        thing: 'clean',
-        fun: false
-      });
-    }).then(function () {
-      return slouch.doc.create(utils.createdDB, {
-        thing: 'code'
-      });
+      return code();
     });
   };
 
@@ -164,6 +176,54 @@ describe('db', function () {
         jam: true,
         clean: true,
         code: true
+      });
+    });
+  });
+
+  it('should resume changes', function () {
+    var changes = {};
+
+    var changesIterator = db.changes(utils.createdDB, {
+      include_docs: true,
+      feed: 'continuous'
+    });
+
+    changesIterator.each(function (change) {
+      // Use associative array as order is not guaranteed
+      if (!changes[change.doc.thing]) {
+        changes[change.doc.thing] = 0;
+      }
+      changes[change.doc.thing]++;
+    });
+
+    var waitForChange = function (thing) {
+      return sporks.waitFor(function () {
+        return changes[thing];
+      });
+    };
+
+    // Create "jam" doc
+    return jam().then(function () {
+      return waitForChange('jam');
+    }).then(function () {
+      // Simulate dropped connection
+      var err = new Error();
+      err.code = 'ETIMEDOUT';
+      changesIterator._lastRequest.emit('error', err);
+    }).then(function () {
+      // Create "code" doc
+      return code();
+    }).then(function () {
+      // Wait for "code" to be read in changes feed
+      return waitForChange('code');
+    }).then(function () {
+      // Shut down iterator
+      changesIterator.abort();
+    }).then(function () {
+      // Make sure we only read each change once, i.e. the reconnect resumed reading after "jam"
+      changes.should.eql({
+        jam: 1,
+        code: 1
       });
     });
   });
