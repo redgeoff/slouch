@@ -31,21 +31,20 @@ describe('exclude-design-docs-iterator', function () {
   };
 
   it('should filter', function () {
-    var docs = [];
+    var docs = {};
     return createDocs().then(function () {
       return new slouch.ExcludeDesignDocsIterator(slouch.doc.all(utils.createdDB, {
         include_docs: true
       })).each(function (doc) {
-        docs.push({
-          thing: doc.doc.thing
-        });
+        // We cannot guarantee the order when our DB has multiple nodes, but this doesn't matter as
+        // all we care about is that we didn't receive the design doc.
+        docs[doc.doc.thing] = true;
       });
     }).then(function () {
-      docs.should.eql([{
-        thing: 'play'
-      }, {
-        thing: 'write'
-      }]);
+      docs.should.eql({
+        play: true,
+        write: true
+      });
     });
   });
 });
