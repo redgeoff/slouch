@@ -13,7 +13,7 @@ if (process.env.COUCHDB_PORT) {
 describe('slouch', function () {
 
   // Sometimes the DB gets a little backed up so we need more time for our tests
-  this.timeout(10000);
+  this.timeout(20000);
 
   require('./spec');
 
