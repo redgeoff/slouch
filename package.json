@@ -1,6 +1,6 @@
 {
   "name": "couch-slouch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A JS API for CouchDB that does the heavy lifting",
   "main": "index.js",
   "repository": {
