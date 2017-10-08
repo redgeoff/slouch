@@ -56,6 +56,12 @@ DB.prototype.exists = function (dbName) {
   });
 };
 
+DB.prototype._setSince = function (opts, lastSeq) {
+  if (lastSeq) {
+    opts.qs.since = lastSeq;
+  }
+};
+
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 DB.prototype.changes = function (dbName, params) {
 
@@ -72,9 +78,7 @@ DB.prototype.changes = function (dbName, params) {
     // Define a wrapper for the request so that we can inject an update "since" on reconnect so that
     // our place can be resumed
     request = function () {
-      if (lastSeq) {
-        arguments[0].qs.since = lastSeq;
-      }
+      self._setSince(arguments[0], lastSeq);
       return self._slouch._request.apply(self._slouch, arguments);
     };
   } else {

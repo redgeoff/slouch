@@ -180,52 +180,70 @@ describe('db', function () {
     });
   });
 
-  it('should resume changes', function () {
-    var changes = {};
+  // Not on PhantomJS? This test does not work on PhantomJS as PhantomJS doesn't properly support
+  // simultaenous connections which means that the changes are never read.
+  if (!global.window || !/PhantomJS/.test(window.navigator.userAgent)) {
+    it('should resume changes', function () {
 
-    var changesIterator = db.changes(utils.createdDB, {
-      include_docs: true,
-      feed: 'continuous'
-    });
+      var changes = {};
 
-    changesIterator.each(function (change) {
-      // Use associative array as order is not guaranteed
-      if (!changes[change.doc.thing]) {
-        changes[change.doc.thing] = 0;
-      }
-      changes[change.doc.thing]++;
-    });
-
-    var waitForChange = function (thing) {
-      return sporks.waitFor(function () {
-        return changes[thing];
+      var changesIterator = db.changes(utils.createdDB, {
+        include_docs: true,
+        feed: 'continuous',
+        heartbeat: true
       });
-    };
 
-    // Create "jam" doc
-    return jam().then(function () {
-      return waitForChange('jam');
-    }).then(function () {
-      // Simulate dropped connection
-      var err = new Error();
-      err.code = 'ETIMEDOUT';
-      changesIterator._streamIterator._lastRequest.emit('error', err);
-    }).then(function () {
-      // Create "code" doc
-      return code();
-    }).then(function () {
-      // Wait for "code" to be read in changes feed
-      return waitForChange('code');
-    }).then(function () {
-      // Shut down iterator
-      changesIterator.abort();
-    }).then(function () {
-      // Make sure we only read each change once, i.e. the reconnect resumed reading after "jam"
-      changes.should.eql({
-        jam: 1,
-        code: 1
+      var changesPromise = changesIterator.each(function (change) {
+        // Use associative array as order is not guaranteed
+        if (!changes[change.doc.thing]) {
+          changes[change.doc.thing] = 0;
+        }
+        changes[change.doc.thing]++;
       });
+
+      var waitForChange = function (thing) {
+        return sporks.waitFor(function () {
+          return changes[thing];
+        });
+      };
+
+      // Create "jam" doc
+      var mainPromise = jam().then(function () {
+        return waitForChange('jam');
+      }).then(function () {
+        // Simulate dropped connection
+        var err = new Error();
+        err.code = 'ETIMEDOUT';
+        changesIterator._streamIterator._lastRequest.emit('error', err);
+      }).then(function () {
+        // Create "code" doc
+        return code();
+      }).then(function () {
+        // Wait for "code" to be read in changes feed
+        return waitForChange('code');
+      }).then(function () {
+        // Shut down iterator
+        changesIterator.abort();
+      }).then(function () {
+        // Make sure we only read each change once, i.e. the reconnect resumed reading after "jam"
+        changes.should.eql({
+          jam: 1,
+          code: 1
+        });
+      });
+
+      return Promise.all([changesPromise, mainPromise]);
     });
+  }
+
+  it('should set since', function () {
+    // Needed for 100% code coverage in PhantomJS
+    var lastSeq = '1',
+      opts = {
+        qs: {}
+      };
+    db._setSince(opts, lastSeq);
+    opts.qs.since.should.eql(lastSeq);
   });
 
   it('should get view', function () {
