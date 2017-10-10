@@ -107,6 +107,8 @@ describe('doc', function () {
       thing: 'play'
     };
 
+    var newRev = null;
+
     return slouch.doc.create(utils.createdDB, doc).then(function (_doc) {
       doc._id = _doc.id;
       return slouch.doc.get(utils.createdDB, doc._id);
@@ -116,6 +118,7 @@ describe('doc', function () {
       return slouch.doc.update(utils.createdDB, doc);
     }).then(function (updatedDoc) {
       var clonedDoc = sporks.clone(doc);
+      newRev = updatedDoc._rev;
       delete clonedDoc._rev;
       delete updatedDoc._rev;
       updatedDoc.should.eql(clonedDoc);
@@ -124,6 +127,9 @@ describe('doc', function () {
     }).then(function (body) {
       doc._rev = body._rev;
       body.should.eql(doc);
+
+      // Make sure we have the new revision number from the update response
+      newRev.should.eql(body._rev);
     });
   });
 
