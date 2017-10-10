@@ -60,11 +60,14 @@ Doc.prototype.update = function (dbName, doc) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + dbName + '/' + doc._id,
     method: 'PUT',
-    body: JSON.stringify(doc)
-  }).then(function () {
-    // Return doc so that callers like getMergeUpdate have an automatic way to get the data that was
-    // update
-    return doc;
+    body: JSON.stringify(doc),
+    parseBody: true
+  }).then(function (response) {
+    // Return doc with updated rev so that callers like getMergeUpdate have an automatic way to get
+    // the data that was update
+    var clonedDoc = sporks.clone(doc);
+    clonedDoc._rev = response.rev;
+    return clonedDoc;
   });
 };
 
