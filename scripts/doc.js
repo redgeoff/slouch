@@ -17,8 +17,9 @@ Doc.prototype.maxRetries = 20;
 Doc.prototype.ignoreDuplicateUpdates = true;
 
 Doc.prototype.ignoreConflict = function (promiseFactory) {
+  var self = this;
   return promiseFactory().catch(function (err) {
-    if (err.error !== 'conflict') { // not a conflict?
+    if (!self.isConflictError(err)) { // not a conflict?
       // Unexpected error
       throw err;
     }
@@ -27,6 +28,10 @@ Doc.prototype.ignoreConflict = function (promiseFactory) {
 
 Doc.prototype.isMissingError = function (err) {
   return err.error === 'not_found';
+};
+
+Doc.prototype.isConflictError = function (err) {
+  return err.error === 'conflict';
 };
 
 Doc.prototype.ignoreMissing = function (promiseFactory) {
@@ -184,7 +189,7 @@ Doc.prototype._persistThroughConflicts = function (promiseFactory) {
       return promiseFactory();
     }).catch(function (err) {
       // Conflict and haven't reached max retries?
-      if (err.error === 'conflict' && i++ < self.maxRetries) {
+      if (self.isConflictError(err) && i++ < self.maxRetries) {
         // Attempt again
         return run();
       } else {
