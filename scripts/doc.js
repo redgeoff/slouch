@@ -336,4 +336,15 @@ Doc.prototype.setDestroyed = function (doc) {
   doc._deleted = true;
 };
 
+Doc.prototype.bulkCreateOrUpdate = function (dbName, docs) {
+  return this._slouch._req({
+    uri: this._slouch._url + '/' + dbName + '/_bulk_docs',
+    method: 'POST',
+    json: {
+      docs: docs
+    },
+    parseBody: true
+  });
+};
+
 module.exports = Doc;
