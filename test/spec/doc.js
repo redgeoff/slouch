@@ -506,4 +506,61 @@ describe('doc', function () {
     });
   });
 
+  it('should bulk create or update', function () {
+    // Bulk create with a single doc
+    return slouch.doc.bulkCreateOrUpdate(utils.createdDB, [{
+      _id: '1',
+      thing: 'read'
+    }, {
+      _id: '2',
+      thing: 'jam'
+    }]).then(function (docs) {
+      docs.length.should.eql(2);
+
+      docs[0].id.should.eql('1');
+      docs[0].ok.should.eql(true);
+      (docs[0].rev === undefined).should.eql(false);
+
+      docs[1].id.should.eql('2');
+      docs[1].ok.should.eql(true);
+      (docs[1].rev === undefined).should.eql(false);
+
+      // Edit doc so that we can prepare for conflict
+      return slouch.doc.update(utils.createdDB, {
+        _id: '1',
+        _rev: docs[0].rev,
+        thing: 'read books'
+      }).then(function () {
+        // Create 1 doc and update 2 docs. The first update should result in a conflict
+        return slouch.doc.bulkCreateOrUpdate(utils.createdDB, [{
+          _id: '1',
+          _rev: docs[0].rev, // outdated rev
+          thing: 'read many books'
+        }, {
+          thing: 'play'
+        }, {
+          _id: '2',
+          _rev: docs[1].rev,
+          thing: 'jam on guitar'
+        }]);
+      }).then(function (docs) {
+        docs.length.should.eql(3);
+
+        // 1st operation should have resulted in conflict
+        docs[0].id.should.eql('1');
+        docs[0].error.should.eql('conflict');
+
+        // 2nd operation should have succeeded
+        (docs[1].id === undefined).should.eql(false);
+        docs[1].ok.should.eql(true);
+        (docs[1].rev === undefined).should.eql(false);
+
+        // 3rd operation should have succeeded and rev should have changed
+        (docs[2].id === undefined).should.eql(false);
+        docs[2].ok.should.eql(true);
+        docs[2].rev.should.not.eql(docs[1].rev);
+      });
+    });
+  });
+
 });
