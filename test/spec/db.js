@@ -180,6 +180,26 @@ describe('db', function () {
     });
   });
 
+  it('should get changes array', function () {
+    var indexedChanges = {};
+    return createDocs().then(function () {
+      return db.changesArray(utils.createdDB, {
+        include_docs: true
+      });
+    }).then(function (changes) {
+      // Order of changes not guaranteed so we will index the values for easy comparison
+      changes.results.forEach(function (change) {
+        indexedChanges[change.doc.thing] = true;
+      });
+
+      indexedChanges.should.eql({
+        jam: true,
+        clean: true,
+        code: true
+      });
+    });
+  });
+
   // Not on PhantomJS? This test does not work on PhantomJS as PhantomJS doesn't properly support
   // simultaenous connections which means that the changes are never read.
   if (!global.window || !/PhantomJS/.test(window.navigator.userAgent)) {

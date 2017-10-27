@@ -100,6 +100,14 @@ DB.prototype.changes = function (dbName, params) {
 
 };
 
+DB.prototype.changesArray = function (dbName, params) {
+  return this._slouch._req({
+    url: this._slouch._url + '/' + dbName + '/_changes',
+    qs: params,
+    parseBody: true
+  });
+};
+
 DB.prototype.view = function (dbName, viewDocId, view, params) {
   return new CouchPersistentStreamIterator({
     url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
