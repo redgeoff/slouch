@@ -10,7 +10,8 @@ describe('db', function () {
 
   var slouch = null,
     db = null,
-    dbsToDestroy = null;
+    dbsToDestroy = null,
+    changes = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
@@ -200,12 +201,21 @@ describe('db', function () {
     });
   });
 
-  // Not on PhantomJS? This test does not work on PhantomJS as PhantomJS doesn't properly support
-  // simultaenous connections which means that the changes are never read.
-  if (!global.window || !/PhantomJS/.test(window.navigator.userAgent)) {
-    it('should resume changes', function () {
+  var notOnPhantomJS = function () {
+    // Not on PhantomJS? This test does not work on PhantomJS as PhantomJS doesn't properly support
+    // simultaenous connections which means that the changes are never read.
+    return !global.window || !/PhantomJS/.test(window.navigator.userAgent);
+  };
 
-      var changes = {};
+  if (notOnPhantomJS()) {
+    var waitForChange = function (thing) {
+      return sporks.waitFor(function () {
+        return changes[thing];
+      });
+    };
+
+    it('should resume changes', function () {
+      changes = {};
 
       var changesIterator = db.changes(utils.createdDB, {
         include_docs: true,
@@ -220,12 +230,6 @@ describe('db', function () {
         }
         changes[change.doc.thing]++;
       });
-
-      var waitForChange = function (thing) {
-        return sporks.waitFor(function () {
-          return changes[thing];
-        });
-      };
 
       // Create "jam" doc
       var mainPromise = jam().then(function () {
@@ -250,6 +254,57 @@ describe('db', function () {
           jam: 1,
           code: 1
         });
+      });
+
+      return Promise.all([changesPromise, mainPromise]);
+    });
+
+    it('changes should force reconnect', function () {
+
+      // Force a reconnect after each item
+      slouch.forceReconnectAfterMilliseconds = 1;
+
+      changes = {};
+
+      var changesIterator = db.changes(utils.createdDB, {
+        include_docs: true,
+        feed: 'continuous',
+        heartbeat: 10
+      });
+
+      var connections = 0;
+      changesIterator.on('connect', function () {
+        connections++;
+      });
+
+      var changesPromise = changesIterator.each(function (change) {
+        // Use associative array as order is not guaranteed
+        if (!changes[change.doc.thing]) {
+          changes[change.doc.thing] = 0;
+        }
+        changes[change.doc.thing]++;
+      });
+
+      var mainPromise = jam().then(function () {
+        return sporks.timeout(100);
+      }).then(function () {
+        return waitForChange('jam');
+      }).then(function () {
+        return code();
+      }).then(function () {
+        return waitForChange('code');
+      }).then(function () {
+        // Shut down iterator
+        changesIterator.abort();
+      }).then(function () {
+        // Make sure we only read each change once, i.e. the reconnects resumed reading
+        changes.should.eql({
+          jam: 1,
+          code: 1
+        });
+
+        // Make sure there were multiple connections
+        connections.should.be.above(1);
       });
 
       return Promise.all([changesPromise, mainPromise]);

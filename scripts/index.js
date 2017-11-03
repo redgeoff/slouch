@@ -34,7 +34,16 @@ var Slouch = function (url) {
   this.NotAuthenticatedError = NotAuthenticatedError;
   this.security = new Security(this);
   this.user = new User(this);
+
+  // When continuously listening to a CouchDB stream our stream can just deadlock, even when we
+  // specify a heartbeat=60s. This rarely happens, about once a week, but when it does it can cause
+  // major issues for users. It isn't clear if this issue is at the CouchDB, AWS load balancer or
+  // Slouch layer as there are no errors generated, but we can avoid it by simply reconnecting
+  // periodically.
+  this.forceReconnectAfterMilliseconds = Slouch.DEFAULT_FORCE_RECONNECT_AFTER_MILLISECONDS;
 };
+
+Slouch.DEFAULT_FORCE_RECONNECT_AFTER_MILLISECONDS = 300000;
 
 Slouch.prototype._requestFactory = function () {
   var self = this;

@@ -69,11 +69,19 @@ DB.prototype.changes = function (dbName, params) {
     indefinite = false,
     jsonStreamParseStr = null,
     request = null,
-    lastSeq = null;
+    lastSeq = null,
+    forceReconnectAfterMilliseconds = null;
 
   if (params && params.feed === 'continuous') {
     indefinite = true;
     jsonStreamParseStr = undefined;
+
+    // When continuously listening to a CouchDB stream our stream can just deadlock, even when we
+    // specify a heartbeat=60s. This rarely happens, about once a week, but when it does it can
+    // cause major issues for users. It isn't clear if this issue is at the CouchDB, AWS load
+    // balancer or Slouch layer as there are no errors generated, but we can avoid it by simply
+    // reconnecting periodically.
+    forceReconnectAfterMilliseconds = self._slouch.forceReconnectAfterMilliseconds;
 
     // Define a wrapper for the request so that we can inject an update "since" on reconnect so that
     // our place can be resumed
@@ -90,7 +98,7 @@ DB.prototype.changes = function (dbName, params) {
     url: self._slouch._url + '/' + dbName + '/_changes',
     method: 'GET',
     qs: params
-  }, jsonStreamParseStr, indefinite, request);
+  }, jsonStreamParseStr, indefinite, request, forceReconnectAfterMilliseconds);
 
   return new FilteredStreamIterator(iterator, function (item) {
     // Store the lastSeq so that we can resume after a reconnect
