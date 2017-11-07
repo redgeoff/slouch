@@ -50,19 +50,31 @@ System.prototype.reset = function (exceptDBNames) {
       // CouchDB 1 automatically recreates the _users database
     } else {
       // CouchDB 2 does not automatically recreate any databases so we have to do it ourselves
-      dbsToDestroyAndRecreate = ['_replicator', '_global_changes', '_users'];
+      dbsToDestroyAndRecreate = ['_replicator', '_users'];
     }
 
-    return self._slouch.db.all().each(function (db) {
-      if (except[db]) {
-        // Do nothing
-        return Promise.resolve();
-      } else if (dbsToDestroyAndRecreate.indexOf(db) !== -1) {
-        return self._slouch.db.destroy(db).then(function () {
-          return self._slouch.db.create(db);
-        });
-      } else {
-        return self._slouch.db.destroy(db);
+    return Promise.resolve().then(function () {
+      if (!isCouchDB1) {
+        // We destroy _global_changes first so that we don't track any of the following changes
+        return self._slouch.db.destroy('_global_changes');
+      }
+    }).then(function () {
+      return self._slouch.db.all().each(function (db) {
+        if (except[db]) {
+          // Do nothing
+          return Promise.resolve();
+        } else if (dbsToDestroyAndRecreate.indexOf(db) !== -1) {
+          return self._slouch.db.destroy(db).then(function () {
+            return self._slouch.db.create(db);
+          });
+        } else {
+          return self._slouch.db.destroy(db);
+        }
+      });
+    }).then(function () {
+      if (!isCouchDB1) {
+        // We create _global_changes last after all the reset changes have been made
+        return self._slouch.db.create('_global_changes');
       }
     });
   });
