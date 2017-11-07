@@ -124,14 +124,14 @@ describe('system', function () {
     });
   });
 
-  it('should reset when not couchdb', function () {
+  it('should reset when not couchdb 1', function () {
     fakeCouchDBVersion('2');
-    fakeDBAll(['_replicator', '_global_changes', '_users', 'testa', 'testb']);
+    fakeDBAll(['_replicator', '_users', 'testa', 'testb']);
     fakeCreateAndDestroy();
 
     return system.reset().then(function () {
-      created.should.eql(['_replicator', '_global_changes', '_users']);
-      destroyed.should.eql(['_replicator', '_global_changes', '_users', 'testa',
+      created.should.eql(['_replicator', '_users', '_global_changes']);
+      destroyed.should.eql(['_global_changes', '_replicator', '_users', 'testa',
         'testb'
       ]);
     });
