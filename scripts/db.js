@@ -118,14 +118,14 @@ DB.prototype.changesArray = function (dbName, params) {
 
 DB.prototype.view = function (dbName, viewDocId, view, params) {
   return new CouchPersistentStreamIterator({
-    url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
+    url: this._slouch._url + '/' + dbName + '/_design/' + viewDocId + '/_view/' + view,
     qs: params
   }, 'rows.*');
 };
 
 DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
   return this._slouch._req({
-    url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
+    url: this._slouch._url + '/' + dbName + '/_design/' + viewDocId + '/_view/' + view,
     qs: params,
     parseBody: true
   });
