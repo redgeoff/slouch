@@ -118,18 +118,23 @@ Doc.prototype._eqls = function (doc1, doc2) {
   return sporks.isEqual(clonedDoc1, clonedDoc2);
 };
 
-Doc.prototype._updateOrIgnore = function (dbName, curDoc, newDoc) {
-  // Are the docs the same? Should we ignore these updates?
-  if (this._eqls(curDoc, newDoc) && this.ignoreDuplicateUpdates) {
+Doc.prototype.updateOrIgnore = function (dbName, curDoc, newDoc) {
+  // Wrap in promise so that errors are handled properly and always returns promise, even when the
+  // docs are the same
+  var self = this;
+  return Promise.resolve().then(function () {
+    // Are the docs the same? Should we ignore these updates?
+    if (self._eqls(curDoc, newDoc) && self.ignoreDuplicateUpdates) {
 
-    // Return doc so that response is standardized
-    return newDoc;
+      // Return doc so that response is standardized
+      return newDoc;
 
-  } else {
+    } else {
 
-    return this.update(dbName, newDoc);
+      return self.update(dbName, newDoc);
 
-  }
+    }
+  });
 };
 
 Doc.prototype.createOrUpdate = function (dbName, doc) {
@@ -142,7 +147,7 @@ Doc.prototype.createOrUpdate = function (dbName, doc) {
     // Use the latest rev so that we can attempt to update the doc without a conflict
     clonedDoc._rev = _doc._rev;
 
-    return self._updateOrIgnore(dbName, _doc, clonedDoc);
+    return self.updateOrIgnore(dbName, _doc, clonedDoc);
 
   }).catch(function (err) {
 
@@ -219,7 +224,7 @@ Doc.prototype.getMergeUpdate = function (dbName, doc) {
 
     clonedDoc = sporks.merge(clonedDoc, doc);
 
-    return self._updateOrIgnore(dbName, _doc, clonedDoc);
+    return self.updateOrIgnore(dbName, _doc, clonedDoc);
 
   });
 };
