@@ -168,7 +168,7 @@ describe('doc', function () {
     });
   });
 
-  it('should ignore conflict when updateting', function () {
+  it('should ignore conflict when updating', function () {
     return slouch.doc.create(utils.createdDB, {
       _id: '1',
       thing: 'jam'
