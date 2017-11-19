@@ -48,7 +48,7 @@
     "bluebird": "^3.5.0",
     "quelle": "^0.0.6",
     "request": "^2.81.0",
-    "sporks": "^0.0.3",
+    "sporks": "^0.0.4",
     "squadron": "^0.0.4"
   },
   "devDependencies": {
