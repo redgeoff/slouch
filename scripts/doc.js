@@ -1,5 +1,7 @@
 'use strict';
 
+var Promise = require('sporks/scripts/promise');
+
 var CouchPersistentStreamIterator = require('./couch-persistent-stream-iterator'),
   sporks = require('sporks'),
   Backoff = require('backoff-promise');
