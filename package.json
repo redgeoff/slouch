@@ -48,15 +48,15 @@
     "bluebird": "^3.5.0",
     "quelle": "^0.0.6",
     "request": "^2.81.0",
-    "sporks": "^0.0.3",
-    "squadron": "^0.0.3"
+    "sporks": "^0.0.4",
+    "squadron": "^0.0.4"
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
     "browserify": "^14.4.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^6.0.0",
-    "gofur": "^0.0.8",
+    "gofur": "^0.0.9",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "memorystream": "^0.3.1",
