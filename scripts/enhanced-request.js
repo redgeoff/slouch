@@ -178,7 +178,8 @@ EnhancedRequest.prototype._shouldReconnect = function (err) {
       'internal_server_error',
       'Failed to fetch', // ECONNREFUSED/ENOTFOUND in Chrome
       'Type error', // ECONNREFUSED/ENOTFOUND in Safari
-      'XHR error' // ECONNREFUSED/ENOTFOUND in Firefox
+      'XHR error', // ECONNREFUSED/ENOTFOUND in Firefox
+      'EAI_AGAIN' // Transient DNS error
     ].join('|'), 'i').test(err.message);
   }
 };
