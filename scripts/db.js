@@ -117,15 +117,21 @@ DB.prototype.changesArray = function (dbName, params) {
 };
 
 DB.prototype.view = function (dbName, viewDocId, view, params) {
+  var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return new CouchPersistentStreamIterator({
-    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + viewDocId + '/_view/' + view,
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodedViewDocId +
+      '/_view/' +
+      view,
     qs: params
   }, 'rows.*');
 };
 
 DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
+  var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return this._slouch._req({
-    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + viewDocId + '/_view/' + view,
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodedViewDocId +
+      '/_view/' +
+      view,
     qs: params,
     parseBody: true
   });

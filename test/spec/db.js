@@ -30,36 +30,36 @@ describe('db', function () {
     return Promise.all(promises);
   });
 
-  var jam = function () {
-    return slouch.doc.create(utils.createdDB, {
+  var jam = function (dbName) {
+    return slouch.doc.create(dbName || utils.createdDB, {
       thing: 'jam'
     });
   };
 
-  var clean = function () {
-    return slouch.doc.create(utils.createdDB, {
+  var clean = function (dbName) {
+    return slouch.doc.create(dbName || utils.createdDB, {
       thing: 'clean',
       fun: false
     });
   };
 
-  var code = function () {
-    return slouch.doc.create(utils.createdDB, {
+  var code = function (dbName) {
+    return slouch.doc.create(dbName || utils.createdDB, {
       thing: 'code'
     });
   };
 
-  var createDocs = function () {
-    return jam().then(function () {
-      return clean();
+  var createDocs = function (dbName) {
+    return jam(dbName).then(function () {
+      return clean(dbName);
     }).then(function () {
-      return code();
+      return code(dbName);
     });
   };
 
-  var createView = function () {
-    return slouch.doc.create(utils.createdDB, {
-      _id: '_design/myview',
+  var createView = function (dbName, docId) {
+    return slouch.doc.create(dbName || utils.createdDB, {
+      _id: docId || '_design/myview',
       views: {
         fun: {
           map: [
@@ -379,10 +379,88 @@ describe('db', function () {
     return createDocs().then(function () {
       return db.create(utils.createdDB + '_2');
     }).then(function () {
+      dbsToDestroy.push(utils.createdDB + '_2');
       return db.copy(utils.createdDB, utils.createdDB + '_2');
     }).then(function () {
       return verifyAllDocs(utils.createdDB + '_2');
     });
   });
 
+  it('show create db with slash in name', function () {
+    const dbName = this.createdDB + '/test';
+    return db.create(dbName)
+      .then(function () {
+        dbsToDestroy.push(dbName);
+        return db.exists(dbName);
+      })
+      .then(function (exists) {
+        exists.should.eql(true);
+      })
+  });
+
+  it('show get a db with slash in name', function () {
+    const dbName = this.createdDB + '/test';
+    return db.create(dbName)
+      .then(function () {
+        dbsToDestroy.push(dbName);
+        return db.get(dbName);
+      })
+      .then(function (_db) {
+        _db.db_name.should.eql(dbName);
+      })
+  });
+
+  it('should get view with slash in id', function () {
+    var docs = {};
+    var dbName = db.createdDB + '/test';
+    var viewDocId = '_design/my/view';
+    return db.create(dbName)
+      .then(function () {
+        dbsToDestroy.push(dbName);
+        return createDocs(dbName)
+      })
+      .then(function () {
+        return createView(dbName, viewDocId);
+      }).then(function () {
+        return db.view(dbName, viewDocId, 'fun', {
+          include_docs: true
+        }).each(function (doc) {
+          // Use associative array as order is not guaranteed
+          docs[doc.doc.thing] = true;
+        });
+      }).then(function () {
+        docs.should.eql({
+          jam: true,
+          code: true
+        });
+      });
+  });
+
+  it('should get view array with slash in name', function () {
+    var docs = {};
+    var dbName = db.createdDB + '/test';
+    var viewDocId = '_design/my/view';
+    return db.create(dbName)
+      .then(function () {
+        dbsToDestroy.push(dbName);
+        return createDocs(dbName)
+      })
+      .then(function () {
+        return createView(dbName, viewDocId);
+      }).then(function () {
+        return db.viewArray(dbName, viewDocId, 'fun', {
+          include_docs: true
+        }).then(function (_docs) {
+          _docs.rows.forEach(function (_doc) {
+            // Use associative array as order is not guaranteed
+            docs[_doc.doc.thing] = true;
+          });
+        });
+      }).then(function () {
+        docs.should.eql({
+          jam: true,
+          code: true
+        });
+      });
+  });
 });

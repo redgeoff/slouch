@@ -5,7 +5,8 @@ var Slouch = require('../../scripts'),
   sporks = require('sporks'),
   Promise = require('sporks/scripts/promise'),
   config = require('../config.json'),
-  Backoff = require('backoff-promise');
+  Backoff = require('backoff-promise'),
+  crypto = require("crypto");
 
 describe('doc', function () {
 
@@ -563,4 +564,72 @@ describe('doc', function () {
     });
   });
 
+  it('should create, update and get doc with slash in _id', function () {
+    var doc = {
+      _id: 'spiegel_cl_user/user_name',
+      thing: 'play'
+    };
+
+    var newRev = null;
+
+    return slouch.doc.create(utils.createdDB, doc).then(function (_doc) {
+      doc._id = _doc.id;
+      return slouch.doc.get(utils.createdDB, doc._id);
+    }).then(function (body) {
+      doc._rev = body._rev;
+      doc.priority = 'medium';
+      return slouch.doc.update(utils.createdDB, doc);
+    }).then(function (updatedDoc) {
+      var clonedDoc = sporks.clone(doc);
+      newRev = updatedDoc._rev;
+      delete clonedDoc._rev;
+      delete updatedDoc._rev;
+      updatedDoc.should.eql(clonedDoc);
+
+      return slouch.doc.get(utils.createdDB, doc._id);
+    }).then(function (body) {
+      doc._rev = body._rev;
+      body.should.eql(doc);
+
+      // Make sure we have the new revision number from the update response
+      newRev.should.eql(body._rev);
+    });
+  });
+
+  it('should create, update and get doc with slash in _id in a db with slash in name', function () {
+    var doc = {
+      _id: crypto.randomBytes(16).toString("hex") + '/user_name',
+      thing: 'play'
+    };
+
+    var newRev = null;
+    var dbName = utils.createdDB + '/test';
+    return db.create(dbName)
+      .then(function () {
+        return slouch.doc.create(dbName, doc)
+      })
+      .then(function (_doc) {
+        doc._id = _doc.id;
+        return slouch.doc.get(dbName, doc._id);
+      }).then(function (body) {
+        doc._rev = body._rev;
+        doc.priority = 'medium';
+        return slouch.doc.update(dbName, doc);
+      }).then(function (updatedDoc) {
+        var clonedDoc = sporks.clone(doc);
+        newRev = updatedDoc._rev;
+        delete clonedDoc._rev;
+        delete updatedDoc._rev;
+        updatedDoc.should.eql(clonedDoc);
+
+        return slouch.doc.get(dbName, doc._id);
+      }).then(function (body) {
+        doc._rev = body._rev;
+        body.should.eql(doc);
+
+        // Make sure we have the new revision number from the update response
+        newRev.should.eql(body._rev);
+        return db.destroy(dbName);
+      });
+  });
 });

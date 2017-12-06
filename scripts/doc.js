@@ -87,7 +87,8 @@ Doc.prototype.updateIgnoreConflict = function (dbName, doc) {
 
 Doc.prototype.get = function (dbName, docId, params) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(docId),
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(
+      docId),
     method: 'GET',
     qs: params,
     parseBody: true
@@ -313,7 +314,8 @@ Doc.prototype.destroyAll = function (dbName, keepDesignDocs) {
 
 Doc.prototype.destroy = function (dbName, docId, docRev) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(docId),
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(
+      docId),
     method: 'DELETE',
     qs: {
       rev: docRev
