@@ -48,7 +48,7 @@ Doc.prototype.ignoreMissing = function (promiseFactory) {
 
 Doc.prototype.create = function (dbName, doc) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName),
     method: 'POST',
     json: doc
   }).then(function (response) {
@@ -65,7 +65,7 @@ Doc.prototype.createAndIgnoreConflict = function (dbName, doc) {
 
 Doc.prototype.update = function (dbName, doc) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/' + doc._id,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(doc._id),
     method: 'PUT',
     body: JSON.stringify(doc),
     parseBody: true
@@ -87,7 +87,7 @@ Doc.prototype.updateIgnoreConflict = function (dbName, doc) {
 
 Doc.prototype.get = function (dbName, docId, params) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/' + docId,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(docId),
     method: 'GET',
     qs: params,
     parseBody: true
@@ -281,7 +281,7 @@ Doc.prototype.getModifyUpsert = function (dbName, docId, onGetPromiseFactory) {
 
 Doc.prototype.allArray = function (dbName, params) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/_all_docs',
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_all_docs',
     method: 'GET',
     qs: params,
     parseBody: true
@@ -291,7 +291,7 @@ Doc.prototype.allArray = function (dbName, params) {
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 Doc.prototype.all = function (dbName, params) {
   return new CouchPersistentStreamIterator({
-    url: this._slouch._url + '/' + dbName + '/_all_docs',
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_all_docs',
     method: 'GET',
     qs: params
   }, 'rows.*', null, this._slouch._request);
@@ -313,7 +313,7 @@ Doc.prototype.destroyAll = function (dbName, keepDesignDocs) {
 
 Doc.prototype.destroy = function (dbName, docId, docRev) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/' + docId,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(docId),
     method: 'DELETE',
     qs: {
       rev: docRev
@@ -350,7 +350,7 @@ Doc.prototype.setDestroyed = function (doc) {
 
 Doc.prototype.bulkCreateOrUpdate = function (dbName, docs) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/_bulk_docs',
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_bulk_docs',
     method: 'POST',
     json: {
       docs: docs

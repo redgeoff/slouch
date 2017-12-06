@@ -9,7 +9,7 @@ var DB = function (slouch) {
 
 DB.prototype._create = function (dbName) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName),
     method: 'PUT'
   });
 };
@@ -31,7 +31,7 @@ DB.prototype.create = function (dbName) {
 
 DB.prototype.destroy = function (dbName) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName),
     method: 'DELETE',
     parseBody: true
   });
@@ -39,7 +39,7 @@ DB.prototype.destroy = function (dbName) {
 
 DB.prototype.get = function (dbName) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName),
     method: 'GET',
     parseBody: true
   });
@@ -47,7 +47,7 @@ DB.prototype.get = function (dbName) {
 
 DB.prototype.exists = function (dbName) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName,
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName),
     method: 'GET'
   }).then(function () {
     return true;
@@ -110,7 +110,7 @@ DB.prototype.changes = function (dbName, params) {
 
 DB.prototype.changesArray = function (dbName, params) {
   return this._slouch._req({
-    url: this._slouch._url + '/' + dbName + '/_changes',
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_changes',
     qs: params,
     parseBody: true
   });
@@ -118,14 +118,14 @@ DB.prototype.changesArray = function (dbName, params) {
 
 DB.prototype.view = function (dbName, viewDocId, view, params) {
   return new CouchPersistentStreamIterator({
-    url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + viewDocId + '/_view/' + view,
     qs: params
   }, 'rows.*');
 };
 
 DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
   return this._slouch._req({
-    url: this._slouch._url + '/' + dbName + '/' + viewDocId + '/_view/' + view,
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + viewDocId + '/_view/' + view,
     qs: params,
     parseBody: true
   });
