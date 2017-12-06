@@ -50,15 +50,15 @@ describe('attachment', function () {
   };
 
   var createBase64AttachmentWithSlash = function (dbName, docId, attachmentId) {
-    return slouch.doc.update(dbName, {
+    var doc = {
       _id: docId,
-      _attachments: {
-        [attachmentId]: {
-          data: base64Data,
-          content_type: 'image/png'
-        }
-      }
-    });
+      _attachments: {}
+    };
+    doc._attachments[attachmentId] = {
+      data: base64Data,
+      content_type: 'image/png'
+    };
+    return slouch.doc.update(dbName, doc);
   };
 
   // TODO
@@ -105,7 +105,7 @@ describe('attachment', function () {
     var attachmentId = 'my/image.png';
     return db.create(dbName)
       .then(function () {
-        return createBase64AttachmentWithSlash(dbName, docId, attachmentId)
+        return createBase64AttachmentWithSlash(dbName, docId, attachmentId);
       })
       .then(function () {
         return slouch.doc.get(dbName, docId);
@@ -126,7 +126,7 @@ describe('attachment', function () {
     var attachmentId = 'my/image.png';
     return db.create(dbName)
       .then(function () {
-        return createBase64AttachmentWithSlash(dbName, docId, attachmentId)
+        return createBase64AttachmentWithSlash(dbName, docId, attachmentId);
       })
       .then(function () {
         return slouch.doc.get(dbName, docId);

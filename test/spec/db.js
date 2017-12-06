@@ -387,7 +387,7 @@ describe('db', function () {
   });
 
   it('show create db with slash in name', function () {
-    const dbName = this.createdDB + '/test';
+    var dbName = this.createdDB + '/test';
     return db.create(dbName)
       .then(function () {
         dbsToDestroy.push(dbName);
@@ -395,11 +395,11 @@ describe('db', function () {
       })
       .then(function (exists) {
         exists.should.eql(true);
-      })
+      });
   });
 
   it('show get a db with slash in name', function () {
-    const dbName = this.createdDB + '/test';
+    var dbName = this.createdDB + '/test';
     return db.create(dbName)
       .then(function () {
         dbsToDestroy.push(dbName);
@@ -407,7 +407,7 @@ describe('db', function () {
       })
       .then(function (_db) {
         _db.db_name.should.eql(dbName);
-      })
+      });
   });
 
   it('should get view with slash in id', function () {
@@ -417,7 +417,7 @@ describe('db', function () {
     return db.create(dbName)
       .then(function () {
         dbsToDestroy.push(dbName);
-        return createDocs(dbName)
+        return createDocs(dbName);
       })
       .then(function () {
         return createView(dbName, viewDocId);
@@ -443,7 +443,7 @@ describe('db', function () {
     return db.create(dbName)
       .then(function () {
         dbsToDestroy.push(dbName);
-        return createDocs(dbName)
+        return createDocs(dbName);
       })
       .then(function () {
         return createView(dbName, viewDocId);

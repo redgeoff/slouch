@@ -606,7 +606,7 @@ describe('doc', function () {
     var dbName = utils.createdDB + '/test';
     return db.create(dbName)
       .then(function () {
-        return slouch.doc.create(dbName, doc)
+        return slouch.doc.create(dbName, doc);
       })
       .then(function (_doc) {
         doc._id = _doc.id;
