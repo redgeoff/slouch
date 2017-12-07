@@ -49,6 +49,18 @@ describe('attachment', function () {
     });
   };
 
+  var createBase64AttachmentWithSlash = function (dbName, docId, attachmentId) {
+    var doc = {
+      _id: docId,
+      _attachments: {}
+    };
+    doc._attachments[attachmentId] = {
+      data: base64Data,
+      content_type: 'image/png'
+    };
+    return slouch.doc.update(dbName, doc);
+  };
+
   // TODO
   // it('should create attachment', function () {
   //   var data = bufferFrom(base64Data);
@@ -87,4 +99,44 @@ describe('attachment', function () {
     });
   });
 
+  it('should create attachment from base 64 data with slash in name', function () {
+    var dbName = utils.createdDB + '/test';
+    var docId = 'foo/bar';
+    var attachmentId = 'my/image.png';
+    return db.create(dbName)
+      .then(function () {
+        return createBase64AttachmentWithSlash(dbName, docId, attachmentId);
+      })
+      .then(function () {
+        return slouch.doc.get(dbName, docId);
+      }).then(function (doc) {
+        doc._attachments[attachmentId].content_type.should.eql('image/png');
+
+        return slouch.attachment.get(dbName, docId, attachmentId);
+      }).then(function (attachment) {
+        var base64Attach = new Buffer(attachment).toString('base64');
+        base64Attach.should.eql(base64Data);
+        return db.destroy(dbName);
+      });
+  });
+
+  it('should destroy attachment with slash in name', function () {
+    var dbName = utils.createdDB + '/test';
+    var docId = 'foo/bar';
+    var attachmentId = 'my/image.png';
+    return db.create(dbName)
+      .then(function () {
+        return createBase64AttachmentWithSlash(dbName, docId, attachmentId);
+      })
+      .then(function () {
+        return slouch.doc.get(dbName, docId);
+      }).then(function (doc) {
+        return slouch.attachment.destroy(dbName, docId, attachmentId, doc._rev);
+      }).then(function () {
+        return slouch.doc.get(dbName, docId);
+      }).then(function (doc) {
+        (doc._attachments === undefined).should.eql(true);
+        return db.destroy(dbName);
+      });
+  });
 });

@@ -17,7 +17,7 @@ var Security = function (slouch) {
 // }
 Security.prototype.set = function (dbName, security) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/_security',
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_security',
     method: 'PUT',
     body: JSON.stringify(security)
   });
@@ -25,7 +25,7 @@ Security.prototype.set = function (dbName, security) {
 
 Security.prototype.get = function (dbName) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + dbName + '/_security',
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_security',
     method: 'GET',
     parseBody: true
   });
