@@ -18,9 +18,9 @@ dependencies:
     # Wait for DB to be ready
     - sleep 15
     # Create system DBs
-    - curl -X PUT http://admin:admin@db.quizster.dev:5984/_users
-    - curl -X PUT http://admin:admin@db.quizster.dev:5984/_replicator
-    - curl -X PUT http://admin:admin@db.quizster.dev:5984/_global_changes
+    - curl -X PUT http://admin:admin@localhost:5984/_users
+    - curl -X PUT http://admin:admin@localhost:5984/_replicator
+    - curl -X PUT http://admin:admin@localhost:5984/_global_changes
 
     # # Install CouchDB 1
     # - docker run -d --name couchdb-1 --restart always -p 15984:5984 couchdb:1.6.1
