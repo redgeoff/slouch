@@ -49,7 +49,7 @@ test:
 
   override:
     # Test on CouchDB 2
-    - sed -i "s/5984/15894/g" test/config.json
+    - sed -i "s/5984/15984/g" test/config.json
     - nvm use $NODE_VERSION && npm run node-full-test
     - nvm use $NODE_VERSION && npm run browser-test-phantomjs
     - nvm use $NODE_VERSION && npm run browser-coverage-full-test
