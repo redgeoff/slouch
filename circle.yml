@@ -49,11 +49,13 @@ test:
 
   override:
     # Test on CouchDB 2
-    - nvm use $NODE_VERSION && COUCHDB_PORT=15984 npm run node-full-test
-    - nvm use $NODE_VERSION && COUCHDB_PORT=15984 npm run browser-test-phantomjs
-    - nvm use $NODE_VERSION && COUCHDB_PORT=15984 npm run browser-coverage-full-test
+    - sed -i "s/5984/15894/g" test/config.json
+    - nvm use $NODE_VERSION && npm run node-full-test
+    - nvm use $NODE_VERSION && npm run browser-test-phantomjs
+    - nvm use $NODE_VERSION && npm run browser-coverage-full-test
 
     # TODO: replication and a number of other things doesn't appear to be working with the official
     # couchdb 1.6.1 docker image. We'll probably need to build a custom image for these tests.
     # Test on CouchDB 1
-    # - nvm use $NODE_VERSION && COUCHDB_PORT=25984 npm run node-full-test
+    # - sed -i "s/15984/25894/g" test/config.json
+    # - nvm use $NODE_VERSION npm run node-full-test
