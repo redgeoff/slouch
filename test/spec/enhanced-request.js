@@ -132,6 +132,45 @@ describe('enhanced-request', function () {
     });
   });
 
+  it('should censor log arguments', function () {
+    var args = enhancedRequest._censorLogArguments([{},
+      {
+        request: {
+          uri: 'https://user:secret@example.com'
+        }
+      }
+    ]);
+    args.should.eql([{},
+      {
+        request: {
+          uri: 'https://user:**********@example.com'
+        }
+      }
+    ]);
+
+    args = enhancedRequest._censorLogArguments([{}]);
+    args.should.eql([{}]);
+
+    args = enhancedRequest._censorLogArguments([{}, {
+      foo: 1
+    }]);
+    args.should.eql([{}, {
+      foo: 1
+    }]);
+  });
+
+  it('should censor opts', function () {
+    var opts = enhancedRequest._censorOpts({
+      uri: 'https://user:secret@example.com'
+    });
+    opts.should.eql({
+      uri: 'https://user:**********@example.com'
+    });
+
+    opts = enhancedRequest._censorOpts({});
+    opts.should.eql({});
+  });
+
   // TODO: test handling of all_dbs_active errors
 
 });
