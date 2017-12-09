@@ -26,9 +26,17 @@ var EnhancedRequest = function (request) {
 // For debugging all traffic
 EnhancedRequest.LOG_EVERYTHING = false;
 
+EnhancedRequest.prototype._censorLogArguments = function (args) {
+  var censoredArgs = sporks.clone(sporks.toArgsArray(args));
+  if (censoredArgs[1] && censoredArgs[1].request) {
+    censoredArgs[1].request = this._censorOpts(censoredArgs[1].request);
+  }
+  return censoredArgs;
+};
+
 EnhancedRequest.prototype._log = function () {
   if (EnhancedRequest.LOG_EVERYTHING) {
-    console.log.apply(console.log, arguments);
+    console.log.apply(console.log, this._censorLogArguments(arguments));
   }
 };
 
@@ -52,9 +60,23 @@ EnhancedRequest.prototype._getStatusCode = function (body) {
   }
 };
 
+EnhancedRequest.prototype._censorOpts = function (opts) {
+  // Censor any passwords
+  if (opts.uri) {
+    opts.uri = sporks.censorPasswordInURL(opts.uri);
+  }
+
+  return opts;
+};
+
 EnhancedRequest.prototype._newError = function (body, args) {
   var err = null,
-    msg = 'reason=' + body.reason + ', error=' + body.error + ', arguments' + JSON.stringify(args);
+    censoredArgs = sporks.clone(sporks.toArgsArray(args));
+
+  censoredArgs[0] = this._censorOpts(censoredArgs[0]);
+
+  var msg = 'reason=' + body.reason + ', error=' + body.error + ', arguments=' + JSON.stringify(
+    censoredArgs);
 
   if (body.error === 'unauthorized') {
     err = new NotAuthorizedError(msg);

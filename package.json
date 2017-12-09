@@ -46,9 +46,9 @@
   "dependencies": {
     "backoff-promise": "^0.0.3",
     "bluebird": "^3.5.0",
-    "quelle": "^0.0.7",
+    "quelle": "^1.0.0",
     "request": "^2.81.0",
-    "sporks": "^0.0.4",
+    "sporks": "^1.0.0",
     "squadron": "^0.0.4"
   },
   "devDependencies": {
