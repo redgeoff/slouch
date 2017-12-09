@@ -1,7 +1,8 @@
 'use strict';
 
 var PersistentStreamIterator = require('quelle').PersistentStreamIterator,
-  inherits = require('inherits');
+  inherits = require('inherits'),
+  sporks = require('sporks');
 
 var CouchPersistentStreamIterator = function () {
   // Call parent constructor
@@ -10,12 +11,23 @@ var CouchPersistentStreamIterator = function () {
 
 inherits(CouchPersistentStreamIterator, PersistentStreamIterator);
 
-CouchPersistentStreamIterator.prototype._onceData = function (stream, data) {
+CouchPersistentStreamIterator.prototype._censorOpts = function (opts) {
+  var clonedOpts = sporks.clone(opts);
+
+  // Censor any passwords
+  clonedOpts.url = sporks.censorPasswordInURL(clonedOpts.url);
+
+  return clonedOpts;
+};
+
+CouchPersistentStreamIterator.prototype._onceData = function (stream, data, requestOpts) {
   try {
     // Detect errors like authentication errors reported in JSON
     var obj = JSON.parse(data);
     if (obj.error) {
-      stream.onError(new Error('reason=' + obj.reason + ', error=' + obj.error));
+      var censoredOpts = this._censorOpts(requestOpts);
+      stream.onError(new Error('reason=' + obj.reason + ', error=' + obj.error + ', opts=' + JSON
+        .stringify(censoredOpts)));
 
       // We need to abort the PersistentStream so that we don't read any items downstream
       this.abort();

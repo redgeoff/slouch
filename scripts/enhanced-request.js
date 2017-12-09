@@ -75,7 +75,7 @@ EnhancedRequest.prototype._newError = function (body, args) {
 
   censoredArgs[0] = this._censorOpts(censoredArgs[0]);
 
-  var msg = 'reason=' + body.reason + ', error=' + body.error + ', arguments' + JSON.stringify(
+  var msg = 'reason=' + body.reason + ', error=' + body.error + ', arguments=' + JSON.stringify(
     censoredArgs);
 
   if (body.error === 'unauthorized') {
