@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
-    "browserify": "^14.4.0",
+    "browserify": "^15.0.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^6.0.0",
     "gofur": "^1.0.0",
