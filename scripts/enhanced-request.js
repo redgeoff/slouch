@@ -178,19 +178,13 @@ EnhancedRequest.prototype._shouldReconnect = function (err) {
     return true;
 
   default:
-
-    // - ECONNREFUSED => Connection refused, e.g. because the CouchDB server is being restarted.
-    // - Occurs randomly when many simultaenous connections:
-    //   - emfile
-    //   - socket hang up
-    //   - ECONNRESET
-    //   - ETIMEDOUT
-    //   - function_clause (CouchDB 2)
-    //   - unknown_error (CouchDB 2)
-    //   - internal_server_error (CouchDB 2)
     return new RegExp([
+      // Connection refused, e.g. because the CouchDB server is being restarted.
       'ECONNREFUSED',
+
       'ENETUNREACH', // can occur when box sleeps/wakes-up
+
+      // Occurs randomly when many simultaenous connections:
       'emfile',
       'socket hang up',
       'ECONNRESET',
@@ -198,10 +192,15 @@ EnhancedRequest.prototype._shouldReconnect = function (err) {
       'function_clause',
       'unknown_error',
       'internal_server_error',
+
       'Failed to fetch', // ECONNREFUSED/ENOTFOUND in Chrome
       'Type error', // ECONNREFUSED/ENOTFOUND in Safari
       'XHR error', // ECONNREFUSED/ENOTFOUND in Firefox
-      'EAI_AGAIN' // Transient DNS error
+      'EAI_AGAIN', // Transient DNS error
+
+      // Occurs randomly even when there is a relatively small amount of data, e.g. "The request
+      // could not be processed in a reasonable amount of time"
+      'timeout'
     ].join('|'), 'i').test(err.message);
   }
 };
