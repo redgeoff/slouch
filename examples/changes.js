@@ -6,7 +6,11 @@ var slouch = new Slouch('http://admin:admin@localhost:5984');
 var i = 0;
 var MAX_ITEMS = 100;
 
-var iterator = slouch.db.changes('_global_changes', { include_docs: true, feed: 'continuous' });
+var iterator = slouch.db.changes('_global_changes', {
+  include_docs: true,
+  feed: 'continuous',
+  heartbeart: true
+});
 
 iterator.each(function (item) {
 
