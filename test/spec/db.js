@@ -262,7 +262,7 @@ describe('db', function () {
     it('changes should force reconnect', function () {
 
       // Force a reconnect after each item
-      slouch.forceReconnectAfterMilliseconds = 1;
+      slouch.forceReconnectAfterMilliseconds = 100;
 
       changes = {};
 
