@@ -36,7 +36,7 @@ jobs:
 
       # Change the host as we want a standard host that will work even from within the Docker
       # container
-      - run: HOST_IP=`/sbin/ip route | awk '/eth0  proto/ { print $9 }'` && sed -i "s/localhost/$HOST_IP/g" test/config.json
+      - run: HOST_IP=`/sbin/ip route | awk '/eth0 proto/ { print $9 }'` && sed -i "s/localhost/$HOST_IP/g" test/config.json
 
       - run: npm run assert-beautified
       - run: npm run jshint
