@@ -32,7 +32,6 @@
     "browser-test": "node_modules/gofur/scripts/browser/test.js -c cache -t test/browser.js",
     "browser-test-firefox": "node_modules/gofur/scripts/browser/test.js -c cache -t test/browser.js -b selenium:firefox",
     "browser-test-chrome": "node_modules/gofur/scripts/browser/test.js -c cache -t test/browser.js -b selenium:chrome",
-    "browser-test-phantomjs": "node_modules/gofur/scripts/browser/test.js -c cache -t test/browser.js -b selenium:phantomjs",
     "browser-coverage-server": "node_modules/gofur/scripts/browser-coverage/serve.js -c cache -t test/browser.js",
     "browser-coverage-test": "node_modules/gofur/scripts/browser-coverage/test.js -c cache -t test/browser.js",
     "browser-coverage-report": "istanbul report --dir cache/coverage/browser --root cache/coverage/browser lcov",
@@ -55,11 +54,11 @@
     "beautify-proj": "^1.0.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^6.0.0",
-    "gofur": "^1.0.0",
+    "gofur": "^1.0.4",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.4",
     "memorystream": "^0.3.1",
-    "mocha": "^5.0.1"
+    "mocha": "^5.0.4"
   },
   "greenkeeper": {
     "ignore": [
