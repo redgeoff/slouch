@@ -4,8 +4,7 @@ var Slouch = require('../../scripts'),
   utils = require('../utils'),
   FakedStreamIterator = require('./faked-stream-iterator'),
   Promise = require('sporks/scripts/promise'),
-  sporks = require('sporks'),
-  MemoryStream = require('memorystream');
+  sporks = require('sporks');
 
 describe('system', function () {
 
