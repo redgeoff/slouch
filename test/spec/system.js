@@ -62,22 +62,6 @@ describe('system', function () {
     };
   };
 
-  var isPhantomJS = function () {
-    return global.navigator && global.navigator.userAgent.indexOf('PhantomJS') !== -1;
-  };
-
-  // TODO: why do continuous requests just hang in PhantomJS, but not in any other browser?
-  var fakeContinuousUpdatesIfPhantomJS = function (item) {
-    if (isPhantomJS()) {
-      slouch._request = function () {
-        var stream = new MemoryStream();
-        stream.write(JSON.stringify(item));
-        stream.abort = function () {};
-        return stream;
-      };
-    }
-  };
-
   it('should clone params when falsy', function () {
     system._cloneParams().should.eql({});
   });
@@ -159,11 +143,6 @@ describe('system', function () {
   });
 
   it('should listen for updates continuously', function () {
-    fakeContinuousUpdatesIfPhantomJS({
-      db_name: utils.createdDB,
-      type: 'updated'
-    });
-
     var promise = new Promise(function (resolve, reject) {
       iteratorToAbort = system.updates({
         feed: 'continuous'
@@ -190,10 +169,6 @@ describe('system', function () {
 
   it('should listen for updates no history when couchdb 1', function () {
     fakeCouchDBVersion('1');
-    fakeContinuousUpdatesIfPhantomJS({
-      db_name: utils.createdDB,
-      type: 'updated'
-    });
 
     var promise = new Promise(function (resolve, reject) {
       iteratorToAbort = system.updatesNoHistory({
@@ -221,9 +196,6 @@ describe('system', function () {
 
   it('should listen for updates no history when couchdb 2', function () {
     fakeCouchDBVersion('2');
-    fakeContinuousUpdatesIfPhantomJS({
-      id: 'updated:' + utils.createdDB
-    });
 
     // Mock get regardless of version of CouchDB
     var defaultGet = db.get;
