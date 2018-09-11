@@ -158,4 +158,12 @@ System.prototype.updatesNoHistory = function (params) {
   return iterator;
 };
 
+System.prototype.listDatabases = function () {
+  return this._slouch._req({
+    uri: this._slouch._url + '/_all_dbs',
+    method: 'GET',
+    parseBody: true
+  });
+};
+
 module.exports = System;
