@@ -8,11 +8,10 @@ docker run -d \
   --name couchdb \
   --restart always \
   -p 5984:5984 \
-  -v $common:/home/couchdb/common \
-  -e COUCHDB_DATA_DIR="/home/couchdb/common/data" \
+  -v $common:/data:/opt/couchdb/data \
   -e COUCHDB_USER='admin' \
   -e COUCHDB_PASSWORD='admin' \
-  redgeoff/couchdb
+  couchdb
 
 # Wait for for DB to be ready
 echo "Sleeping for 15 secs to allow for DB to start..."
