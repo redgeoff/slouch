@@ -1,6 +1,6 @@
 {
   "name": "couch-slouch",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A JS API for CouchDB that does the heavy lifting",
   "main": "index.js",
   "repository": {
@@ -52,12 +52,12 @@
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-as-promised": "^6.0.0",
-    "gofur": "^1.1.0",
+    "gofur": "^1.1.1",
     "istanbul": "^0.4.5",
-    "jshint": "^2.9.4",
-    "mocha": "^5.0.4",
+    "jshint": "^2.9.7",
+    "mocha": "^5.2.0",
     "wait-on": "^3.2.0"
   },
   "greenkeeper": {
