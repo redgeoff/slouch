@@ -43,21 +43,21 @@
     "reset-db": "./reset-db.js"
   },
   "dependencies": {
-    "backoff-promise": "^0.0.3",
-    "bluebird": "^3.5.2",
-    "quelle": "^1.0.3",
-    "request": "^2.87.0",
-    "sporks": "^1.0.0",
-    "squadron": "^0.0.4"
+    "backoff-promise": "0.0.3",
+    "bluebird": "^3.5.3",
+    "quelle": "^1.0.4",
+    "request": "^2.88.0",
+    "sporks": "^1.0.1",
+    "squadron": "0.0.4"
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-as-promised": "^6.0.0",
     "gofur": "^1.1.1",
     "istanbul": "^0.4.5",
-    "jshint": "^2.9.4",
-    "mocha": "^5.0.4",
+    "jshint": "^2.9.7",
+    "mocha": "^5.2.0",
     "wait-on": "^3.2.0"
   },
   "greenkeeper": {
