@@ -48,7 +48,7 @@
     "quelle": "^1.0.3",
     "request": "^2.87.0",
     "sporks": "^1.0.0",
-    "squadron": "^0.0.4"
+    "squadron": "^1.0.0"
   },
   "devDependencies": {
     "beautify-proj": "^1.0.0",
