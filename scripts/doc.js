@@ -298,6 +298,16 @@ Doc.prototype.all = function (dbName, params) {
   }, 'rows.*', null, this._slouch._request);
 };
 
+Doc.prototype.find = function (dbName, body, params) {
+  return this._slouch._req({
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_find',
+    method: 'POST',
+    json: body,
+    qs: params,
+    parseBody: true
+  });
+};
+
 Doc.prototype.destroyAllNonDesign = function (dbName) {
   return this.destroyAll(dbName, true);
 };
