@@ -6,7 +6,8 @@ var Slouch = require('../../scripts'),
   Promise = require('sporks/scripts/promise'),
   config = require('../config.json'),
   Backoff = require('backoff-promise'),
-  crypto = require("crypto");
+  crypto = require("crypto"),
+  assert = require('chai').assert;
 
 describe('doc', function () {
 
@@ -631,5 +632,25 @@ describe('doc', function () {
         newRev.should.eql(body._rev);
         return db.destroy(dbName);
       });
+  });
+
+  it('should find a document by selector', function () {
+    const requestBody = {
+      selector: {
+        thing: 'findme',
+      },
+    };
+    return slouch.doc.create(utils.createdDB, {
+      thing: 'play'
+    }).then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        thing: 'findme'
+      });
+    }).then(function () {
+      return slouch.doc.find(utils.createdDB, requestBody);
+    }).then(function (body) {
+      assert.lengthOf(body.docs, 1, 'body.docs has a length of 1');
+      assert.equal(body.docs[0].thing, 'findme', '`thing` field has value `findme`');
+    });
   });
 });
