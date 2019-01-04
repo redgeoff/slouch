@@ -39,7 +39,7 @@
    * destroyAllNonDesign(dbName)
    * destroyIgnoreConflict(dbName, docId, docRev)
    * exists(dbName, id)
-   * find(dbName, body, params)
+   * [find(dbName, body, params)](https://github.com/redgeoff/slouch/blob/master/API.md#finddbname-body-params)
    * get(dbName, docId)
    * getAndDestroy(dbName, docId)
    * getIgnoreMissing(dbName, id)
@@ -102,16 +102,14 @@
 
 #### find(dbName, body, params)
 
-Find documents using a declarative JSON querying syntax
+Find documents using a declarative JSON querying syntax. See https://docs.couchdb.org/en/latest/api/database/find.html for more details.
 
 Example:
 
 ```js
 slouch.doc.find('myDB', {
   selector: {
-    thing: 'findme',
+    thing: 'findme'
   }
 });
 ```
-
-See https://docs.couchdb.org/en/latest/api/database/find.html for more details
