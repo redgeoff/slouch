@@ -635,7 +635,7 @@ describe('doc', function () {
   });
 
   it('should find a document by selector', function () {
-    const requestBody = {
+    var requestBody = {
       selector: {
         thing: 'findme',
       },
