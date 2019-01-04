@@ -39,7 +39,7 @@
    * destroyAllNonDesign(dbName)
    * destroyIgnoreConflict(dbName, docId, docRev)
    * exists(dbName, id)
-   * doc.find(dbName, body, params)
+   * find(dbName, body, params)
    * get(dbName, docId)
    * getAndDestroy(dbName, docId)
    * getIgnoreMissing(dbName, id)
@@ -97,3 +97,21 @@
    * toUsername(userId)
    * upsertRole(username, role)
 
+
+### Doc
+
+#### find(dbName, body, params)
+
+Find documents using a declarative JSON querying syntax
+
+Example:
+
+```js
+slouch.doc.find('myDB', {
+  selector: {
+    thing: 'findme',
+  }
+});
+```
+
+See https://docs.couchdb.org/en/latest/api/database/find.html for more details
