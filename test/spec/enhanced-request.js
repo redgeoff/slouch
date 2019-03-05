@@ -5,7 +5,7 @@ var EnhancedRequest = require('../../scripts/enhanced-request'),
   Backoff = require('backoff-promise'),
   Promise = require('sporks/scripts/promise'),
   request = require('request'),
-  Slouch = requre('../../scripts'),
+  Slouch = require('../../scripts'),
   utils = require('../utils');
 
 describe('enhanced-request', function () {
