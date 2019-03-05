@@ -21,7 +21,6 @@ var EnhancedRequest = function (slouch) {
   this._slouch = slouch;
   this._throttler = new Throttler(EnhancedRequest.DEFAULT_CONNECTIONS);
   this._req = Promise.promisify(this._slouch._request);
-  this._cookie = null;
 };
 
 // For debugging all traffic
