@@ -4,7 +4,9 @@ var EnhancedRequest = require('../../scripts/enhanced-request'),
   sporks = require('sporks'),
   Backoff = require('backoff-promise'),
   Promise = require('sporks/scripts/promise'),
-  request = require('request');
+  request = require('request'),
+  Slouch = requre('../../scripts'),
+  utils = require('../utils');
 
 describe('enhanced-request', function () {
 
@@ -13,7 +15,8 @@ describe('enhanced-request', function () {
     defaultRequest = null;
 
   beforeEach(function () {
-    enhancedRequest = new EnhancedRequest(request);
+    slouch = new Slouch(utils.couchDBURL());
+    enhancedRequest = new EnhancedRequest(slouch);
     defaultRequest = enhancedRequest.request;
 
     // Shorten the backoff
