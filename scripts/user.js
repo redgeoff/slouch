@@ -165,9 +165,6 @@ User.prototype.destroySession = function (cookie) {
   });
 };
 
-// TODO: get authenticate() and authenticated() working properly in the browser. For now, we
-// have to fake the responses as it appears that the session cookie is not being propogated from
-// the session post to the session get.
 User.prototype.authenticated = function (cookie) {
   // Specify a URL w/o a username and password as we want to check to make sure that the cookie is
   // for a current session
@@ -201,11 +198,7 @@ User.prototype.setCookie = function (cookie) {
 
 User.prototype.logIn = function (username, password) {
   var self = this;
-  return self.authenticate(username, password).then(function (response) {
-    // Set cookie for all subsequent calls
-    self.setCookie(response.cookie);
-    return response;
-  });
+  return self.authenticate(username, password);
 };
 
 User.prototype.logOut = function () {
