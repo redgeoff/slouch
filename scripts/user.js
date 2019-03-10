@@ -198,7 +198,11 @@ User.prototype.setCookie = function (cookie) {
 
 User.prototype.logIn = function (username, password) {
   var self = this;
-  return self.authenticate(username, password);
+  return self.authenticate(username, password).then(function (response) {
+    // Set cookie for all subsequent calls
+    self.setCookie(response.cookie);
+    return response;
+  });
 };
 
 User.prototype.logOut = function () {
