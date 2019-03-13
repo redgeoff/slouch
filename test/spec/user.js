@@ -180,28 +180,6 @@ describe('user', function () {
   });
 
   it('should authenticate and get session', function () {
-
-    slouch._req = function () {
-      if (arguments['0'].uri.indexOf('_session') !== -1) {
-        return Promise.resolve({
-          headers: {
-            'set-cookie': [
-              'some-cookie'
-            ]
-          },
-          body: {
-            userCtx: {
-              name: username,
-              roles: ['testrole1']
-            },
-            cookie: 'some-cookie'
-          }
-        });
-      } else {
-        return defaultReq.apply(this, arguments);
-      }
-    };
-
     return user.authenticateAndGetSession(username, 'testpassword').then(function (session) {
       // Sanity check
       session.userCtx.name.should.eql(username);
