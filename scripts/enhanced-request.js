@@ -134,7 +134,9 @@ EnhancedRequest.prototype._request = function (opts) {
       throw err;
     }
 
-    // Update locally stored cookie when couchDB sends set-cookie in response
+    // Update locally stored cookie when couchDB sends set-cookie in response - for node only
+    // Skip this in browser coverage test to test failure as in browser, set-cookie is not accessible from headers
+    /* istanbul ignore if */ 
     if (response.headers && response.headers['set-cookie']) {
       self._slouch._requestWrapper.setCookie(response.headers['set-cookie'][0]);
     }
