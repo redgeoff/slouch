@@ -16,7 +16,8 @@ describe('request-wrapper', function () {
       headers: {
         'my-header': 'my-value',
         cookie: 'my-cookie'
-      }
+      },
+      withCredentials: true
     });
   });
 
@@ -27,7 +28,8 @@ describe('request-wrapper', function () {
     opts.should.eql({
       headers: {
         cookie: 'my-cookie'
-      }
+      },
+      withCredentials: true
     });
   });
 

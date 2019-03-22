@@ -16,6 +16,7 @@ RequestWrapper.prototype._setCookieHeader = function (opts) {
     }
     opts.headers.cookie = this._cookie;
   }
+  opts.withCredentials = true; // Needed for cookie-authentication to work in browser
   return opts;
 };
 
