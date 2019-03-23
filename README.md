@@ -27,3 +27,5 @@ A JS API for CouchDB that does the heavy lifting
 * [Don’t Just Relax; Slouch: A JS Client for CouchDB that Does the Heavy Lifting](https://medium.com/@redgeoff/dont-just-relax-slouch-a-js-client-for-couchdb-that-does-the-heavy-lifting-d8232eba8e2c)
 
 ## [Testing/Contributing](TESTING.md)
+
+## [Building](BUILDING.md)
