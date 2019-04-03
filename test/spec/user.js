@@ -180,33 +180,6 @@ describe('user', function () {
   });
 
   it('should authenticate and get session', function () {
-
-    // TODO: get authenticate() and authenticated() working properly in the browser. For now, we
-    // have to fake the responses as it appears that the session cookie is not being propogated from
-    // the session post to the session get.
-    if (global.window) { // in browser?
-      slouch._req = function () {
-        if (arguments['0'].uri.indexOf('_session') !== -1) {
-          return Promise.resolve({
-            headers: {
-              'set-cookie': [
-                'some-cookie'
-              ]
-            },
-            body: {
-              userCtx: {
-                name: username,
-                roles: ['testrole1']
-              },
-              cookie: 'some-cookie'
-            }
-          });
-        } else {
-          return defaultReq.apply(this, arguments);
-        }
-      };
-    }
-
     return user.authenticateAndGetSession(username, 'testpassword').then(function (session) {
       // Sanity check
       session.userCtx.name.should.eql(username);
@@ -238,10 +211,6 @@ describe('user', function () {
   it('should log in, get session and log out', function () {
     var n = 0;
 
-    // TODO: in node? Cookie authentication is not working in the browser yet
-    // https://github.com/redgeoff/slouch/issues/10
-    var onNode = !global.window;
-
     return createPrivateDB().then(function () {
       // Make sure cannot access DB before log in
       return sporks.shouldThrow(function () {
@@ -250,31 +219,27 @@ describe('user', function () {
     }).then(function () {
       return slouchNoAuth.user.logIn(username, 'testpassword');
     }).then(function () {
-      if (onNode) {
-        // This would throw if the user does not have access
-        return slouchNoAuth.db.get(username).then(function () {
-          return slouchNoAuth.doc.all(username).each(function () {
-            n++;
-          });
-        }).then(function () {
-          // Make sure we read a doc
-          n.should.eql(1);
-        }).then(function () {
-          return slouchNoAuth.user.getSession().then(function (response) {
-            // Sanity test
-            response.body.userCtx.name.should.eql(username);
-          });
+      // This would throw if the user does not have access
+      return slouchNoAuth.db.get(username).then(function () {
+        return slouchNoAuth.doc.all(username).each(function () {
+          n++;
         });
-      }
+      }).then(function () {
+        // Make sure we read a doc
+        n.should.eql(1);
+      }).then(function () {
+        return slouchNoAuth.user.getSession().then(function (response) {
+          // Sanity test
+          response.body.userCtx.name.should.eql(username);
+        });
+      });
     }).then(function () {
       return slouchNoAuth.user.logOut();
     }).then(function () {
-      if (onNode) {
-        // Make sure can no longer access DB
-        return sporks.shouldThrow(function () {
-          return slouchNoAuth.db.get(username);
-        }, notAuthorizedErr);
-      }
+      // Make sure can no longer access DB
+      return sporks.shouldThrow(function () {
+        return slouchNoAuth.db.get(username);
+      }, notAuthorizedErr);
     });
   });
 

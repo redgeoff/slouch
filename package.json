@@ -1,6 +1,6 @@
 {
   "name": "couch-slouch",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "A JS API for CouchDB that does the heavy lifting",
   "main": "index.js",
   "repository": {
@@ -40,7 +40,8 @@
     "test": "npm run assert-beautified && npm run jshint && npm run node-full-test && npm run browser-coverage-full-test",
     "TODO-build": "",
     "TODO-test-in-sauce": "",
-    "reset-db": "./reset-db.js"
+    "reset-db": "./reset-db.js",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "backoff-promise": "^1.0.0",
@@ -57,7 +58,7 @@
     "gofur": "^1.1.1",
     "istanbul": "^0.4.5",
     "jshint": "^2.9.7",
-    "mocha": "^5.2.0",
+    "mocha": "^6.0.2",
     "wait-on": "^3.2.0"
   },
   "greenkeeper": {

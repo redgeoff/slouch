@@ -17,10 +17,10 @@ QueryString.prototype.unescape = function (s) {
 };
 
 // Adds persistence, throttling, error handling and promises to request
-var EnhancedRequest = function (request) {
+var EnhancedRequest = function (slouch) {
+  this._slouch = slouch;
   this._throttler = new Throttler(EnhancedRequest.DEFAULT_CONNECTIONS);
-  this._req = Promise.promisify(request);
-  this._cookie = null;
+  this._req = Promise.promisify(this._slouch._request);
 };
 
 // For debugging all traffic
@@ -132,6 +132,13 @@ EnhancedRequest.prototype._request = function (opts) {
         request: opts
       });
       throw err;
+    }
+
+    // Update locally stored cookie when couchDB sends set-cookie in response - for node only
+    // Skip this in coverage test, set-cookie is not accessible from response.headers in browser
+    /* istanbul ignore if */
+    if (response.headers && response.headers['set-cookie']) {
+      self._slouch._requestWrapper.setCookie(response.headers['set-cookie'][0]);
     }
 
     var body = null;
