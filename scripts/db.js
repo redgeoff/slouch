@@ -63,7 +63,7 @@ DB.prototype._setSince = function (opts, lastSeq) {
 };
 
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
-DB.prototype.changes = function (dbName, params) {
+DB.prototype.changes = function (dbName, params, filter) {
 
   var self = this,
     indefinite = false,
@@ -94,10 +94,18 @@ DB.prototype.changes = function (dbName, params) {
     request = self._slouch._request;
   }
 
+  // When a filter object is provided use the key to set the filter query param
+  // Supported filters include doc_ids or selector
+  if (filter && Object.keys(filter).length === 1) {
+    params.filter = '_' + Object.keys(filter)[0];
+  }
+
   var iterator = new CouchPersistentStreamIterator({
     url: self._slouch._url + '/' + dbName + '/_changes',
-    method: 'GET',
-    qs: params
+    method: filter ? 'POST' : 'GET', // don't send a POST request if there is nothing for the body
+    qs: params,
+    json: filter,
+    parseBody: true
   }, jsonStreamParseStr, indefinite, request, forceReconnectAfterMilliseconds);
 
   return new FilteredStreamIterator(iterator, function (item) {
@@ -108,10 +116,18 @@ DB.prototype.changes = function (dbName, params) {
 
 };
 
-DB.prototype.changesArray = function (dbName, params) {
+DB.prototype.changesArray = function (dbName, params, filter) {
+  // When a filter object is provided use the key to set the filter query param
+  // Supported filters include doc_ids or selector
+  if (filter && Object.keys(filter).length === 1) {
+    params.filter = '_' + Object.keys(filter)[0];
+  }
+
   return this._slouch._req({
     url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_changes',
+    method: filter ? 'POST' : 'GET', // don't send a POST request if there is nothing for the body
     qs: params,
+    json: filter,
     parseBody: true
   });
 };

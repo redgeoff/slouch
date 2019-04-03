@@ -16,8 +16,8 @@
    * unsetIgnoreMissing(path)
  * db
    * all()
-   * changes(dbName, params)
-   * changesArray(dbName, params)
+   * [changes(dbName, params, filter)](https://github.com/redgeoff/slouch/blob/master/API.md#changesdbname-params-filter)
+   * [changesArray(dbName, params, filter)](https://github.com/redgeoff/slouch/blob/master/API.md#changesarraydbname-params-filter)
    * copy(fromDBName, toDBName)
    * create(dbName)
    * destroy(dbName)
@@ -97,6 +97,51 @@
    * toUsername(userId)
    * upsertRole(username, role)
 
+### DB
+
+#### changes(dbName, params, filter)
+
+Returns a list of changes in the database. See https://docs.couchdb.org/en/stable/api/database/changes.html for more details.
+
+The function returns an iterator that indefinitely returns changes from the database.
+
+You can use an optional third argument to pass a selector for filtering the change feed.
+
+Example:
+
+```js
+slouch.db.changes('myDB', {
+  include_docs: true,
+  feed: 'continuous',
+  heartbeat: true
+}, {
+  selector: {
+    thing: 'findme'
+  }
+});
+```
+
+#### changesArray(dbName, params, filter)
+
+Returns a list of changes in the database. See https://docs.couchdb.org/en/stable/api/database/changes.html for more details.
+
+The function returns an array of changes from the database.
+
+You can use an optional third argument to pass a selector for filtering the change feed.
+
+Example:
+
+```js
+slouch.db.changesArray('myDB', {
+  include_docs: true,
+  feed: 'continuous',
+  heartbeat: true
+}, {
+  selector: {
+    thing: 'findme'
+  }
+});
+```
 
 ### Doc
 
