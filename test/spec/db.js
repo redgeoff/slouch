@@ -181,6 +181,45 @@ describe('db', function () {
     });
   });
 
+  it('should get changes with a selector', function () {
+    var changes = {};
+    return createDocs().then(function () {
+      return db.changes(utils.createdDB, {
+        include_docs: true
+      }, {
+        selector: {
+          thing: 'jam'
+        }
+      }).each(function (change) {
+        // Use associative array as order is not guaranteed
+        changes[change.doc.thing] = true;
+      });
+    }).then(function () {
+      changes.should.eql({
+        jam: true
+      });
+    });
+  });
+
+  it('should get no changes with an unknown selector', function () {
+    var changes = {};
+    return createDocs().then(function () {
+      return db.changes(utils.createdDB, {
+        include_docs: true
+      }, {
+        selector: {
+          thing: 'does-not-exist'
+        }
+      }).each(function (change) {
+        // Use associative array as order is not guaranteed
+        changes[change.doc.thing] = true;
+      });
+    }).then(function () {
+      changes.should.eql({});
+    });
+  });
+
+
   it('should get changes array', function () {
     var indexedChanges = {};
     return createDocs().then(function () {
@@ -200,6 +239,49 @@ describe('db', function () {
       });
     });
   });
+
+  it('should get changes array with a selector', function () {
+    var indexedChanges = {};
+    return createDocs().then(function () {
+      return db.changesArray(utils.createdDB, {
+        include_docs: true
+      }, {
+        selector: {
+          thing: 'jam'
+        }
+      });
+    }).then(function (changes) {
+      // Order of changes not guaranteed so we will index the values for easy comparison
+      changes.results.forEach(function (change) {
+        indexedChanges[change.doc.thing] = true;
+      });
+
+      indexedChanges.should.eql({
+        jam: true
+      });
+    });
+  });
+
+  it('should get no changes array with a unknown selector', function () {
+    var indexedChanges = {};
+    return createDocs().then(function () {
+      return db.changesArray(utils.createdDB, {
+        include_docs: true
+      }, {
+        selector: {
+          thing: 'does-not-exist'
+        }
+      });
+    }).then(function (changes) {
+      // Order of changes not guaranteed so we will index the values for easy comparison
+      changes.results.forEach(function (change) {
+        indexedChanges[change.doc.thing] = true;
+      });
+
+      indexedChanges.should.eql({});
+    });
+  });
+
 
   var waitForChange = function (thing) {
     return sporks.waitFor(function () {
