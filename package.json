@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "backoff-promise": "^1.0.0",
-    "bluebird": "^3.5.3",
+    "bluebird": "^3.5.4",
     "quelle": "^1.0.4",
     "request": "^2.88.0",
     "sporks": "^1.0.1",
