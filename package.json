@@ -54,16 +54,11 @@
   "devDependencies": {
     "beautify-proj": "^1.0.0",
     "chai": "^4.2.0",
-    "chai-as-promised": "^6.0.0",
+    "chai-as-promised": "^7.1.1",
     "gofur": "^1.1.1",
     "istanbul": "^0.4.5",
-    "jshint": "^2.9.7",
+    "jshint": "^2.10.2",
     "mocha": "^6.0.2",
     "wait-on": "^3.2.0"
-  },
-  "greenkeeper": {
-    "ignore": [
-      "chai-as-promised"
-    ]
   }
 }
