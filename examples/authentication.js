@@ -1,8 +1,5 @@
 'use strict';
 
-// TODO: Until https://github.com/redgeoff/slouch/issues/10 is completed, this example only works in
-// node
-
 var Slouch = require('../');
 var slouch = new Slouch('http://localhost:5984');
 
