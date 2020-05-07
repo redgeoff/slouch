@@ -45,7 +45,6 @@ describe('user', function () {
   afterEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     user = slouch.user;
-    slouch._req = defaultReq;
     return user.destroy(username).then(function () {
       return destroyDBs();
     });
