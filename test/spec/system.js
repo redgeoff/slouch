@@ -76,7 +76,7 @@ describe('system', function () {
 
   it('should check if support partitioned', function () {
     // We run the tests on both CouchDB 1 and 2+ and so we don't care about the version. In the
-    // future, we could pass a parameter to our test scripts that would allow us to test this better.
+    // future, we could pass a parameter to our test script that would allow us to test this better.
     return system.supportPartitioned();
   });
 
@@ -98,7 +98,7 @@ describe('system', function () {
 
   it('should check if couchdb 1', function () {
     // We run the tests on both CouchDB 1 and 2+ and so we don't care about the version. In the
-    // future, we could pass a parameter to our test scripts that would allow us to test this better.
+    // future, we could pass a parameter to our test script that would allow us to test this better.
     return system.isCouchDB1();
   });
 
