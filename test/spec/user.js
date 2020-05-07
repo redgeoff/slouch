@@ -41,10 +41,12 @@ describe('user', function () {
   };
 
   afterEach(function () {
-    slouch = new Slouch(utils.couchDBURL());
-    user = slouch.user;
-    return user.destroy(username).then(function () {
-      return destroyDBs();
+    user.destroySession().then(function () {
+      slouch = new Slouch(utils.couchDBURL());
+      user = slouch.user;
+      return user.destroy(username).then(function () {
+        return destroyDBs();
+      });
     });
   });
 
