@@ -13,7 +13,6 @@ describe('user', function () {
     user = null,
     defaultUpdate = null,
     username = null,
-    defaultReq = null,
     dbs = null,
     slouchNoAuth = null,
     notAuthenticatedErr = new NotAuthenticatedError(),
@@ -24,7 +23,6 @@ describe('user', function () {
     slouchNoAuth = new Slouch(utils.couchDBURLNoAuth());
     user = slouch.user;
     username = 'test_' + utils.nextId();
-    defaultReq = slouch._req;
     dbs = [];
     return user.create(username, 'testpassword', ['testrole1'], {
       firstName: 'Jill',
