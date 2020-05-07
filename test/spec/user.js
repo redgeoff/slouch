@@ -41,7 +41,7 @@ describe('user', function () {
   };
 
   afterEach(function () {
-    user.destroySession().then(function () {
+    user.logOut().then(function () {
       slouch = new Slouch(utils.couchDBURL());
       user = slouch.user;
       return user.destroy(username).then(function () {
