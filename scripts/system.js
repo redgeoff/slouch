@@ -9,6 +9,7 @@ var FilteredStreamIterator = require('quelle').FilteredStreamIterator,
 var System = function (slouch) {
   this._slouch = slouch;
   this._couchDB1 = null;
+  this._partitioned = null;
 };
 
 System.prototype._isCouchDB1 = function () {
@@ -27,6 +28,26 @@ System.prototype.isCouchDB1 = function () {
       });
     } else {
       return self._couchDB1;
+    }
+  });
+};
+
+System.prototype._supportPartitioned = function () {
+  return this.get().then(function (obj) {
+    return obj.features && obj.features.includes('partitioned');
+  });
+};
+
+System.prototype.supportPartitioned = function () {
+  var self = this;
+  return Promise.resolve().then(function () {
+    if (self._partitioned === null) {
+      return self._supportPartitioned().then(function (supportPartitioned) {
+        self._partitioned = supportPartitioned;
+        return self._partitioned;
+      });
+    } else {
+      return self._partitioned;
     }
   });
 };
