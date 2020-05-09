@@ -184,6 +184,9 @@ describe('user', function () {
       session.userCtx.name.should.eql(username);
       session.userCtx.roles.should.eql(['testrole1']);
       (session.cookie === undefined).should.eql(false);
+      user.destroySession().then(function (response) {
+        response.body.ok.should.eql(true);
+      });
     });
   });
 
@@ -194,10 +197,11 @@ describe('user', function () {
   });
 
   it('should get session with default url', function () {
-    // TODO: should be able to remove after cookie authentication works in the browser
-    return slouch.user.getSession().then(function (response) {
-      // Sanity test
-      response.body.ok.should.eql(true);
+    return user.getSession().then(function (response) {
+      response.body.userCtx.name.should.eql('admin');
+      user.destroySession().then(function (response) {
+        response.body.ok.should.eql(true);
+      });
     });
   });
 

@@ -155,11 +155,10 @@ User.prototype.getSession = function (cookie, url) {
   });
 };
 
-User.prototype.destroySession = function (cookie) {
+User.prototype.destroySession = function () {
   return this._slouch._req({
     uri: this._slouch._url + '/_session',
     method: 'DELETE',
-    headers: this._getHeaderWithCookie(cookie),
     parseBody: true,
     fullResponse: true
   });
