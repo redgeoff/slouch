@@ -83,7 +83,7 @@
    * create(username, password, roles, metadata)
    * createSession(doc)
    * destroy(username)
-   * destroySession()
+   * destroySession([cookie])
    * downsertRole(username, role)
    * get(username)
    * getSession([cookie], [url])
