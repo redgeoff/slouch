@@ -13,7 +13,6 @@ describe('user', function () {
     user = null,
     defaultUpdate = null,
     username = null,
-    defaultReq = null,
     dbs = null,
     slouchNoAuth = null,
     notAuthenticatedErr = new NotAuthenticatedError(),
@@ -24,7 +23,6 @@ describe('user', function () {
     slouchNoAuth = new Slouch(utils.couchDBURLNoAuth());
     user = slouch.user;
     username = 'test_' + utils.nextId();
-    defaultReq = slouch._req;
     dbs = [];
     return user.create(username, 'testpassword', ['testrole1'], {
       firstName: 'Jill',
@@ -43,7 +41,8 @@ describe('user', function () {
   };
 
   afterEach(function () {
-    slouch._req = defaultReq;
+    slouch = new Slouch(utils.couchDBURL());
+    user = slouch.user;
     return user.destroy(username).then(function () {
       return destroyDBs();
     });
@@ -185,6 +184,9 @@ describe('user', function () {
       session.userCtx.name.should.eql(username);
       session.userCtx.roles.should.eql(['testrole1']);
       (session.cookie === undefined).should.eql(false);
+      return user.destroySession().then(function (response) {
+        response.body.ok.should.eql(true);
+      });
     });
   });
 
@@ -195,10 +197,11 @@ describe('user', function () {
   });
 
   it('should get session with default url', function () {
-    // TODO: should be able to remove after cookie authentication works in the browser
-    return slouch.user.getSession().then(function (response) {
-      // Sanity test
-      response.body.ok.should.eql(true);
+    return user.getSession().then(function (response) {
+      response.body.userCtx.name.should.eql('admin');
+      return user.destroySession().then(function (response) {
+        response.body.ok.should.eql(true);
+      });
     });
   });
 

@@ -34,6 +34,15 @@ describe('system', function () {
     return utils.destroyDB();
   });
 
+  var fakePartitionedSupport = function () {
+    defaultGet = system.get;
+    system.get = function () {
+      return Promise.resolve({
+        features: ['partitioned']
+      });
+    };
+  };
+
   var fakeCouchDBVersion = function (version) {
     defaultGet = system.get;
     system.get = function () {
@@ -65,9 +74,31 @@ describe('system', function () {
     system._cloneParams().should.eql({});
   });
 
+  it('should check if support partitioned', function () {
+    // We run the tests on both CouchDB 1 and 2+ and so we don't care about the version. In the
+    // future, we could pass a parameter to our test script that would allow us to test this better.
+    return system.supportPartitioned();
+  });
+
+  it('should detect partitioned support', function () {
+    fakePartitionedSupport();
+    return system.supportPartitioned().then(function (supportPartitioned) {
+      supportPartitioned.should.eql(true);
+    });
+  });
+
+  it('should cache partitioned support', function () {
+    fakePartitionedSupport();
+    return system.supportPartitioned().then(function () {
+      return system.supportPartitioned();
+    }).then(function (supportPartitioned) {
+      supportPartitioned.should.eql(true);
+    });
+  });
+
   it('should check if couchdb 1', function () {
-    // We run the tests on both CouchDB 1 and 2 and so we don't care about the version. In the
-    // future, we could pass a paramter to our test scripts that would allow us to test this better.
+    // We run the tests on both CouchDB 1 and 2+ and so we don't care about the version. In the
+    // future, we could pass a parameter to our test script that would allow us to test this better.
     return system.isCouchDB1();
   });
 

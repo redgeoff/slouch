@@ -70,6 +70,7 @@
  * system
    * get()
    * isCouchDB1()
+   * supportPartitioned()
    * reset(exceptDBNames)
    * updates(params)
    * updatesNoHistory(params)
