@@ -101,7 +101,7 @@ DB.prototype.changes = function (dbName, params, filter) {
   }
 
   var iterator = new CouchPersistentStreamIterator({
-    url: self._slouch._url + '/' + dbName + '/_changes',
+    url: self._slouch._url + '/' + encodeURIComponent(dbName) + '/_changes',
     method: filter ? 'POST' : 'GET', // don't send a POST request if there is nothing for the body
     qs: params,
     json: filter,
