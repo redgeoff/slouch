@@ -177,8 +177,8 @@ DB.prototype.copy = function (fromDBName, toDBName) {
     return self._slouch.security.set(toDBName, security);
   }).then(function () {
     return self.replicate({
-      source: self._slouch._url + '/' + fromDBName,
-      target: self._slouch._url + '/' + toDBName
+      source: self._slouch._url + '/' + encodeURIComponent(fromDBName),
+      target: self._slouch._url + '/' + encodeURIComponent(toDBName)
     });
   });
 };
