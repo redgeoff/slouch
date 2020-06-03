@@ -25,7 +25,7 @@ Utils.prototype.nextId = function () {
 // Use unique DB names for each tests as there can be race conditions where a DB is destroyed, but
 // has not yet been fully released.
 Utils.prototype.createDB = function () {
-  this.createdDB = 'test_' + this.nextId();
+  this.createdDB = 'test$()+-/_' + this.nextId();
   return this._slouch.db.create(this.createdDB);
 };
 

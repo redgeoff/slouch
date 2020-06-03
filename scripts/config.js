@@ -104,7 +104,7 @@ Config.prototype.setLogLevel = function (level) {
 };
 
 Config.prototype.setCompactionRule = function (dbName, rule) {
-  return this.set('compactions/' + dbName, rule);
+  return this.set('compactions/' + encodeURIComponent(dbName), rule);
 };
 
 Config.prototype.setCouchDBMaxDBsOpen = function (maxDBsOpen) {

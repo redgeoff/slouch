@@ -446,8 +446,8 @@ describe('db', function () {
     }).then(function () {
       dbsToDestroy.push(utils.createdDB + '_2');
       return db.replicate({
-        source: slouch._url + '/' + utils.createdDB,
-        target: slouch._url + '/' + utils.createdDB + '_2'
+        source: slouch._url + '/' + encodeURIComponent(utils.createdDB),
+        target: slouch._url + '/' + encodeURIComponent(utils.createdDB) + '_2'
       });
     }).then(function () {
       return verifyAllDocs(utils.createdDB + '_2');

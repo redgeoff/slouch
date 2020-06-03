@@ -101,7 +101,7 @@ DB.prototype.changes = function (dbName, params, filter) {
   }
 
   var iterator = new CouchPersistentStreamIterator({
-    url: self._slouch._url + '/' + dbName + '/_changes',
+    url: self._slouch._url + '/' + encodeURIComponent(dbName) + '/_changes',
     method: filter ? 'POST' : 'GET', // don't send a POST request if there is nothing for the body
     qs: params,
     json: filter,
@@ -177,8 +177,8 @@ DB.prototype.copy = function (fromDBName, toDBName) {
     return self._slouch.security.set(toDBName, security);
   }).then(function () {
     return self.replicate({
-      source: self._slouch._url + '/' + fromDBName,
-      target: self._slouch._url + '/' + toDBName
+      source: self._slouch._url + '/' + encodeURIComponent(fromDBName),
+      target: self._slouch._url + '/' + encodeURIComponent(toDBName)
     });
   });
 };
