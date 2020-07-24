@@ -7,17 +7,18 @@ var DB = function (slouch) {
   this._slouch = slouch;
 };
 
-DB.prototype._create = function (dbName) {
+DB.prototype._create = function (dbName, params) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName),
-    method: 'PUT'
+    method: 'PUT',
+    qs: params
   });
 };
 
-DB.prototype.create = function (dbName) {
+DB.prototype.create = function (dbName, params) {
   var self = this;
 
-  return self._create(dbName).catch(function (err) {
+  return self._create(dbName, params).catch(function (err) {
     // During heavy traffic, CouchDB does this strange thing where it will return an error even when
     // the DB has been created. So, we check to see if the DB exists and then only throw the error
     // if the DB does not exist.
@@ -26,6 +27,12 @@ DB.prototype.create = function (dbName) {
         throw err;
       }
     });
+  });
+};
+
+DB.prototype.isPartitioned = function (dbName) {
+  return this.get(dbName).then(function (obj) {
+    return obj.props && (obj.props.partitioned === true);
   });
 };
 
