@@ -97,7 +97,8 @@ describe('partition', function () {
   });
 
   it('should get all docs as Array in partitioned db', function () {
-    return slouch.doc.allPartitionArray(utils.createdDB, utils.createdDB).then(function (body) {
+    return slouch.doc.allPartitionArray(utils.createdDB, utils.createdDB).then(function (
+      body) {
       body.total_rows.should.eql(2);
     });
   });
