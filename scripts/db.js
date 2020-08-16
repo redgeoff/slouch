@@ -51,7 +51,7 @@ DB.prototype.get = function (dbName) {
     parseBody: true
   });
 };
-/* TODO: Test
+
 DB.prototype.getPartition = function (dbName, partition) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(
@@ -60,7 +60,7 @@ DB.prototype.getPartition = function (dbName, partition) {
     parseBody: true
   });
 };
-*/
+
 DB.prototype.exists = function (dbName) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName),

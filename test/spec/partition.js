@@ -71,32 +71,31 @@ describe('partition', function () {
       });
     });
   });
-  /*
-    (partition ? it : it.skip)('should get partitioned db', function () {
-      return utils.createDB(true).then(function () {
-        dbsToDestroy.push(utils.createdDB);
+
+  it('should get partitioned db', function () {
+    return utils.createDB(true).then(function () {
+      dbsToDestroy.push(utils.createdDB);
+      return slouch.doc.create(utils.createdDB, {
+        _id: partitionId + ':1',
+        thing: 'jam'
+      }).then(function () {
         return slouch.doc.create(utils.createdDB, {
-          _id: partitionId + ':1',
-          thing: 'jam'
+          _id: partitionId + ':2',
+          thing: 'peanut butter'
         }).then(function () {
           return slouch.doc.create(utils.createdDB, {
-            _id: partitionId + ':2',
-            thing: 'peanut butter'
+            _id: partitionId + 'x:1',
+            thing: 'another partition'
           }).then(function () {
-            return slouch.doc.create(utils.createdDB, {
-              _id: partitionId + 'x:1',
-              thing: 'another partition'
-            }).then(function () {
-              return db.getPartition(utils.createdDB, partitionId).then(
-                function (_db) {
-                  _db.db_name.should.eql(utils.createdDB);
-                  _db.partition.should.eql(partitionId);
-                  _db.doc_count.should.eql(2);
-                });
-            });
+            return db.getPartition(utils.createdDB, partitionId).then(
+              function (_db) {
+                _db.db_name.should.eql(utils.createdDB);
+                _db.partition.should.eql(partitionId);
+                _db.doc_count.should.eql(2);
+              });
           });
         });
       });
     });
-  */
+  });
 });
