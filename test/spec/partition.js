@@ -105,10 +105,10 @@ describe('partition', function () {
   });
 
   it('should get all docs in partitioned db', function () {
-    return slouch.doc.allPartition(utils.createdDB, partitionId).each(function (item) {
+    return slouch.doc.allPartition(utils.createdDB, partitionId).each(function () {
       return Promise.resolve();
     }).then(function () {
       dbsToDestroy.push(utils.createdDB);
-    })
+    });
   });
 });
