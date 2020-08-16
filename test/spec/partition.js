@@ -10,15 +10,13 @@ describe('partition', function () {
     system = null,
     dbsToDestroy = null,
     defaultGet = null,
-    partition = null,
-    partitionId = null;
+    partition = null;
 
   beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     system = slouch.system;
     dbsToDestroy = [];
-    partitionId = 'test-partition';
   });
 
   afterEach(function () {
@@ -75,21 +73,21 @@ describe('partition', function () {
   it('should get partitioned db', function () {
     return utils.createDB(true).then(function () {
       return slouch.doc.create(utils.createdDB, {
-        _id: partitionId + ':1',
+        _id: utils.createdDB + ':1',
         thing: 'jam'
       }).then(function () {
         return slouch.doc.create(utils.createdDB, {
-          _id: partitionId + ':2',
+          _id: utils.createdDB + ':2',
           thing: 'peanut butter'
         }).then(function () {
           return slouch.doc.create(utils.createdDB, {
-            _id: partitionId + 'x:1',
+            _id: utils.createdDB + 'x:1',
             thing: 'another partition'
           }).then(function () {
-            return db.getPartition(utils.createdDB, partitionId).then(
+            return db.getPartition(utils.createdDB, utils.createdDB).then(
               function (_db) {
                 _db.db_name.should.eql(utils.createdDB);
-                _db.partition.should.eql(partitionId);
+                _db.partition.should.eql(utils.createdDB);
                 _db.doc_count.should.eql(2);
               });
           });
@@ -99,13 +97,13 @@ describe('partition', function () {
   });
 
   it('should get all docs as Array in partitioned db', function () {
-    return slouch.doc.allPartitionArray(utils.createdDB, partitionId).then(function (body) {
+    return slouch.doc.allPartitionArray(utils.createdDB, utils.createdDB).then(function (body) {
       body.total_rows.should.eql(2);
     });
   });
 
   it('should get all docs in partitioned db', function () {
-    return slouch.doc.allPartition(utils.createdDB, partitionId).each(function () {
+    return slouch.doc.allPartition(utils.createdDB, utils.createdDB).each(function () {
       return Promise.resolve();
     }).then(function () {
       dbsToDestroy.push(utils.createdDB);
