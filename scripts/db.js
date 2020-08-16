@@ -147,7 +147,7 @@ DB.prototype.changesArray = function (dbName, params, filter) {
     parseBody: true
   });
 };
-
+/* TODO: Test
 DB.prototype.viewPartition = function (dbName, partition, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return new CouchPersistentStreamIterator({
@@ -157,7 +157,7 @@ DB.prototype.viewPartition = function (dbName, partition, viewDocId, view, param
       view,
     qs: params
   }, 'rows.*');
-};
+};*/
 
 DB.prototype.view = function (dbName, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
@@ -179,7 +179,7 @@ DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
     parseBody: true
   });
 };
-
+/* TODO: Test
 DB.prototype.viewPartitionArray = function (dbName, partition, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return this._slouch._req({
@@ -191,7 +191,7 @@ DB.prototype.viewPartitionArray = function (dbName, partition, viewDocId, view, 
     parseBody: true
   });
 };
-
+*/
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 DB.prototype.all = function () {
   return new CouchPersistentStreamIterator({
