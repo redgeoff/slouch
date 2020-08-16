@@ -73,21 +73,21 @@ describe('partition', function () {
   it('should get partitioned db', function () {
     return utils.createDB(true).then(function () {
       return slouch.doc.create(utils.createdDB, {
-        _id: utils.createdDB + ':1',
+        _id: 'part:1',
         thing: 'jam'
       }).then(function () {
         return slouch.doc.create(utils.createdDB, {
-          _id: utils.createdDB + ':2',
+          _id: 'part:2',
           thing: 'peanut butter'
         }).then(function () {
           return slouch.doc.create(utils.createdDB, {
-            _id: utils.createdDB + 'x:3',
+            _id: 'partX:3',
             thing: 'jam'
           }).then(function () {
-            return db.getPartition(utils.createdDB, utils.createdDB).then(
+            return db.getPartition(utils.createdDB, 'part').then(
               function (_db) {
                 _db.db_name.should.eql(utils.createdDB);
-                _db.partition.should.eql(utils.createdDB);
+                _db.partition.should.eql('part');
                 _db.doc_count.should.eql(2);
               });
           });
@@ -97,18 +97,28 @@ describe('partition', function () {
   });
 
   it('should get all docs as Array in partitioned db', function () {
-    return slouch.doc.allPartitionArray(utils.createdDB, utils.createdDB).then(function (
+    return slouch.doc.allPartitionArray(utils.createdDB, 'part').then(function (
       body) {
-      console.log(body);
-      body.total_rows.should.eql(2);
+      body.rows.length.should.eql(2);
     });
   });
 
   it('should get all docs in partitioned db', function () {
-    return slouch.doc.allPartition(utils.createdDB, utils.createdDB).each(function () {
+    return slouch.doc.allPartition(utils.createdDB, 'part').each(function () {
       return Promise.resolve();
     }).then(function () {
-      dbsToDestroy.push(utils.createdDB);
+      ;
     });
   });
+
+  it('should find doc in partitioned db', function () {
+    return slouch.doc.findPartition(utils.createdDB, 'part', {
+      selector: {
+        thing: 'jam'
+      }
+    }).then(function (items) {
+      items.docs.length.should.eql(1);
+      dbsToDestroy.push(utils.createdDB);
+    })
+  })
 });
