@@ -99,28 +99,6 @@ describe('db', function () {
     });
   });
 
-  it('should create partitioned database if supported', function () {
-    return slouch.system.supportPartitioned().then(function (partitioned) {
-      if (partitioned) {
-        return db.create('p' + utils.createdDB, {
-          partitioned: true
-        }).then(function () {
-          dbsToDestroy.push('p' + utils.createdDB);
-          return db.isPartitioned('p' + utils.createdDB).then(function (partitioned) {
-            partitioned.should.eql(true);
-          });
-        });
-      } else {
-        return db.create('p' + utils.createdDB).then(function () {
-          dbsToDestroy.push('p' + utils.createdDB);
-          return db.isPartitioned('p' + utils.createdDB).then(function (partitioned) {
-            partitioned.should.eql(false);
-          });
-        });
-      }
-    });
-  });
-
   it('should iterate through dbs', function () {
     var dbNames = [];
 
