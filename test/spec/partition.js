@@ -2,9 +2,7 @@
 
 var Slouch = require('../../scripts'),
   utils = require('../utils'),
-  sporks = require('sporks'),
-  Promise = require('sporks/scripts/promise'),
-  config = require('../config.json');
+  Promise = require('sporks/scripts/promise');
 
 describe('partition', function () {
   var slouch = null,
@@ -12,7 +10,7 @@ describe('partition', function () {
     system = null,
     dbsToDestroy = null,
     defaultGet = null,
-    supportPartitioned = null,
+    partition = null,
     partitionId = null;
 
   beforeEach(function () {
@@ -20,7 +18,7 @@ describe('partition', function () {
     db = slouch.db;
     system = slouch.system;
     dbsToDestroy = [];
-    partitionId = 'test-partition'
+    partitionId = 'test-partition';
   });
 
   afterEach(function () {
@@ -45,7 +43,7 @@ describe('partition', function () {
     // We run the tests on both CouchDB 1 and 2+ and so we don't care about the version. In the
     // future, we could pass a parameter to our test script that would allow us to test this better.
     return system.supportPartitioned().then(function (p) {
-      return supportPartition = p;
+      partition = p;
     });
   });
 
