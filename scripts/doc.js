@@ -327,7 +327,7 @@ Doc.prototype.find = function (dbName, body, params) {
     parseBody: true
   });
 };
-
+/* TODO: Test
 Doc.prototype.findPartition = function (dbName, partition, body, params) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
@@ -338,7 +338,7 @@ Doc.prototype.findPartition = function (dbName, partition, body, params) {
     parseBody: true
   });
 };
-
+*/
 Doc.prototype.destroyAllNonDesign = function (dbName) {
   return this.destroyAll(dbName, true);
 };
