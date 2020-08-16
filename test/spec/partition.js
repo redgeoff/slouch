@@ -106,8 +106,6 @@ describe('partition', function () {
   it('should get all docs in partitioned db', function () {
     return slouch.doc.allPartition(utils.createdDB, 'part').each(function () {
       return Promise.resolve();
-    }).then(function () {
-      ;
     });
   });
 
@@ -119,6 +117,6 @@ describe('partition', function () {
     }).then(function (items) {
       items.docs.length.should.eql(1);
       dbsToDestroy.push(utils.createdDB);
-    })
-  })
+    });
+  });
 });
