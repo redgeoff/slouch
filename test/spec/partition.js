@@ -81,8 +81,8 @@ describe('partition', function () {
           thing: 'peanut butter'
         }).then(function () {
           return slouch.doc.create(utils.createdDB, {
-            _id: utils.createdDB + 'x:1',
-            thing: 'another partition'
+            _id: utils.createdDB + 'x:3',
+            thing: 'jam'
           }).then(function () {
             return db.getPartition(utils.createdDB, utils.createdDB).then(
               function (_db) {
@@ -99,6 +99,7 @@ describe('partition', function () {
   it('should get all docs as Array in partitioned db', function () {
     return slouch.doc.allPartitionArray(utils.createdDB, utils.createdDB).then(function (
       body) {
+      console.log(body);
       body.total_rows.should.eql(2);
     });
   });
