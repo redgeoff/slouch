@@ -288,7 +288,7 @@ Doc.prototype.allArray = function (dbName, params) {
     parseBody: true
   });
 };
-/* TODO: Test
+
 Doc.prototype.allPartitionArray = function (dbName, partition, params) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
@@ -298,7 +298,7 @@ Doc.prototype.allPartitionArray = function (dbName, partition, params) {
     parseBody: true
   });
 };
-*/
+
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 Doc.prototype.all = function (dbName, params) {
   return new CouchPersistentStreamIterator({
@@ -307,7 +307,7 @@ Doc.prototype.all = function (dbName, params) {
     qs: params
   }, 'rows.*', null, this._slouch._request);
 };
-/* TODO: Test
+
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 Doc.prototype.allPartition = function (dbName, partition, params) {
   return new CouchPersistentStreamIterator({
@@ -317,7 +317,7 @@ Doc.prototype.allPartition = function (dbName, partition, params) {
     qs: params
   }, 'rows.*', null, this._slouch._request);
 };
-*/
+
 Doc.prototype.find = function (dbName, body, params) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_find',

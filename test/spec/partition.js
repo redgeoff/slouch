@@ -74,7 +74,6 @@ describe('partition', function () {
 
   it('should get partitioned db', function () {
     return utils.createDB(true).then(function () {
-      dbsToDestroy.push(utils.createdDB);
       return slouch.doc.create(utils.createdDB, {
         _id: partitionId + ':1',
         thing: 'jam'
@@ -97,5 +96,19 @@ describe('partition', function () {
         });
       });
     });
+  });
+
+  it('should get all docs as Array in partitioned db', function () {
+    return slouch.doc.allPartitionArray(utils.createdDB, partitionId).then(function (body) {
+      body.total_rows.should.eql(2);
+    });
+  });
+
+  it('should get all docs in partitioned db', function () {
+    return slouch.doc.allPartition(utils.createdDB, partitionId).each(function (item) {
+      return Promise.resolve();
+    }).then(function () {
+      dbsToDestroy.push(utils.createdDB);
+    })
   });
 });
