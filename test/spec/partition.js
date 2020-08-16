@@ -63,15 +63,15 @@ describe('partition', function () {
     });
   });
 
-  (partition ? it : it.skip)('should create partitioned database', function () {
+  it('should create partitioned database', function () {
     return utils.createDB(true).then(function () {
       dbsToDestroy.push(utils.createdDB);
       return db.isPartitioned(utils.createdDB).then(function (p) {
-        p.should.eql(true);
+        p.should.eql(partition);
       });
     });
   });
-
+/*
   (partition ? it : it.skip)('should get partitioned db', function () {
     return utils.createDB(true).then(function () {
       dbsToDestroy.push(utils.createdDB);
@@ -98,4 +98,5 @@ describe('partition', function () {
       });
     });
   });
+*/
 });
