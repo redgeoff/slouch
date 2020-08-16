@@ -54,7 +54,7 @@ DB.prototype.get = function (dbName) {
 
 DB.prototype.getPartition = function (dbName, partition) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' + encodeURIComponent(
       partition),
     method: 'GET',
     parseBody: true
