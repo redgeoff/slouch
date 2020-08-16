@@ -27,7 +27,9 @@ Utils.prototype.nextId = function () {
 Utils.prototype.createDB = function (partitioned = null) {
   this.createdDB = 'test$()+-/_' + this.nextId();
   if (partitioned)
-    return this._slouch.db.create(this.createdDB, { partitioned: true });
+    return this._slouch.db.create(this.createdDB, {
+      partitioned: true
+    });
   else
     return this._slouch.db.create(this.createdDB);
 };

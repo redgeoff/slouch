@@ -291,7 +291,8 @@ Doc.prototype.allArray = function (dbName, params) {
 
 Doc.prototype.allPartitionArray = function (dbName, partition, params) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' + encodeURIComponent(partition) + '/_all_docs',
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
+      encodeURIComponent(partition) + '/_all_docs',
     method: 'GET',
     qs: params,
     parseBody: true
@@ -310,7 +311,8 @@ Doc.prototype.all = function (dbName, params) {
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 Doc.prototype.allPartition = function (dbName, partition, params) {
   return new CouchPersistentStreamIterator({
-    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' + encodeURIComponent(partition) + '/_all_docs',
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
+      encodeURIComponent(partition) + '/_all_docs',
     method: 'GET',
     qs: params
   }, 'rows.*', null, this._slouch._request);
@@ -328,7 +330,8 @@ Doc.prototype.find = function (dbName, body, params) {
 
 Doc.prototype.findPartition = function (dbName, partition, body, params) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/'+ encodeURIComponent(partition) + '/_find',
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
+      encodeURIComponent(partition) + '/_find',
     method: 'POST',
     json: body,
     qs: params,

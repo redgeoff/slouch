@@ -89,11 +89,12 @@ describe('partition', function () {
             _id: partitionId + 'x:1',
             thing: 'another partition'
           }).then(function () {
-            return db.getPartition(utils.createdDB, partitionId).then(function (_db) {
-              _db.db_name.should.eql(utils.createdDB);
-              _db.partition.should.eql(partitionId);
-              _db.doc_count.should.eql(2);
-            });
+            return db.getPartition(utils.createdDB, partitionId).then(
+              function (_db) {
+                _db.db_name.should.eql(utils.createdDB);
+                _db.partition.should.eql(partitionId);
+                _db.doc_count.should.eql(2);
+              });
           });
         });
       });
