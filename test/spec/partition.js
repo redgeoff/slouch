@@ -40,16 +40,16 @@ describe('partition', function () {
       return slouch.doc.create(utils.createdDB, {
         _id: 'part:2',
         thing: 'code'
-      }).then(function () {
-        return slouch.doc.create(utils.createdDB, {
-          _id: 'partX:3',
-          thing: 'jam'
-        }).then(function () {
-          return slouch.doc.create(utils.createdDB, {
-            _id: 'partX:4',
-            thing: 'slouch'
-          });
-        });
+      });
+    }).then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        _id: 'partX:3',
+        thing: 'jam'
+      });
+    }).then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        _id: 'partX:4',
+        thing: 'slouch'
       });
     });
   };
