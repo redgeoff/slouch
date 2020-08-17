@@ -145,7 +145,8 @@ describe('partition', function () {
     return createDocs().then(function () {
       return createView();
     }).then(function () {
-      return db.viewPartition(utils.createdDB, 'part', '_design/myview', 'fun', {
+      //return db.viewPartition(utils.createdDB, 'part', '_design/myview', 'fun', {
+        return db.view(utils.createdDB, '_design/myview', 'fun', {
         include_docs: true
       }).each(function (doc) {
         // Use associative array as order is not guaranteed
