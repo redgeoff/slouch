@@ -87,7 +87,7 @@ describe('partition', function () {
   });
 
   it('should get partitioned db', function () {
-    createDocs().then(function () {
+    return createDocs().then(function () {
       return db.getPartition(utils.createdDB, 'part').then(
         function (_db) {
           _db.db_name.should.eql(utils.createdDB);
@@ -98,7 +98,7 @@ describe('partition', function () {
   });
 
   it('should get all docs as Array in partitioned db', function () {
-    createDocs().then(function () {
+    return createDocs().then(function () {
       return slouch.doc.allPartitionArray(utils.createdDB, 'part').then(function (
         body) {
         body.total_rows.should.eql(2);
@@ -108,7 +108,7 @@ describe('partition', function () {
 
   it('should get all docs in partitioned db', function () {
     var docs = {};
-    createDocs().then(function () {
+    return createDocs().then(function () {
       return slouch.doc.allPartition(utils.createdDB, 'part').each(function (item) {
         docs[item.thing] += 1;
         return Promise.resolve();
@@ -122,7 +122,7 @@ describe('partition', function () {
   });
 
   it('should find doc in partitioned db', function () {
-    createDocs().then(function () {
+    return createDocs().then(function () {
       return slouch.doc.findPartition(utils.createdDB, 'part', {
         selector: {
           thing: 'jam'
