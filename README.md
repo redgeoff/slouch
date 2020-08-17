@@ -15,7 +15,7 @@ A JS API for CouchDB that does the heavy lifting
   - Works in node and in the browser
   - Provides upserts and "get and update" functions
   - Support for optionally ignoring conflicts, missing docs, etc...
-  - Designed for both CouchDB 1 and CouchDB 2
+  - Designed for CouchDB 1, CouchDB 2 and CouchDB 3
 
 
 ## Table of Contents
