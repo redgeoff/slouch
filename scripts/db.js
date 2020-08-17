@@ -148,7 +148,7 @@ DB.prototype.changesArray = function (dbName, params, filter) {
     parseBody: true
   });
 };
-/* TODO: Test
+
 DB.prototype.viewPartition = function (dbName, partition, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return new CouchPersistentStreamIterator({
@@ -158,7 +158,7 @@ DB.prototype.viewPartition = function (dbName, partition, viewDocId, view, param
       view,
     qs: params
   }, 'rows.*');
-};*/
+};
 
 DB.prototype.view = function (dbName, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));

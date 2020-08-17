@@ -15,7 +15,9 @@ describe('partition', function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     system = slouch.system;
-    return utils.createDB(true);
+    return utils.createDB(true).then(function () {
+      return;
+    });
   });
 
   afterEach(function () {
@@ -39,7 +41,8 @@ describe('partition', function () {
     }).then(function () {
       return slouch.doc.create(utils.createdDB, {
         _id: 'part:2',
-        thing: 'code'
+        thing: 'code',
+        fun: false
       });
     }).then(function () {
       return slouch.doc.create(utils.createdDB, {
@@ -49,8 +52,26 @@ describe('partition', function () {
     }).then(function () {
       return slouch.doc.create(utils.createdDB, {
         _id: 'partX:4',
-        thing: 'slouch'
+        thing: 'slouch',
+        fun: false
       });
+    });
+  };
+
+  var createView = function () {
+    return slouch.doc.create(utils.createdDB, {
+      _id: '_design/myview',
+      views: {
+        fun: {
+          map: [
+            'function(doc) {',
+            'if (doc.fun !== false) {',
+            'emit(doc._id, null);',
+            '}',
+            '}'
+          ].join(' ')
+        }
+      }
     });
   };
 
@@ -115,6 +136,23 @@ describe('partition', function () {
           'part:1': true,
           'part:2': true
         });
+      });
+    });
+  });
+
+  it('should get view in partitioned db', function () {
+    return createDocs().then(function () {
+      return createView();
+    }).then(function () {
+      return db.viewPartition(utils.createdDB, 'part', '_design/myview', 'fun', {
+        include_docs: true
+      }).each(function (doc) {
+        // Use associative array as order is not guaranteed
+        docs[doc.doc._id] = true;
+      });
+    }).then(function () {
+      docs.should.eql({
+        'part:1': true
       });
     });
   });
