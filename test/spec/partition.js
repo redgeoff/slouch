@@ -15,9 +15,7 @@ describe('partition', function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     system = slouch.system;
-    return utils.createDB(true).then(function () {
-      return;
-    });
+    return utils.createDB(true);
   });
 
   afterEach(function () {
@@ -110,12 +108,12 @@ describe('partition', function () {
     var docs = {};
     return createDocs().then(function () {
       return slouch.doc.allPartition(utils.createdDB, 'part').each(function (item) {
-        docs[item.thing] += 1;
+        docs[item.id] += 1;
         return Promise.resolve();
       }).then(function () {
         docs.should.eql({
-          'jam': 1,
-          'code': 1
+          'part:1': 1,
+          'part:2': 1
         });
       });
     });
