@@ -145,12 +145,31 @@ describe('partition', function () {
     return createDocs().then(function () {
       return createView();
     }).then(function () {
-      //return db.viewPartition(utils.createdDB, 'part', '_design/myview', 'fun', {
-      return db.view(utils.createdDB, '_design/myview', 'fun', {
+      return db.viewPartition(utils.createdDB, 'part', '_design/myview', 'fun', {
         include_docs: true
       }).each(function (doc) {
         // Use associative array as order is not guaranteed
         docs[doc.doc._id] = true;
+      });
+    }).then(function () {
+      docs.should.eql({
+        'part:1': true
+      });
+    });
+  });
+
+  it('should get view array in partitioned db', function () {
+    var docs = {};
+    return createDocs().then(function () {
+      return createView();
+    }).then(function () {
+      return db.viewPartitionArray(utils.createdDB, 'part', '_design/myview', 'fun', {
+        include_docs: true
+      }).then(function (_docs) {
+        _docs.rows.forEach(function (_doc) {
+          // Use associative array as order is not guaranteed
+          docs[_doc.doc._id] = true;
+        });
       });
     }).then(function () {
       docs.should.eql({

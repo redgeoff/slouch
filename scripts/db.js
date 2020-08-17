@@ -180,7 +180,7 @@ DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
     parseBody: true
   });
 };
-/* TODO: Test
+
 DB.prototype.viewPartitionArray = function (dbName, partition, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return this._slouch._req({
@@ -192,7 +192,7 @@ DB.prototype.viewPartitionArray = function (dbName, partition, viewDocId, view, 
     parseBody: true
   });
 };
-*/
+
 // Use a JSONStream so that we don't have to load a large JSON structure into memory
 DB.prototype.all = function () {
   return new CouchPersistentStreamIterator({
