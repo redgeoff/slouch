@@ -8,7 +8,6 @@ describe('partition', function () {
   var slouch = null,
     db = null,
     system = null,
-    dbsToDestroy = null,
     defaultGet = null,
     partition = null;
 
@@ -16,16 +15,12 @@ describe('partition', function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     system = slouch.system;
-    dbsToDestroy = [];
+    return utils.createDB(true);
   });
 
   afterEach(function () {
     system.get = defaultGet;
-    var promises = [];
-    dbsToDestroy.forEach(function (name) {
-      promises.push(db.destroy(name));
-    });
-    return Promise.all(promises);
+    return utils.destroyDB();
   });
 
   var fakePartitionedSupport = function () {
@@ -35,6 +30,28 @@ describe('partition', function () {
         features: ['partitioned']
       });
     };
+  };
+
+  var createDocs = function () {
+    return slouch.doc.create(utils.createdDB, {
+      _id: 'part:1',
+      thing: 'jam'
+    }).then(function () {
+      return slouch.doc.create(utils.createdDB, {
+        _id: 'part:2',
+        thing: 'code'
+      }).then(function () {
+        return slouch.doc.create(utils.createdDB, {
+          _id: 'partX:3',
+          thing: 'jam'
+        }).then(function () {
+          return slouch.doc.create(utils.createdDB, {
+            _id: 'partX:4',
+            thing: 'slouch'
+          });
+        });
+      });
+    });
   };
 
   it('should check if support partitioned', function () {
@@ -62,61 +79,55 @@ describe('partition', function () {
   });
 
   it('should create partitioned database', function () {
-    return utils.createDB(true).then(function () {
-      dbsToDestroy.push(utils.createdDB);
-      return db.isPartitioned(utils.createdDB).then(function (p) {
-        p.should.eql(partition);
-      });
+    return db.isPartitioned(utils.createdDB).then(function (p) {
+      p.should.eql(partition);
     });
   });
 
   it('should get partitioned db', function () {
-    return utils.createDB(true).then(function () {
-      return slouch.doc.create(utils.createdDB, {
-        _id: 'part:1',
-        thing: 'jam'
+    createDocs().then(function () {
+      return db.getPartition(utils.createdDB, 'part').then(
+        function (_db) {
+          _db.db_name.should.eql(utils.createdDB);
+          _db.partition.should.eql('part');
+          _db.doc_count.should.eql(2);
+        });
+    });
+  });
+
+  it('should get all docs as Array in partitioned db', function () {
+    createDocs().then(function () {
+      return slouch.doc.allPartitionArray(utils.createdDB, 'part').then(function (
+        body) {
+        body.total_rows.should.eql(2);
+      });
+    });
+  });
+
+  it('should get all docs in partitioned db', function () {
+    var docs = {};
+    createDocs().then(function () {
+      return slouch.doc.allPartition(utils.createdDB, 'part').each(function (item) {
+        docs[item.thing] += 1;
+        return Promise.resolve();
       }).then(function () {
-        return slouch.doc.create(utils.createdDB, {
-          _id: 'part:2',
-          thing: 'peanut butter'
-        }).then(function () {
-          return slouch.doc.create(utils.createdDB, {
-            _id: 'partX:3',
-            thing: 'jam'
-          }).then(function () {
-            return db.getPartition(utils.createdDB, 'part').then(
-              function (_db) {
-                _db.db_name.should.eql(utils.createdDB);
-                _db.partition.should.eql('part');
-                _db.doc_count.should.eql(2);
-              });
-          });
+        docs.should.eql({
+          'jam': 1,
+          'code': 1
         });
       });
     });
   });
 
-  it('should get all docs as Array in partitioned db', function () {
-    return slouch.doc.allPartitionArray(utils.createdDB, 'part').then(function (
-      body) {
-      body.rows.length.should.eql(2);
-    });
-  });
-
-  it('should get all docs in partitioned db', function () {
-    return slouch.doc.allPartition(utils.createdDB, 'part').each(function () {
-      return Promise.resolve();
-    });
-  });
-
   it('should find doc in partitioned db', function () {
-    return slouch.doc.findPartition(utils.createdDB, 'part', {
-      selector: {
-        thing: 'jam'
-      }
-    }).then(function (items) {
-      items.docs.length.should.eql(1);
-      dbsToDestroy.push(utils.createdDB);
+    createDocs().then(function () {
+      return slouch.doc.findPartition(utils.createdDB, 'part', {
+        selector: {
+          thing: 'jam'
+        }
+      }).then(function (items) {
+        items.docs.length.should.eql(1);
+      });
     });
   });
 });
