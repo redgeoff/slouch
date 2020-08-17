@@ -11,12 +11,12 @@ describe('partition', function () {
     defaultGet = null,
     partition = null;
 
-  beforeEach(function (done) {
+  beforeEach(function () {
     slouch = new Slouch(utils.couchDBURL());
     db = slouch.db;
     system = slouch.system;
     return utils.createDB(true).then(function () {
-      done();
+      return;
     });
   });
 
