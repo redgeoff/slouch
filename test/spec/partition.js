@@ -108,12 +108,12 @@ describe('partition', function () {
     var docs = {};
     return createDocs().then(function () {
       return slouch.doc.allPartition(utils.createdDB, 'part').each(function (item) {
-        docs[item.id] += 1;
+        docs[item.id] = true;
         return Promise.resolve();
       }).then(function () {
         docs.should.eql({
-          'part:1': 1,
-          'part:2': 1
+          'part:1': true,
+          'part:2': true
         });
       });
     });
@@ -127,6 +127,7 @@ describe('partition', function () {
         }
       }).then(function (items) {
         items.docs.length.should.eql(1);
+        items.docs._id.should.eql('part:1');
       });
     });
   });
