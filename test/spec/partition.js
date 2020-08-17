@@ -127,7 +127,7 @@ describe('partition', function () {
         }
       }).then(function (items) {
         items.docs.length.should.eql(1);
-        items.docs._id.should.eql('part:1');
+        items.docs[0]._id.should.eql('part:1');
       });
     });
   });
