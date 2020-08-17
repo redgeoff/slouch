@@ -141,6 +141,7 @@ describe('partition', function () {
   });
 
   it('should get view in partitioned db', function () {
+    var docs = {};
     return createDocs().then(function () {
       return createView();
     }).then(function () {
