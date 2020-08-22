@@ -11,3 +11,4 @@ require('./request-wrapper');
 require('./security');
 require('./system');
 require('./user');
+require('./partition');

@@ -52,6 +52,16 @@ DB.prototype.get = function (dbName) {
   });
 };
 
+DB.prototype.getPartition = function (dbName, partition) {
+  return this._slouch._req({
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
+      encodeURIComponent(
+        partition),
+    method: 'GET',
+    parseBody: true
+  });
+};
+
 DB.prototype.exists = function (dbName) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName),
@@ -139,6 +149,17 @@ DB.prototype.changesArray = function (dbName, params, filter) {
   });
 };
 
+DB.prototype.viewPartition = function (dbName, partition, viewDocId, view, params) {
+  var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
+  return new CouchPersistentStreamIterator({
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
+      encodeURIComponent(partition) + '/' + encodedViewDocId +
+      '/_view/' +
+      view,
+    qs: params
+  }, 'rows.*');
+};
+
 DB.prototype.view = function (dbName, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return new CouchPersistentStreamIterator({
@@ -153,6 +174,18 @@ DB.prototype.viewArray = function (dbName, viewDocId, view, params) {
   var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
   return this._slouch._req({
     url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodedViewDocId +
+      '/_view/' +
+      view,
+    qs: params,
+    parseBody: true
+  });
+};
+
+DB.prototype.viewPartitionArray = function (dbName, partition, viewDocId, view, params) {
+  var encodedViewDocId = '_design/' + encodeURIComponent(viewDocId.substr(8));
+  return this._slouch._req({
+    url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_partition/' +
+      encodeURIComponent(partition) + '/' + encodedViewDocId +
       '/_view/' +
       view,
     qs: params,
