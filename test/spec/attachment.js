@@ -92,7 +92,7 @@ describe('attachment', function () {
       return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {
       return slouch.attachment.destroy(utils.createdDB, 'foo', 'my_image.png', doc
-      ._rev);
+        ._rev);
     }).then(function () {
       return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {

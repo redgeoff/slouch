@@ -180,7 +180,7 @@ describe('user', function () {
 
   it('should authenticate and get session', function () {
     return user.authenticateAndGetSession(username, 'testpassword').then(function (
-    session) {
+      session) {
       // Sanity check
       session.userCtx.name.should.eql(username);
       session.userCtx.roles.should.eql(['testrole1']);
