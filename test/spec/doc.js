@@ -440,7 +440,8 @@ describe('doc', function () {
   });
 
   it('all should throw when permissions error', function () {
-    var badAuthURL = config.couchdb.scheme + '://baduser:badpassord@' + config.couchdb.host +
+    var badAuthURL = config.couchdb.scheme + '://baduser:badpassord@' + config.couchdb
+      .host +
       ':' + config.couchdb.port,
       slouch2 = new Slouch(badAuthURL),
       readItem = false;
@@ -597,42 +598,43 @@ describe('doc', function () {
     });
   });
 
-  it('should create, update and get doc with slash in _id in a db with slash in name', function () {
-    var doc = {
-      _id: crypto.randomBytes(16).toString("hex") + '/user_name',
-      thing: 'play'
-    };
+  it('should create, update and get doc with slash in _id in a db with slash in name',
+    function () {
+      var doc = {
+        _id: crypto.randomBytes(16).toString("hex") + '/user_name',
+        thing: 'play'
+      };
 
-    var newRev = null;
-    var dbName = utils.createdDB + '/test';
-    return db.create(dbName)
-      .then(function () {
-        return slouch.doc.create(dbName, doc);
-      })
-      .then(function (_doc) {
-        doc._id = _doc.id;
-        return slouch.doc.get(dbName, doc._id);
-      }).then(function (body) {
-        doc._rev = body._rev;
-        doc.priority = 'medium';
-        return slouch.doc.update(dbName, doc);
-      }).then(function (updatedDoc) {
-        var clonedDoc = sporks.clone(doc);
-        newRev = updatedDoc._rev;
-        delete clonedDoc._rev;
-        delete updatedDoc._rev;
-        updatedDoc.should.eql(clonedDoc);
+      var newRev = null;
+      var dbName = utils.createdDB + '/test';
+      return db.create(dbName)
+        .then(function () {
+          return slouch.doc.create(dbName, doc);
+        })
+        .then(function (_doc) {
+          doc._id = _doc.id;
+          return slouch.doc.get(dbName, doc._id);
+        }).then(function (body) {
+          doc._rev = body._rev;
+          doc.priority = 'medium';
+          return slouch.doc.update(dbName, doc);
+        }).then(function (updatedDoc) {
+          var clonedDoc = sporks.clone(doc);
+          newRev = updatedDoc._rev;
+          delete clonedDoc._rev;
+          delete updatedDoc._rev;
+          updatedDoc.should.eql(clonedDoc);
 
-        return slouch.doc.get(dbName, doc._id);
-      }).then(function (body) {
-        doc._rev = body._rev;
-        body.should.eql(doc);
+          return slouch.doc.get(dbName, doc._id);
+        }).then(function (body) {
+          doc._rev = body._rev;
+          body.should.eql(doc);
 
-        // Make sure we have the new revision number from the update response
-        newRev.should.eql(body._rev);
-        return db.destroy(dbName);
-      });
-  });
+          // Make sure we have the new revision number from the update response
+          newRev.should.eql(body._rev);
+          return db.destroy(dbName);
+        });
+    });
 
   it('should find a document by selector', function () {
     var requestBody = {

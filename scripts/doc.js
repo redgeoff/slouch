@@ -65,7 +65,8 @@ Doc.prototype.createAndIgnoreConflict = function (dbName, doc) {
 
 Doc.prototype.update = function (dbName, doc) {
   return this._slouch._req({
-    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(doc._id),
+    uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(doc
+      ._id),
     method: 'PUT',
     body: JSON.stringify(doc),
     parseBody: true

@@ -119,7 +119,8 @@ DB.prototype.changes = function (dbName, params, filter) {
 
   var iterator = new CouchPersistentStreamIterator({
     url: self._slouch._url + '/' + encodeURIComponent(dbName) + '/_changes',
-    method: filter ? 'POST' : 'GET', // don't send a POST request if there is nothing for the body
+    method: filter ? 'POST' :
+    'GET', // don't send a POST request if there is nothing for the body
     qs: params,
     json: filter,
     parseBody: true
@@ -142,7 +143,8 @@ DB.prototype.changesArray = function (dbName, params, filter) {
 
   return this._slouch._req({
     url: this._slouch._url + '/' + encodeURIComponent(dbName) + '/_changes',
-    method: filter ? 'POST' : 'GET', // don't send a POST request if there is nothing for the body
+    method: filter ? 'POST' :
+    'GET', // don't send a POST request if there is nothing for the body
     qs: params,
     json: filter,
     parseBody: true
