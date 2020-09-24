@@ -91,7 +91,8 @@ describe('attachment', function () {
     return createBase64Attachment().then(function () {
       return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {
-      return slouch.attachment.destroy(utils.createdDB, 'foo', 'my_image.png', doc._rev);
+      return slouch.attachment.destroy(utils.createdDB, 'foo', 'my_image.png', doc
+        ._rev);
     }).then(function () {
       return slouch.doc.get(utils.createdDB, 'foo');
     }).then(function (doc) {

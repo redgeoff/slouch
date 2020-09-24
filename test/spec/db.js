@@ -120,7 +120,8 @@ describe('db', function () {
   });
 
   it('all should throw when permissions error', function () {
-    var badAuthURL = config.couchdb.scheme + '://baduser:badpassord@' + config.couchdb.host +
+    var badAuthURL = config.couchdb.scheme + '://baduser:badpassord@' + config.couchdb
+      .host +
       ':' + config.couchdb.port,
       slouch2 = new Slouch(badAuthURL),
       readItem = false;
