@@ -7,7 +7,7 @@ var Attachment = function (slouch) {
 Attachment.prototype.create = function (dbName, docId, attachmentName, data, contentType, rev) {
   return this._slouch._req({
     uri: this._slouch._url + '/' + encodeURIComponent(dbName) + '/' + encodeURIComponent(
-      docId) + '/' + encodeURIComponent(attachmentName) + '?rev=' + encodeURIComponent(rev),
+      docId) + '/' + attachmentName + '?rev=' + encodeURIComponent(rev),
     method: 'PUT',
     headers: {
       'Content-Type': contentType
