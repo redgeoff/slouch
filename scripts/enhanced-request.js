@@ -126,8 +126,8 @@ EnhancedRequest.prototype._request = function (opts) {
     // Sometimes CouchDB just returns an malformed error
     if (!response || !response.body) {
       if (response && opts.method === 'HEAD') {
-        // or we only want the response headers
-        return response.headers;
+        // or we only want the response/headers
+        return response;
       }
       err = new Error('malformed body');
       err.error = 'malformed body';
