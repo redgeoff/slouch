@@ -49,10 +49,10 @@ EnhancedRequest.MAX_RETRIES = 10;
 // Preserve some compatibility with nano
 EnhancedRequest.prototype._getStatusCode = function (body) {
   switch (body.error) {
-  case 'conflict':
-    return 409;
-  case 'not_found':
-    return 404;
+    case 'conflict':
+      return 409;
+    case 'not_found':
+      return 404;
   }
 
   if (body.reason && body.reason.indexOf('Could not open source database') !== -1) {
@@ -125,6 +125,10 @@ EnhancedRequest.prototype._request = function (opts) {
 
     // Sometimes CouchDB just returns an malformed error
     if (!response || !response.body) {
+      if (response && opts.method === 'HEAD') {
+        // or we only want the response headers
+        return response.headers;
+      }
       err = new Error('malformed body');
       err.error = 'malformed body';
       self._log('Slouch Request:', {
@@ -181,42 +185,42 @@ EnhancedRequest.prototype._throttledEnhancedRequest = function () {
 EnhancedRequest.prototype._shouldReconnect = function (err) {
   switch (err.message) {
 
-  case 'all_dbs_active': // No more connections
-    return true;
+    case 'all_dbs_active': // No more connections
+      return true;
 
-  default:
-    return new RegExp([
-      // Connection refused, e.g. because the CouchDB server is being restarted.
-      'ECONNREFUSED',
+    default:
+      return new RegExp([
+        // Connection refused, e.g. because the CouchDB server is being restarted.
+        'ECONNREFUSED',
 
-      'ENETUNREACH', // can occur when box sleeps/wakes-up
+        'ENETUNREACH', // can occur when box sleeps/wakes-up
 
-      // Occurs randomly when many simultaenous connections:
-      'emfile',
-      'socket hang up',
-      'ECONNRESET',
-      'ETIMEDOUT',
-      'function_clause',
-      'unknown_error',
-      'internal_server_error',
+        // Occurs randomly when many simultaenous connections:
+        'emfile',
+        'socket hang up',
+        'ECONNRESET',
+        'ETIMEDOUT',
+        'function_clause',
+        'unknown_error',
+        'internal_server_error',
 
-      'Failed to fetch', // ECONNREFUSED/ENOTFOUND in Chrome
-      'Type error', // ECONNREFUSED/ENOTFOUND in Safari
-      'XHR error', // ECONNREFUSED/ENOTFOUND in Firefox
-      'EAI_AGAIN' // Transient DNS error
+        'Failed to fetch', // ECONNREFUSED/ENOTFOUND in Chrome
+        'Type error', // ECONNREFUSED/ENOTFOUND in Safari
+        'XHR error', // ECONNREFUSED/ENOTFOUND in Firefox
+        'EAI_AGAIN' // Transient DNS error
 
-      // TODO: It is not clear why CouchDB responds with these timeout errors and immediately
-      // retrying the request often leads to deadlocks when you are continuously listening. In
-      // practice, it is better that your app throws a fatal error and then is restarted, e.g. via
-      // Docker, as this seems to reliably recover from this state. At some point we should analyze
-      // this better and determine where the bug lies and fix it at the root cause:
-      // https://github.com/redgeoff/spiegel/issues/100
-      //
-      // Occurs randomly even when there is a relatively small amount of data, e.g. "The request
-      // could not be processed in a reasonable amount of time"
-      //
-      // 'timeout'
-    ].join('|'), 'i').test(err.message);
+        // TODO: It is not clear why CouchDB responds with these timeout errors and immediately
+        // retrying the request often leads to deadlocks when you are continuously listening. In
+        // practice, it is better that your app throws a fatal error and then is restarted, e.g. via
+        // Docker, as this seems to reliably recover from this state. At some point we should analyze
+        // this better and determine where the bug lies and fix it at the root cause:
+        // https://github.com/redgeoff/spiegel/issues/100
+        //
+        // Occurs randomly even when there is a relatively small amount of data, e.g. "The request
+        // could not be processed in a reasonable amount of time"
+        //
+        // 'timeout'
+      ].join('|'), 'i').test(err.message);
   }
 };
 
