@@ -102,7 +102,7 @@ Doc.prototype.rev = function (dbName, docId, params) {
     method: 'HEAD',
     qs: params,
     parseBody: false
-  }).then(function (headers) { return headers.etag; });
+  }).then(function (response) { return response.headers.etag; });
 };
 
 Doc.prototype.getIgnoreMissing = function (dbName, id) {
